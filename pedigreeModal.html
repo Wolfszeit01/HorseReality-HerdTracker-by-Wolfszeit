@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --hr-purple: #0b2c41;
+      --hr-purple-light: #407f9c;
+      --hr-bg: #f5f7f9;
+      --hr-gold: #ffa100;
+      --hr-text: #0b2c41;
+      --white: #FFFFFF;
+      --border: 1px solid rgba(255, 161, 0, 0.3);
+      --shadow: 0 12px 30px rgba(8, 27, 40, 0.15);
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: 'Roboto', sans-serif; background-color: #e4e8ec; padding: 10px; }
+
+    .modal-frame {
+      width: 100%; max-width: 580px;
+      background-color: var(--hr-bg);
+      border-radius: 12px; overflow: hidden;
+      box-shadow: var(--shadow); border: var(--border); margin: auto;
+    }
+
+    .modal-header {
+      background-color: var(--hr-purple); padding: 16px;
+      text-align: center; border-bottom: 3px solid var(--hr-gold);
+    }
+    .modal-header h1 {
+      font-family: 'Roboto', sans-serif; font-weight: 700;
+      color: #ffffff; font-size: 20px; margin-bottom: 2px;
+    }
+    .modal-header .subtitle {
+      color: var(--white); font-size: 10px; text-transform: uppercase;
+      letter-spacing: 2px; font-weight: 700; opacity: 0.9;
+    }
+
+    .modal-body { padding: 15px; max-height: 78vh; overflow-y: auto; }
+
+    .horse-info {
+      background: var(--white); border-radius: 10px; padding: 12px;
+      margin-bottom: 12px; border: 1px solid rgba(0,0,0,0.05);
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .status-text { font-size: 11px; color: var(--hr-gold); font-weight: 700; text-transform: uppercase; }
+
+    .section {
+      background: var(--white); border-radius: 10px; padding: 14px;
+      margin-bottom: 12px; border: 1px solid rgba(0,0,0,0.04);
+    }
+    .section-title {
+      font-weight: 700; color: var(--hr-text); font-size: 11px;
+      text-transform: uppercase; letter-spacing: 1.5px;
+      margin-bottom: 12px; border-bottom: 1px solid rgba(255,161,0,0.2); padding-bottom: 4px;
+    }
+
+    /* String-Parser Box */
+    .parser-box {
+      background: linear-gradient(to right, #f0f4f7, #e8f0f5);
+      border: 1px solid var(--hr-gold);
+      border-left: 4px solid var(--hr-gold);
+      border-radius: 8px; padding: 12px; margin-bottom: 12px;
+    }
+    .parser-box .section-title { color: var(--hr-gold); border-bottom-color: rgba(255,161,0,0.2); }
+    .parser-box textarea {
+      width: 100%; height: 70px;
+      border: 1px solid #ddd; border-radius: 4px;
+      font-family: monospace; font-size: 10px; padding: 6px;
+      resize: vertical; margin-bottom: 8px;
+    }
+    .parser-box textarea:focus { outline: none; border-color: var(--hr-gold); }
+    .parse-btn {
+      width: 100%; padding: 8px;
+      background: var(--hr-gold); color: #ffffff;
+      border: none; border-radius: 6px;
+      font-family: 'Roboto'; font-weight: 700;
+      font-size: 11px; text-transform: uppercase;
+      cursor: pointer; letter-spacing: 1px;
+    }
+    .parse-btn:hover { background: var(--hr-purple); color: #ffffff; }
+
+    .form-row { display: flex; align-items: center; margin-bottom: 8px; gap: 10px; }
+    label { width: 130px; font-size: 12px; font-weight: 600; color: var(--hr-text); flex-shrink: 0; }
+    input[type="text"] {
+      flex: 1; padding: 6px 10px;
+      border: 1px solid rgba(11, 44, 65, 0.15);
+      border-radius: 6px; font-family: 'Roboto'; font-size: 12px;
+      transition: border-color 0.2s;
+    }
+    input[type="text"]:focus { outline: none; border-color: var(--hr-gold); }
+
+    /* Generation blocks */
+    .gen-side {
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 10px;
+    }
+    .gen-side.paternal {
+      background: rgba(255, 161, 0, 0.07);
+      border-left: 3px solid var(--hr-gold);
+    }
+    .gen-side.maternal {
+      background: rgba(11, 44, 65, 0.05);
+      border-left: 3px solid var(--hr-purple);
+    }
+    .gen-side.paternal.sub {
+      background: rgba(255, 161, 0, 0.04);
+      border-left: 3px solid var(--hr-gold);
+      border-left-style: dashed;
+    }
+    .gen-side.maternal.sub {
+      background: rgba(11, 44, 65, 0.03);
+      border-left: 3px solid var(--hr-purple);
+      border-left-style: dashed;
+    }
+
+    .side-title {
+      font-size: 10px; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1px;
+      margin-bottom: 8px; padding-bottom: 4px;
+      border-bottom: 1px dashed rgba(0,0,0,0.08);
+    }
+    .gen-side.paternal .side-title { color: #cc8a00; }
+    .gen-side.maternal .side-title { color: var(--hr-purple-light); }
+
+    .path-tag {
+      display: inline-block;
+      font-size: 9px; font-weight: 700;
+      padding: 1px 6px; border-radius: 10px;
+      margin-left: 6px; vertical-align: middle;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .path-tag.sire-side { background: rgba(255,161,0,0.2); color: #cc8a00; }
+    .path-tag.dam-side  { background: rgba(11,44,65,0.1);   color: var(--hr-purple); }
+
+    .outside-badge {
+      background: var(--hr-gold); color: #ffffff;
+      font-size: 9px; font-weight: 800; padding: 2px 6px;
+      border-radius: 4px; text-transform: uppercase; flex-shrink: 0;
+    }
+
+    .autocomplete-container { position: relative; flex: 1; display: flex; align-items: center; gap: 5px; }
+    .autocomplete-list {
+      position: absolute; top: 100%; left: 0; width: 100%;
+      z-index: 100; background: white; border: 1px solid var(--hr-gold);
+      border-radius: 0 0 6px 6px; box-shadow: var(--shadow);
+      max-height: 130px; overflow-y: auto; display: none;
+    }
+    .autocomplete-item { padding: 6px 10px; cursor: pointer; font-size: 12px; border-bottom: 1px solid #f5f5f5; }
+    .autocomplete-item:hover { background: var(--hr-bg); color: var(--hr-purple); font-weight: bold; }
+
+    .modal-footer {
+      padding: 15px; background: var(--white);
+      display: flex; gap: 10px; border-top: 1px solid var(--hr-bg);
+    }
+    button {
+      flex: 1; padding: 10px; font-family: 'Roboto'; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 1px;
+      border-radius: 8px; cursor: pointer; font-size: 11px; transition: all 0.2s;
+    }
+    #saveBtn { background: var(--hr-purple); color: #ffffff; border: 1px solid rgba(255,161,0,0.4); }
+    #saveBtn:hover:not(:disabled) { background: var(--hr-gold); color: white; }
+    #saveBtn:disabled { opacity: 0.6; cursor: not-allowed; }
+    #cancelBtn { background: transparent; color: var(--hr-purple); border: 1px solid rgba(11,44,65,0.2); }
+    #cancelBtn:hover { background: #eee; }
+
+    .status-message {
+      text-align: center; padding: 8px; font-weight: 600;
+      border-radius: 6px; margin-top: 8px; display: none; font-size: 12px;
+    }
+    .status-success { background: #d4edda; color: #155724; display: block; }
+    .status-error   { background: #f8d7da; color: #721c24; display: block; }
+    .status-loading { background: #fff3cd; color: #856404; display: block; }
+
+    .modal-body::-webkit-scrollbar { width: 5px; }
+    .modal-body::-webkit-scrollbar-thumb { background: var(--hr-gold); border-radius: 10px; }
+  </style>
+</head>
+<body>
+<div class="modal-frame">
+  <div class="modal-header">
+    <h1>Pedigree Editor</h1>
+    <div class="subtitle">Ancestral Records</div>
+  </div>
+
+  <div class="modal-body">
+
+    <!-- Horse Selection -->
+    <div class="horse-info">
+      <div style="flex:1;">
+        <span style="font-size:10px;opacity:0.6;display:block;text-transform:uppercase;">Select or edit horse</span>
+        <div class="autocomplete-container">
+          <input type="text" id="horseSearch" placeholder="Type name or ID..." autocomplete="off"
+            style="font-weight:bold;color:var(--hr-purple);border:none;background:transparent;padding:0;font-size:15px;width:100%;">
+          <div id="horseSearchOptions" class="autocomplete-list"></div>
+        </div>
+        <input type="hidden" id="horseIdDisplay" value="">
+      </div>
+      <div style="text-align:right;min-width:110px;">
+        <span id="parentsStatus" class="status-text">Ready</span>
+      </div>
+    </div>
+
+    <!-- String Parser -->
+    <div class="parser-box">
+      <div class="section-title">🔍 Parse Pedigree String</div>
+      <textarea id="pedigreeStringInput" placeholder="Paste Info-tab text here (from 'Pedigree' to 'Pregnancy')..."></textarea>
+      <button class="parse-btn" onclick="parseStringAndFill()">Extract Pedigree</button>
+    </div>
+
+    <!-- Generation I -->
+    <div class="section">
+      <div class="section-title">Generation I — Parents</div>
+      <div class="gen-side paternal">
+        <div class="side-title">🐴 Sire (Father)</div>
+        <div class="form-row">
+          <label>Sire:</label>
+          <div class="autocomplete-container">
+            <input type="text" id="sire" autocomplete="off">
+            <span id="sireBadge" class="outside-badge" style="display:none;">Outside</span>
+            <div id="sireOptions" class="autocomplete-list"></div>
+          </div>
+        </div>
+        <div class="form-row"><label>Sire Line:</label><input type="text" id="stallionline" placeholder="e.g. Royal High"></div>
+      </div>
+      <div class="gen-side maternal">
+        <div class="side-title">🐴 Dam (Mother)</div>
+        <div class="form-row">
+          <label>Dam:</label>
+          <div class="autocomplete-container">
+            <input type="text" id="dam" autocomplete="off">
+            <span id="damBadge" class="outside-badge" style="display:none;">Outside</span>
+            <div id="damOptions" class="autocomplete-list"></div>
+          </div>
+        </div>
+        <div class="form-row"><label>Dam Line:</label><input type="text" id="damline" placeholder="e.g. Old Nordic A"></div>
+      </div>
+    </div>
+
+    <!-- Generation II -->
+    <div class="section">
+      <div class="section-title">Generation II — Grandparents</div>
+
+      <div class="gen-side paternal">
+        <div class="side-title">Paternal Side <span class="path-tag sire-side">via Sire</span></div>
+        <div class="form-row"><label>Grand-Sire:</label><input type="text" id="gs_p" placeholder="Father of Sire"></div>
+        <div class="form-row"><label>Grand-Dam:</label><input type="text" id="gd_p" placeholder="Mother of Sire"></div>
+      </div>
+
+      <div class="gen-side maternal">
+        <div class="side-title">Maternal Side <span class="path-tag dam-side">via Dam</span></div>
+        <div class="form-row"><label>Grand-Sire:</label><input type="text" id="gs_m" placeholder="Father of Dam"></div>
+        <div class="form-row"><label>Grand-Dam:</label><input type="text" id="gd_m" placeholder="Mother of Dam"></div>
+      </div>
+    </div>
+
+    <!-- Generation III -->
+    <div class="section">
+      <div class="section-title">Generation III — Great-Grandparents</div>
+
+      <!-- via Sire's Sire -->
+      <div class="gen-side paternal sub">
+        <div class="side-title">via Sire's Sire <span class="path-tag sire-side">PP</span></div>
+        <div class="form-row"><label>Great-Grand-Sire:</label><input type="text" id="ggs_pp" placeholder="Father of Grand-Sire (P)"></div>
+        <div class="form-row"><label>Great-Grand-Dam:</label><input type="text" id="ggd_pp" placeholder="Mother of Grand-Sire (P)"></div>
+      </div>
+
+      <!-- via Sire's Dam -->
+      <div class="gen-side paternal sub">
+        <div class="side-title">via Sire's Dam <span class="path-tag sire-side">PM</span></div>
+        <div class="form-row"><label>Great-Grand-Sire:</label><input type="text" id="ggs_pm" placeholder="Father of Grand-Dam (P)"></div>
+        <div class="form-row"><label>Great-Grand-Dam:</label><input type="text" id="ggd_pm" placeholder="Mother of Grand-Dam (P)"></div>
+      </div>
+
+      <!-- via Dam's Sire -->
+      <div class="gen-side maternal sub">
+        <div class="side-title">via Dam's Sire <span class="path-tag dam-side">MP</span></div>
+        <div class="form-row"><label>Great-Grand-Sire:</label><input type="text" id="ggs_mp" placeholder="Father of Grand-Sire (M)"></div>
+        <div class="form-row"><label>Great-Grand-Dam:</label><input type="text" id="ggd_mp" placeholder="Mother of Grand-Sire (M)"></div>
+      </div>
+
+      <!-- via Dam's Dam -->
+      <div class="gen-side maternal sub">
+        <div class="side-title">via Dam's Dam <span class="path-tag dam-side">MM</span></div>
+        <div class="form-row"><label>Great-Grand-Sire:</label><input type="text" id="ggs_mm" placeholder="Father of Grand-Dam (M)"></div>
+        <div class="form-row"><label>Great-Grand-Dam:</label><input type="text" id="ggd_mm" placeholder="Mother of Grand-Dam (M)"></div>
+      </div>
+
+    </div>
+
+    <div id="statusMessage" class="status-message"></div>
+  </div>
+
+  <div class="modal-footer">
+    <button id="cancelBtn" onclick="google.script.host.close()">Cancel</button>
+    <button id="saveBtn" onclick="save()">Save Pedigree</button>
+  </div>
+</div>
+
+<script>
+  let horseNames = [];
+  let isLoading  = false;
+
+  document.addEventListener('DOMContentLoaded', function() {
+    google.script.run
+      .withSuccessHandler(function(data) {
+        if (data && data.success) initModal(data);
+      })
+      .withFailureHandler(function(err) {
+        showStatus('Error loading data: ' + err.message, 'error');
+      })
+      .getPedigreeModalData();
+
+    google.script.run
+      .withSuccessHandler(function(data) {
+        if (data && data.horseNames) {
+          horseNames = data.horseNames;
+          setupAllAutocomplete();
+        }
+      })
+      .getPedigreeAutocompleteData();
+  });
+
+  function initModal(data) {
+    if (!data) return;
+    const idField = document.getElementById('horseIdDisplay');
+    if (idField) idField.value = data.id || '';
+    const searchField = document.getElementById('horseSearch');
+    if (searchField) searchField.value = data.name || '';
+
+    const fieldMap = {
+      'sire':        data.sireName   || data.sire   || '',
+      'dam':         data.damName    || data.dam     || '',
+      'stallionline':data.stallionline || '',
+      'damline':     data.damline      || '',
+      'gs_p': data.gs_p || '', 'gd_p': data.gd_p || '',
+      'gs_m': data.gs_m || '', 'gd_m': data.gd_m || '',
+      'ggs_pp': data.ggs_pp || '', 'ggd_pp': data.ggd_pp || '',
+      'ggs_mp': data.ggs_mp || '', 'ggd_mp': data.ggd_mp || '',
+      'ggs_pm': data.ggs_pm || '', 'ggd_pm': data.ggd_pm || '',
+      'ggs_mm': data.ggs_mm || '', 'ggd_mm': data.ggd_mm || '',
+    };
+    Object.entries(fieldMap).forEach(function([id, val]) {
+      const el = document.getElementById(id);
+      if (el) el.value = val;
+    });
+
+    document.getElementById('damBadge').style.display  = data.outsideDam  ? 'inline-block' : 'none';
+    document.getElementById('sireBadge').style.display = data.outsideSire ? 'inline-block' : 'none';
+    const statusElem = document.getElementById('parentsStatus');
+    if (statusElem) statusElem.textContent = (data.outsideDam || data.outsideSire) ? 'Outside detected' : 'Ancestors loaded';
+  }
+
+  function parseStringAndFill() {
+    const rawText = document.getElementById('pedigreeStringInput').value.trim();
+    if (!rawText) { showStatus('Please paste a pedigree string first.', 'error'); return; }
+    showStatus('Parsing pedigree...', 'loading');
+
+    google.script.run
+      .withSuccessHandler(function(result) {
+        if (!result) { showStatus('No result returned.', 'error'); return; }
+
+        const fillIfEmpty = (id, val) => {
+          const el = document.getElementById(id);
+          if (el && !el.value.trim() && val) el.value = val;
+        };
+
+        // Gen I — always set
+        if (result.sire) document.getElementById('sire').value = result.sire;
+        if (result.dam)  document.getElementById('dam').value  = result.dam;
+
+        // Gen II + III — only if empty
+        ['gs_p','gd_p','gs_m','gd_m',
+         'ggs_pp','ggd_pp','ggs_mp','ggd_mp',
+         'ggs_pm','ggd_pm','ggs_mm','ggd_mm'].forEach(id => fillIfEmpty(id, result[id]));
+
+        showStatus('✓ Pedigree extracted! Please verify parents.', 'success');
+        document.getElementById('pedigreeStringInput').value = '';
+      })
+      .withFailureHandler(function(err) {
+        showStatus('Error: ' + err.message, 'error');
+      })
+      .parsePedigreeString(rawText);
+  }
+
+  function setupAllAutocomplete() {
+    const ids = ['horseSearch','sire','dam','gs_p','gd_p','gs_m','gd_m',
+                 'ggs_pp','ggd_pp','ggs_mp','ggd_mp','ggs_pm','ggd_pm','ggs_mm','ggd_mm'];
+    ids.forEach(function(id) {
+      const input = document.getElementById(id);
+      if (!input) return;
+      let list = document.getElementById(id + 'Options');
+      if (!list) {
+        list = document.createElement('div');
+        list.id = id + 'Options';
+        list.className = 'autocomplete-list';
+        input.parentNode.appendChild(list);
+      }
+      input.addEventListener('input', function() {
+        const val = this.value.toLowerCase().trim();
+        if (val.length < 1) { list.style.display = 'none'; return; }
+        const filtered = horseNames.filter(h => h.toLowerCase().includes(val)).slice(0, 8);
+        list.innerHTML = '';
+        if (!filtered.length) { list.style.display = 'none'; return; }
+        filtered.forEach(function(h) {
+          const div = document.createElement('div');
+          div.className = 'autocomplete-item';
+          div.textContent = h;
+          div.addEventListener('click', function() {
+            input.value = h;
+            list.style.display = 'none';
+            if (id === 'horseSearch') loadFullHorsePedigree(h);
+            else if (id === 'dam' || id === 'sire') fetchParentDetails(id, h);
+          });
+          list.appendChild(div);
+        });
+        list.style.display = 'block';
+      });
+      input.addEventListener('blur', function() {
+        setTimeout(function() { list.style.display = 'none'; }, 250);
+      });
+    });
+  }
+
+  function loadFullHorsePedigree(nameOrId) {
+    showStatus('Loading pedigree for ' + nameOrId + '...', 'loading');
+    google.script.run
+      .withSuccessHandler(function(data) {
+        if (!data) { showStatus('Horse not found.', 'error'); return; }
+        data.success = true;
+        initModal(data);
+        showStatus('Data loaded for ' + nameOrId + '.', 'success');
+      })
+      .getExistingPedigreeInfo(nameOrId);
+  }
+
+  function fetchParentDetails(type, name) {
+    if (!name) return;
+    showStatus('Looking up ancestors for ' + name + '...', 'loading');
+    google.script.run
+      .withSuccessHandler(function(pData) {
+        if (!pData) { showStatus('No data found for ' + name + '.', 'error'); return; }
+        if (type === 'sire') {
+          // Sire's parents → GS(P) and GD(P)
+          document.getElementById('gs_p').value = pData.sire || '';
+          document.getElementById('gd_p').value = pData.dam  || '';
+          if (pData.stallionline) document.getElementById('stallionline').value = pData.stallionline;
+          // Great-grandparents via Sire's Sire (PP)
+          document.getElementById('ggs_pp').value = pData.gs_p || '';
+          document.getElementById('ggd_pp').value = pData.gd_p || '';
+          // Great-grandparents via Sire's Dam (PM)
+          document.getElementById('ggs_pm').value = pData.gs_m || '';
+          document.getElementById('ggd_pm').value = pData.gd_m || '';
+        } else {
+          // Dam's parents → GS(M) and GD(M)
+          document.getElementById('gs_m').value = pData.sire || '';
+          document.getElementById('gd_m').value = pData.dam  || '';
+          if (pData.damline) document.getElementById('damline').value = pData.damline;
+          // Great-grandparents via Dam's Sire (MP)
+          document.getElementById('ggs_mp').value = pData.gs_p || '';
+          document.getElementById('ggd_mp').value = pData.gd_p || '';
+          // Great-grandparents via Dam's Dam (MM)
+          document.getElementById('ggs_mm').value = pData.gs_m || '';
+          document.getElementById('ggd_mm').value = pData.gd_m || '';
+        }
+        showStatus('Ancestors loaded for ' + name + '!', 'success');
+      })
+      .getExistingPedigreeInfo(name);
+  }
+
+  function save() {
+    if (isLoading) return;
+    const horseId   = document.getElementById('horseIdDisplay').value;
+    const horseName = document.getElementById('horseSearch').value.trim();
+    if (!horseName) { showStatus('Please enter a horse name.', 'error'); return; }
+
+    isLoading = true;
+    const saveBtn = document.getElementById('saveBtn');
+    saveBtn.disabled = true;
+    saveBtn.textContent = 'Saving...';
+    showStatus('Saving pedigree...', 'loading');
+
+    const pedigreeData = {
+      id:           horseId,
+      name:         horseName,
+      sire:         document.getElementById('sire').value         || '',
+      dam:          document.getElementById('dam').value          || '',
+      stallionline: document.getElementById('stallionline').value || '',
+      damline:      document.getElementById('damline').value      || '',
+      gs_p:         document.getElementById('gs_p').value         || '',
+      gd_p:         document.getElementById('gd_p').value         || '',
+      gs_m:         document.getElementById('gs_m').value         || '',
+      gd_m:         document.getElementById('gd_m').value         || '',
+      ggs_pp:       document.getElementById('ggs_pp').value       || '',
+      ggd_pp:       document.getElementById('ggd_pp').value       || '',
+      ggs_mp:       document.getElementById('ggs_mp').value       || '',
+      ggd_mp:       document.getElementById('ggd_mp').value       || '',
+      ggs_pm:       document.getElementById('ggs_pm').value       || '',
+      ggd_pm:       document.getElementById('ggd_pm').value       || '',
+      ggs_mm:       document.getElementById('ggs_mm').value       || '',
+      ggd_mm:       document.getElementById('ggd_mm').value       || '',
+    };
+
+    google.script.run
+      .withSuccessHandler(function(result) {
+        showStatus('✓ ' + result, 'success');
+        setTimeout(function() { google.script.host.close(); }, 1500);
+      })
+      .withFailureHandler(function(err) {
+        isLoading = false;
+        saveBtn.disabled = false;
+        saveBtn.textContent = 'Save Pedigree';
+        showStatus('Error: ' + err.message, 'error');
+      })
+      .saveManualPedigree(pedigreeData);
+  }
+
+  function showStatus(message, type) {
+    const el = document.getElementById('statusMessage');
+    if (!el) return;
+    el.textContent = message;
+    el.className = 'status-message status-' + type;
+    el.style.display = 'block';
+  }
+</script>
+</body>
+</html>
