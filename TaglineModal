@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --hr-purple:       #0b2c41;
+      --hr-purple-mid:   #081b28;
+      --hr-purple-light: #407f9c;
+      --hr-gold:         #ffa100;
+      --hr-bg:           #f5f7f9;
+      --hr-card:         #f5f7f9;
+      --hr-white:        #ffffff;
+      --hr-text:         #0b2c41;
+      --hr-text-muted:   #5a7a8a;
+      --hr-border:       rgba(255, 161, 0, 0.3);
+      --hr-shadow:       0 12px 30px rgba(8, 27, 40, 0.15);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: #e4e8ec;
+      color: var(--hr-text);
+      padding: 15px;
+      line-height: 1.4;
+    }
+
+    .modal-frame {
+      background: var(--hr-card);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--hr-shadow);
+      border: 1px solid var(--hr-border);
+      min-height: 600px;
+    }
+
+    .modal-header {
+      background: var(--hr-purple);
+      padding: 18px 20px;
+      text-align: center;
+      border-bottom: 3px solid var(--hr-gold);
+    }
+    .modal-header h1 {
+      font-family: 'Playfair Display', serif;
+      font-style: italic;
+      color: #ffffff;
+      font-size: 20px;
+      margin-bottom: 3px;
+    }
+    .modal-header .subtitle {
+      color: rgba(255,255,255,0.75);
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: 700;
+    }
+
+    /* ===== TABS ===== */
+    .tabs {
+      display: flex;
+      background: var(--hr-purple-mid);
+    }
+    .tab {
+      flex: 1;
+      padding: 9px 4px;
+      border: none;
+      background: transparent;
+      color: rgba(255,255,255,0.6);
+      cursor: pointer;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-family: 'Roboto', sans-serif;
+      font-weight: 600;
+      transition: all 0.2s;
+      border-bottom: 2px solid transparent;
+    }
+    .tab:hover { color: rgba(255,255,255,0.9); }
+    .tab.active {
+      background: var(--hr-card);
+      color: var(--hr-text);
+      border-bottom: 2px solid var(--hr-gold);
+    }
+
+    .tab-content { display: none; padding: 20px; }
+    .tab-content.active { display: block; }
+
+    .section-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--hr-text);
+      border-bottom: 1px solid rgba(255,161,0,0.3);
+      padding: 0 0 4px 0;
+      margin: 16px 0 10px 0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .section-title::before {
+      content: '';
+      display: inline-block;
+      width: 3px; height: 12px;
+      background: var(--hr-gold);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+    .section-title:first-child { margin-top: 0; }
+
+    /* ===== SEARCH ===== */
+    .search-wrap { position: relative; margin-bottom: 4px; }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 10px 14px;
+      border-radius: 7px;
+      border: 1px solid #ddd;
+      background: var(--hr-white);
+      color: var(--hr-text);
+      font-family: 'Roboto', sans-serif;
+      font-size: 13px;
+      font-weight: 600;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input[type="text"]:focus {
+      border-color: var(--hr-gold);
+      box-shadow: 0 0 0 2px rgba(255,161,0,0.15);
+    }
+
+    #suggestions {
+      position: absolute;
+      width: 100%; z-index: 100;
+      background: var(--hr-white);
+      border-radius: 0 0 8px 8px;
+      margin-top: 2px;
+      box-shadow: var(--hr-shadow);
+      border: 1px solid var(--hr-gold);
+      max-height: 180px;
+      overflow-y: auto;
+      display: none;
+    }
+    .suggestion-item {
+      padding: 9px 14px;
+      cursor: pointer;
+      border-bottom: 1px solid #f5f5f5;
+      font-size: 12px;
+      transition: background 0.15s;
+    }
+    .suggestion-item:hover { background: var(--hr-bg); color: var(--hr-purple); }
+    .suggestion-item:last-child { border-bottom: none; }
+    .suggestion-item strong { color: var(--hr-purple); }
+
+    /* ===== TAGLINE DISPLAY ===== */
+    .tagline-display {
+      background: var(--hr-white);
+      padding: 16px 18px;
+      border-radius: 8px;
+      border: 1px solid var(--hr-border);
+      border-left: 4px solid var(--hr-gold);
+      font-family: 'Courier New', monospace;
+      font-size: 15px;
+      font-weight: 700;
+      text-align: center;
+      letter-spacing: 1px;
+      min-height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: var(--hr-text-muted);
+      word-break: break-all;
+    }
+    .tagline-display.loaded { color: var(--hr-purple); }
+
+    .info-box {
+      background: var(--hr-white);
+      border-radius: 8px;
+      border: 1px solid #eee;
+      padding: 14px;
+      font-size: 12px;
+      color: var(--hr-text);
+      white-space: pre-line;
+      max-height: 150px;
+      overflow-y: auto;
+      line-height: 1.7;
+    }
+
+    /* ===== BUTTONS ===== */
+    .button-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-top: 20px;
+    }
+    .btn {
+      padding: 10px 12px;
+      border-radius: 7px;
+      border: none;
+      cursor: pointer;
+      font-family: 'Roboto', sans-serif;
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+    }
+    .btn-primary  { background: var(--hr-purple); color: #ffffff; border: 1px solid rgba(255,161,0,0.4); }
+    .btn-primary:hover { background: var(--hr-gold); color: var(--hr-white); }
+    .btn-secondary { background: var(--hr-gold); color: var(--hr-white); border: 1px solid var(--hr-gold); }
+    .btn-secondary:hover { opacity: 0.85; }
+    .btn-full { grid-column: span 2; background: var(--hr-purple-mid); color: var(--hr-gold); border: 1px solid var(--hr-gold); }
+    .btn-full:hover { background: var(--hr-gold); color: var(--hr-white); }
+    .btn-outline { grid-column: span 2; background: transparent; color: var(--hr-purple); border: 1px solid rgba(11,44,65,0.2); }
+    .btn-outline:hover { background: rgba(74,35,60,0.05); }
+    .btn-save { width: 100%; padding: 10px; background: var(--hr-purple); color: #ffffff; border: 1px solid rgba(255,161,0,0.4); border-radius: 7px; font-family: 'Roboto', sans-serif; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; margin-top: 16px; transition: all 0.2s; }
+    .btn-save:hover { background: var(--hr-gold); color: var(--hr-white); }
+
+    /* ===== SETTINGS ===== */
+    .settings-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .settings-row label {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--hr-text);
+      min-width: 110px;
+      flex-shrink: 0;
+    }
+    .settings-row input[type="text"] {
+      padding: 6px 10px;
+      font-size: 12px;
+      height: 32px;
+    }
+    .settings-hint {
+      font-size: 10px;
+      color: var(--hr-text-muted);
+      margin-top: -6px;
+      margin-bottom: 8px;
+      padding-left: 120px;
+    }
+
+    /* ===== TAGLINE BUILDER ===== */
+    .builder-list {
+      list-style: none;
+      margin-bottom: 12px;
+    }
+    .builder-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 8px 10px;
+      background: var(--hr-white);
+      border: 1px solid #eee;
+      border-radius: 7px;
+      margin-bottom: 6px;
+      cursor: grab;
+      user-select: none;
+      transition: box-shadow 0.15s;
+    }
+    .builder-item:active { cursor: grabbing; }
+    .builder-item.dragging { opacity: 0.4; }
+    .builder-item.drag-over { border-color: var(--hr-gold); box-shadow: 0 0 0 2px rgba(255,161,0,0.2); }
+
+    .drag-handle {
+      color: var(--hr-text-muted);
+      font-size: 14px;
+      cursor: grab;
+      flex-shrink: 0;
+    }
+    .builder-item input[type="checkbox"] {
+      width: 16px; height: 16px;
+      accent-color: var(--hr-purple);
+      flex-shrink: 0;
+      cursor: pointer;
+    }
+    .builder-label {
+      flex-grow: 1;
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--hr-text);
+    }
+    .builder-preview {
+      font-size: 10px;
+      color: var(--hr-text-muted);
+      font-family: monospace;
+      background: #e8f0f5;
+      padding: 2px 6px;
+      border-radius: 3px;
+    }
+
+    .separator-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .separator-row label { font-size: 11px; font-weight: 600; color: var(--hr-text); min-width: 110px; }
+    .separator-row input[type="text"] { max-width: 80px; padding: 6px 10px; font-size: 13px; font-family: monospace; }
+
+    .save-status {
+      font-size: 11px;
+      text-align: center;
+      padding: 6px;
+      border-radius: 5px;
+      margin-top: 8px;
+      display: none;
+      font-weight: 700;
+    }
+    .save-status.success { background: #d4edda; color: #155724; display: block; }
+
+    .note {
+      font-size: 10px;
+      color: var(--hr-text-muted);
+      text-align: center;
+      margin-top: 14px;
+      font-style: italic;
+      letter-spacing: 0.5px;
+      line-height: 1.5;
+    }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-thumb { background: var(--hr-gold); border-radius: 10px; }
+  </style>
+
+  <script>
+    let quickHorses = [];
+    let currentHorseData = null;
+
+    // Settings with defaults
+    let settings = {
+      suffix:      '',
+      namePrefix:  '',
+      nameSuffix:  '',
+      separator:   '|',
+      predicates: {
+        star:     '☆',
+        proven:   'ℙ',
+        clinical: 'ℂ'
+      },
+      parts: [
+        { id: 'discipline_gp', label: 'Discipline + GP (combined)', enabled: true,  custom: false, text: '' },
+        { id: 'discipline',    label: 'Discipline only',            enabled: false, custom: false, text: '' },
+        { id: 'gp',            label: 'GP only',                   enabled: false, custom: false, text: '' },
+        { id: 'confo',         label: 'Confo Score',               enabled: true,  custom: false, text: '' },
+        { id: 'vg_g_a',        label: 'VG : G : A',                enabled: true,  custom: false, text: '' },
+        { id: 'genes',         label: 'Genetic Code',              enabled: true,  custom: false, text: '' }
+      ],
+      infoLines: [
+        { id: 'stable_name',  label: 'Stable Name',      enabled: true,  custom: false, text: '' },
+        { id: 'meaning',      label: 'Meaning',          enabled: true,  custom: false, text: 'meaning: ' },
+        { id: 'coat',         label: 'Coat Color',       enabled: true,  custom: false, text: '' },
+        { id: 'confo',        label: 'Highest Confo',    enabled: true,  custom: false, text: '' },
+        { id: 'sireline',     label: 'Sire Line',        enabled: true,  custom: false, text: '' },
+        { id: 'damline',      label: 'Dam Line',         enabled: true,  custom: false, text: '' },
+        { id: 'suffix_note',  label: 'Stud Suffix Note', enabled: true,  custom: false, text: '' },
+      ]
+    };
+
+    function init() {
+      google.script.run.withSuccessHandler(function(saved) {
+        if (saved) {
+          try {
+            const s = JSON.parse(saved);
+            settings.suffix     = s.suffix     ?? settings.suffix;
+            settings.namePrefix = s.namePrefix ?? settings.namePrefix;
+            settings.nameSuffix = s.nameSuffix ?? settings.nameSuffix;
+            settings.separator  = s.separator  ?? settings.separator;
+            if (s.predicates)                      settings.predicates = { ...settings.predicates, ...s.predicates };
+            if (s.parts     && s.parts.length)     settings.parts      = s.parts;
+            if (s.infoLines && s.infoLines.length) settings.infoLines  = s.infoLines;
+          } catch(e) {}
+        }
+        renderSettingsUI();
+      }).getTaglineSettings();
+
+      google.script.run.withSuccessHandler(function(list) {
+        quickHorses = list;
+      }).getQuickHorseList();
+    }
+
+    // ===== TAB SWITCHING =====
+    function switchTab(id) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.getElementById('tab-' + id).classList.add('active');
+      document.getElementById('content-' + id).classList.add('active');
+    }
+
+    // ===== SEARCH =====
+    function searchHorses() {
+      const term = document.getElementById('horseSearch').value.toLowerCase();
+      const sugg = document.getElementById('suggestions');
+      if (term.length < 1) { sugg.style.display = 'none'; return; }
+
+      const filtered = quickHorses.filter(h =>
+        h.name.toLowerCase().includes(term) || h.id.toString().includes(term)
+      ).slice(0, 10);
+
+      sugg.innerHTML = '';
+      if (!filtered.length) { sugg.style.display = 'none'; return; }
+
+      filtered.forEach(h => {
+        const d = document.createElement('div');
+        d.className = 'suggestion-item';
+        d.innerHTML = '<strong>' + h.name + '</strong> <span style="color:var(--hr-text-muted);font-size:11px;">(ID: ' + h.id + ')</span>';
+        d.onclick = () => selectHorse(h.id, h.name);
+        sugg.appendChild(d);
+      });
+      sugg.style.display = 'block';
+    }
+
+    function selectHorse(id, name) {
+      document.getElementById('horseSearch').value = name;
+      document.getElementById('suggestions').style.display = 'none';
+
+      const display = document.getElementById('taglineDisplay');
+      display.textContent = 'Loading...';
+      display.classList.remove('loaded');
+
+      google.script.run.withSuccessHandler(function(horse) {
+        currentHorseData = horse;
+        renderTagline();
+      }).getHorseDataForTagline(id);
+    }
+
+    // ===== TAGLINE RENDERING =====
+    function renderTagline() {
+      if (!currentHorseData) return;
+      const horse = currentHorseData;
+      const sep   = settings.separator || '|';
+
+      // Build tagline parts in order — supports custom text parts too
+      const partValues = {
+        discipline_gp: buildDisciplineGP(horse),
+        discipline:    buildDisciplineCode(horse),
+        gp:            buildGPOnly(horse),
+        confo:         buildConfo(horse),
+        vg_g_a:        buildVGA(horse),
+        genes:         horse.color ? shortenColorGenes(horse.color) : '??'
+      };
+      const taglineParts = settings.parts
+        .filter(p => p.enabled)
+        .map(p => p.custom ? (p.text || '') : (partValues[p.id] || ''))
+        .filter(v => v !== '');
+      const tagline = taglineParts.join(sep);
+
+      // Build predicate prefix using per-predicate symbols
+      let prefix = '';
+      const pText = (horse.predicates || '').toString().toUpperCase();
+      if (pText.includes('STAR'))     prefix += (settings.predicates.star     || '☆');
+      if (pText.includes('PROVEN'))   prefix += (settings.predicates.proven   || 'ℙ');
+      if (pText.includes('CLINICAL')) prefix += (settings.predicates.clinical || 'ℂ');
+
+      const rawName     = (horse.name || '').replace(/\bNB\b/g, settings.suffix).trim();
+      const displayName = (settings.namePrefix || '') +
+                          (prefix ? prefix + ' ' : '') +
+                          rawName +
+                          (settings.nameSuffix ? '   ' + settings.nameSuffix : '');
+
+      const rawC = horse.confo != null ? horse.confo : horse.maxConfo;
+      const confoStr = (rawC != null && !isNaN(parseFloat(rawC)))
+        ? (parseFloat(rawC) > 100 ? parseFloat(rawC) / 1000 : parseFloat(rawC)).toFixed(3)
+        : '??';
+
+      const lineValues = {
+        stable_name: 'Stable Name: ' + displayName,
+        meaning:     'meaning: ',
+        coat:        'Coat: ' + (horse.coatColor || '??') + ' (' + (horse.color || '??') + ')',
+        confo:       'high. Confo: ' + confoStr,
+        sireline:    horse.sireline ? 'Sire Line: ' + horse.sireline : null,
+        damline:     horse.damline  ? 'Dam Line: '  + horse.damline  : null,
+        suffix_note: 'Please keep my Stud Suffix ' + settings.suffix +
+                     ' in the name. My horses have it intentionally so I can keep track of the horses I have bred. Thank you for respecting that!'
+      };
+
+      const addLines = settings.infoLines
+        .filter(l => l.enabled)
+        .map(l => l.custom ? (l.text || '') : (lineValues[l.id] ?? null))
+        .filter(l => l !== null);
+
+      document.getElementById('taglineDisplay').textContent = tagline;
+      document.getElementById('taglineDisplay').classList.add('loaded');
+      document.getElementById('additionalInfoDisplay').textContent = addLines.join('\n');
+    }
+
+    function buildDisciplineGP(horse) {
+      return buildDisciplineCode(horse) + buildGPOnly(horse);
+    }
+
+    function buildDisciplineCode(horse) {
+      if (!horse.discipline) return 'DV';
+      const d = horse.discipline.toString().toUpperCase();
+      if      (d.includes('DRESSAGE'))                        return 'DR';
+      else if (d.includes('DRIVING'))                         return 'DV';
+      else if (d.includes('ENDURANCE'))                       return 'EN';
+      else if (d.includes('EVENTING'))                        return 'EV';
+      else if (d.includes('JUMPING') || d.includes('JMP'))    return 'JMP';
+      else if (d.includes('REINING') || d.includes('WESTERN')) return 'RE';
+      else if (d.includes('RACING')  || d.includes('FLAT'))   return 'RC';
+      return 'DV';
+    }
+
+    function buildGPOnly(horse) {
+      return horse.gp != null && !isNaN(parseFloat(horse.gp))
+        ? Math.round(parseFloat(horse.gp)).toString() : '??';
+    }
+
+    function buildConfo(horse) {
+      const rawC = horse.confo != null ? horse.confo : horse.maxConfo;
+      if (rawC == null || isNaN(parseFloat(rawC))) return '?.?';
+      const c = parseFloat(rawC);
+      return (c > 100 ? c / 1000 : c).toFixed(1);
+    }
+
+    function buildVGA(horse) {
+      const parts = [];
+      if (horse.vg != null && horse.vg !== 0) parts.push(horse.vg);
+      if (horse.g  != null && horse.g  !== 0) parts.push(horse.g);
+      if (horse.a  != null && horse.a  !== 0) parts.push(horse.a);
+      return parts.length > 0 ? parts.join(':') : '?:?:?';
+    }
+
+    function shortenColorGenes(colorString) {
+      if (!colorString || colorString.trim() === '') return '??';
+      const abbr = { 'SW1':'SP','SW2':'SP','SW3':'SP' };
+      return colorString.trim().split(' ').map(part => {
+        const genes = part.split('/');
+        if (genes.length === 2) {
+          const g1 = genes[0].trim(), g2 = genes[1].trim();
+          if (g1 === g2) return (abbr[g1.toUpperCase()] || g1.toUpperCase()) + '²';
+          if (g1.toUpperCase() === 'N') return abbr[g2.toUpperCase()] || g2.toUpperCase();
+          if (g2.toUpperCase() === 'N') return abbr[g1.toUpperCase()] || g1.toUpperCase();
+          if (g1.toLowerCase() === g2.toLowerCase()) return g1.toUpperCase();
+          return (abbr[g1.toUpperCase()] || g1.toUpperCase()) + (abbr[g2.toUpperCase()] || g2.toUpperCase());
+        }
+        return part;
+      }).join(' ');
+    }
+
+    // ===== COPY =====
+    function copyTagline() {
+      const text = document.getElementById('taglineDisplay').textContent;
+      if (text === '—' || text === 'Loading...') return;
+      copyToClipboard(text);
+    }
+    function copyFormattedName() {
+      const info  = document.getElementById('additionalInfoDisplay').textContent;
+      const lines = info.split('\n');
+      const line  = lines.find(l => l.includes('Stable Name:'));
+      if (line) copyToClipboard(line.replace(/Stable Name:\s*/, '').trim());
+    }
+    function copyAll() {
+      const info = document.getElementById('additionalInfoDisplay').textContent;
+      if (info.includes('Select a horse')) return;
+      copyToClipboard(info);
+    }
+    function copyToClipboard(text) {
+      const tmp = document.createElement('textarea');
+      tmp.value = text;
+      document.body.appendChild(tmp);
+      tmp.select();
+      document.execCommand('copy');
+      document.body.removeChild(tmp);
+      const btn = event.currentTarget;
+      const orig = btn.innerHTML;
+      btn.innerHTML = '✓ Copied!';
+      setTimeout(() => { btn.innerHTML = orig; }, 1500);
+    }
+
+    // ===== SETTINGS UI =====
+    function renderSettingsUI() {
+      document.getElementById('set_suffix').value     = settings.suffix;
+      document.getElementById('set_namePrefix').value = settings.namePrefix;
+      document.getElementById('set_nameSuffix').value = settings.nameSuffix;
+      document.getElementById('set_separator').value  = settings.separator;
+      document.getElementById('set_pred_star').value     = settings.predicates.star;
+      document.getElementById('set_pred_proven').value   = settings.predicates.proven;
+      document.getElementById('set_pred_clinical').value = settings.predicates.clinical;
+      renderBuilderList();
+      renderInfoBuilder();
+    }
+
+    function renderInfoBuilder() {
+      const list = document.getElementById('infoBuilderList');
+      list.innerHTML = '';
+      settings.infoLines.forEach((line, idx) => {
+        const li = document.createElement('li');
+        li.className = 'builder-item';
+        li.draggable = true;
+        li.dataset.idx = idx;
+        li.dataset.list = 'info';
+
+        const isCustom = line.custom;
+        li.innerHTML = `
+          <span class="drag-handle">⠿</span>
+          <input type="checkbox" ${line.enabled ? 'checked' : ''} onchange="toggleInfoLine(${idx}, this.checked)">
+          ${isCustom
+            ? `<input type="text" value="${line.text || ''}" placeholder="Custom text..." oninput="updateCustomLine(${idx}, this.value)"
+                style="flex:1;padding:4px 8px;font-size:11px;height:26px;">`
+            : `<span class="builder-label">${line.label}</span>`
+          }
+          ${isCustom
+            ? `<span class="builder-preview" style="cursor:pointer;color:#c0392b;" onclick="removeCustomLine(${idx})">✕</span>`
+            : ''
+          }
+        `;
+
+        li.addEventListener('dragstart', onDragStartInfo);
+        li.addEventListener('dragover',  onDragOverInfo);
+        li.addEventListener('drop',      onDropInfo);
+        li.addEventListener('dragend',   onDragEndInfo);
+        list.appendChild(li);
+      });
+    }
+
+    function toggleInfoLine(idx, enabled) {
+      settings.infoLines[idx].enabled = enabled;
+      if (currentHorseData) renderTagline();
+    }
+
+    function updateCustomLine(idx, text) {
+      settings.infoLines[idx].text = text;
+      if (currentHorseData) renderTagline();
+    }
+
+    function removeCustomLine(idx) {
+      settings.infoLines.splice(idx, 1);
+      renderInfoBuilder();
+      if (currentHorseData) renderTagline();
+    }
+
+    function addCustomLine() {
+      settings.infoLines.push({ id: 'custom_' + Date.now(), label: '', enabled: true, custom: true, text: '' });
+      renderInfoBuilder();
+    }
+
+    // Drag for info builder
+    let dragInfoSrcIdx = null;
+    function onDragStartInfo(e) {
+      dragInfoSrcIdx = parseInt(this.dataset.idx);
+      this.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    }
+    function onDragOverInfo(e) {
+      e.preventDefault();
+      document.querySelectorAll('#infoBuilderList .builder-item').forEach(el => el.classList.remove('drag-over'));
+      this.classList.add('drag-over');
+    }
+    function onDropInfo(e) {
+      e.preventDefault();
+      const targetIdx = parseInt(this.dataset.idx);
+      if (dragInfoSrcIdx === null || dragInfoSrcIdx === targetIdx) return;
+      const moved = settings.infoLines.splice(dragInfoSrcIdx, 1)[0];
+      settings.infoLines.splice(targetIdx, 0, moved);
+      renderInfoBuilder();
+      if (currentHorseData) renderTagline();
+    }
+    function onDragEndInfo() {
+      document.querySelectorAll('#infoBuilderList .builder-item').forEach(el => {
+        el.classList.remove('dragging');
+        el.classList.remove('drag-over');
+      });
+      dragInfoSrcIdx = null;
+    }
+
+    function renderBuilderList() {
+      const list = document.getElementById('builderList');
+      list.innerHTML = '';
+      settings.parts.forEach((part, idx) => {
+        const li = document.createElement('li');
+        li.className = 'builder-item';
+        li.draggable = true;
+        li.dataset.idx = idx;
+
+        li.innerHTML = `
+          <span class="drag-handle">⠿</span>
+          <input type="checkbox" ${part.enabled ? 'checked' : ''} onchange="togglePart(${idx}, this.checked)">
+          ${part.custom
+            ? `<input type="text" value="${part.text || ''}" placeholder="Custom text e.g. ❊ or NB"
+                oninput="updateCustomPart(${idx}, this.value)"
+                style="flex:1;padding:4px 8px;font-size:11px;height:26px;">`
+            : `<span class="builder-label">${part.label}</span>
+               <span class="builder-preview">${getPartPreview(part.id)}</span>`
+          }
+          ${part.custom
+            ? `<span class="builder-preview" style="cursor:pointer;color:#c0392b;" onclick="removeCustomPart(${idx})">✕</span>`
+            : ''
+          }
+        `;
+
+        li.addEventListener('dragstart', onDragStart);
+        li.addEventListener('dragover',  onDragOver);
+        li.addEventListener('drop',      onDrop);
+        li.addEventListener('dragend',   onDragEnd);
+        list.appendChild(li);
+      });
+    }
+
+    function updateCustomPart(idx, text) {
+      settings.parts[idx].text = text;
+      if (currentHorseData) renderTagline();
+    }
+
+    function removeCustomPart(idx) {
+      settings.parts.splice(idx, 1);
+      renderBuilderList();
+      if (currentHorseData) renderTagline();
+    }
+
+    function addCustomPart() {
+      settings.parts.push({ id: 'custom_' + Date.now(), label: '', enabled: true, custom: true, text: '' });
+      renderBuilderList();
+    }
+
+    function getPartPreview(id) {
+      const examples = {
+        discipline_gp: 'EN754',
+        discipline:    'EN',
+        gp:            '754',
+        confo:         '93.4',
+        vg_g_a:        '12:0:0',
+        genes:         'E² A²'
+      };
+      return examples[id] || '';
+    }
+
+    function togglePart(idx, enabled) {
+      settings.parts[idx].enabled = enabled;
+      if (currentHorseData) renderTagline();
+    }
+
+    // ===== DRAG & DROP =====
+    let dragSrcIdx = null;
+
+    function onDragStart(e) {
+      dragSrcIdx = parseInt(this.dataset.idx);
+      this.classList.add('dragging');
+      e.dataTransfer.effectAllowed = 'move';
+    }
+    function onDragOver(e) {
+      e.preventDefault();
+      document.querySelectorAll('.builder-item').forEach(el => el.classList.remove('drag-over'));
+      this.classList.add('drag-over');
+      e.dataTransfer.dropEffect = 'move';
+    }
+    function onDrop(e) {
+      e.preventDefault();
+      const targetIdx = parseInt(this.dataset.idx);
+      if (dragSrcIdx === null || dragSrcIdx === targetIdx) return;
+      const moved = settings.parts.splice(dragSrcIdx, 1)[0];
+      settings.parts.splice(targetIdx, 0, moved);
+      renderBuilderList();
+      if (currentHorseData) renderTagline();
+    }
+    function onDragEnd() {
+      document.querySelectorAll('.builder-item').forEach(el => {
+        el.classList.remove('dragging');
+        el.classList.remove('drag-over');
+      });
+      dragSrcIdx = null;
+    }
+
+    // ===== SAVE SETTINGS =====
+    function saveSettings() {
+      settings.suffix     = document.getElementById('set_suffix').value.trim();
+      settings.namePrefix = document.getElementById('set_namePrefix').value;
+      settings.nameSuffix = document.getElementById('set_nameSuffix').value;
+      settings.separator  = document.getElementById('set_separator').value || '|';
+      settings.predicates = {
+        star:     document.getElementById('set_pred_star').value,
+        proven:   document.getElementById('set_pred_proven').value,
+        clinical: document.getElementById('set_pred_clinical').value
+      };
+
+      google.script.run
+        .withSuccessHandler(function() {
+          const s = document.getElementById('saveStatus');
+          s.textContent = '✓ Settings saved!';
+          s.className = 'save-status success';
+          setTimeout(() => { s.style.display = 'none'; }, 2000);
+          if (currentHorseData) renderTagline();
+        })
+        .saveTaglineSettings(JSON.stringify(settings));
+    }
+  </script>
+</head>
+<body onload="init()">
+
+  <div class="modal-frame">
+    <div class="modal-header">
+      <h1>Tagline Printer</h1>
+      <div class="subtitle">HorseReality Herd Manager</div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" id="tab-printer"  onclick="switchTab('printer')">Printer</button>
+      <button class="tab"        id="tab-settings" onclick="switchTab('settings')">⚙ Settings</button>
+    </div>
+
+    <!-- ===== PRINTER TAB ===== -->
+    <div class="tab-content active" id="content-printer">
+
+      <div class="section-title">Search Horse</div>
+      <div class="search-wrap">
+        <input type="text" id="horseSearch" placeholder="Search by name or ID..." onkeyup="searchHorses()">
+        <div id="suggestions"></div>
+      </div>
+
+      <div class="section-title">Generated Tagline</div>
+      <div class="tagline-display" id="taglineDisplay">—</div>
+
+      <div class="section-title">Additional Info</div>
+      <div class="info-box" id="additionalInfoDisplay">Select a horse to generate data...</div>
+
+      <div class="button-grid">
+        <button class="btn btn-primary"   onclick="copyTagline()">Copy Tagline</button>
+        <button class="btn btn-secondary" onclick="copyFormattedName()">Copy Name</button>
+        <button class="btn btn-full"      onclick="copyAll()">Copy Complete Info</button>
+        <button class="btn btn-outline"   onclick="google.script.host.close()">Close</button>
+      </div>
+
+      <div class="note">Suffix, symbols and tagline order can be configured in ⚙ Settings.</div>
+    </div>
+
+    <!-- ===== SETTINGS TAB ===== -->
+    <div class="tab-content" id="content-settings">
+
+      <div class="section-title">Name Settings</div>
+
+      <div class="settings-row">
+        <label>Stud Suffix</label>
+        <input type="text" id="set_suffix" placeholder="e.g. NB" style="max-width:80px;">
+      </div>
+      <div class="settings-hint">Replaces your stud suffix in all horse names</div>
+
+      <div class="settings-row">
+        <label>Name Prefix</label>
+        <input type="text" id="set_namePrefix" placeholder="e.g. ☆ or ✦">
+      </div>
+      <div class="settings-hint">Symbol added before the name in Additional Info</div>
+
+      <div class="settings-row">
+        <label>Name Suffix</label>
+        <input type="text" id="set_nameSuffix" placeholder="e.g. ˚₊✧⋆">
+      </div>
+      <div class="settings-hint">Symbol added after the name in Additional Info</div>
+
+      <div class="section-title">Predicate Symbols</div>
+
+      <div class="settings-row">
+        <label>Star</label>
+        <input type="text" id="set_pred_star" placeholder="☆" style="max-width:70px;">
+      </div>
+      <div class="settings-row">
+        <label>Proven</label>
+        <input type="text" id="set_pred_proven" placeholder="ℙ" style="max-width:70px;">
+      </div>
+      <div class="settings-row">
+        <label>Clinical Approved</label>
+        <input type="text" id="set_pred_clinical" placeholder="ℂ" style="max-width:70px;">
+      </div>
+
+      <div class="section-title">Tagline Settings</div>
+
+      <div class="separator-row">
+        <label>Separator</label>
+        <input type="text" id="set_separator" placeholder="|" maxlength="5">
+      </div>
+
+      <p style="font-size:10px;color:var(--hr-text-muted);margin-bottom:10px;">
+        Drag to reorder · Toggle checkbox to show/hide
+      </p>
+      <ul class="builder-list" id="builderList"></ul>
+      <button type="button" onclick="addCustomPart()"
+        style="width:100%;padding:7px;background:transparent;border:1px dashed var(--hr-gold);
+               border-radius:7px;color:var(--hr-gold);font-family:'Roboto',sans-serif;
+               font-weight:700;font-size:11px;cursor:pointer;margin-bottom:12px;">
+        + Add Custom Part
+      </button>
+
+      <div class="section-title">Additional Info Lines</div>
+      <p style="font-size:10px;color:var(--hr-text-muted);margin-bottom:10px;">
+        Drag to reorder · Toggle to show/hide · Add custom lines below
+      </p>
+      <ul class="builder-list" id="infoBuilderList"></ul>
+      <button type="button" onclick="addCustomLine()"
+        style="width:100%;padding:7px;background:transparent;border:1px dashed var(--hr-gold);
+               border-radius:7px;color:var(--hr-gold);font-family:'Roboto',sans-serif;
+               font-weight:700;font-size:11px;cursor:pointer;margin-bottom:10px;">
+        + Add Custom Line
+      </button>
+
+      <button class="btn-save" onclick="saveSettings()">Save Settings</button>
+      <div id="saveStatus" class="save-status"></div>
+    </div>
+
+  </div>
+
+</body>
+</html>
