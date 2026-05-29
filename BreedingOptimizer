@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --hr-purple:       #0b2c41;
+      --hr-purple-mid:   #081b28;
+      --hr-purple-light: #407f9c;
+      --hr-gold:         #ffa100;
+      --hr-gold-light:   #ffb733;
+      --hr-bg:           #f5f7f9;
+      --hr-card:         #f5f7f9;
+      --hr-white:        #ffffff;
+      --hr-text:         #0b2c41;
+      --hr-text-muted:   #5a7a8a;
+      --hr-border:       rgba(255, 161, 0, 0.3);
+      --hr-shadow:       0 8px 24px rgba(11, 44, 65, 0.15);
+      --hr-success:      #2E7D32;
+      --hr-success-bg:   #d4edda;
+      --hr-danger:       #b71c1c;
+      --hr-warn:         #856404;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: #e4e8ec;
+      color: var(--hr-text);
+      padding: 10px;
+      line-height: 1.4;
+      font-size: 13px;
+    }
+
+    /* ===== CONTROL PANEL ===== */
+    .control-panel {
+      background: var(--hr-purple);
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: var(--hr-shadow);
+      margin-bottom: 14px;
+      border-bottom: 3px solid var(--hr-gold);
+    }
+
+    .panel-header {
+      font-family: 'Roboto', sans-serif;
+      font-weight: 700;
+      font-size: 20px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #ffffff;
+      text-align: center;
+      margin-bottom: 4px;
+    }
+
+    .panel-subtitle {
+      text-align: center;
+      color: rgba(255,255,255,0.6);
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .control-panel label {
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--hr-gold);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .control-panel input,
+    .control-panel select {
+      width: 100%;
+      padding: 8px 10px;
+      margin-bottom: 10px;
+      border: 1px solid rgba(255,161,0,0.4);
+      border-radius: 6px;
+      background: rgba(255,255,255,0.08);
+      color: var(--hr-white);
+      font-size: 13px;
+      font-family: 'Roboto', sans-serif;
+      transition: border-color 0.2s;
+    }
+    .control-panel input::placeholder { color: rgba(255,255,255,0.4); }
+    .control-panel input:focus,
+    .control-panel select:focus {
+      outline: none;
+      border-color: var(--hr-gold);
+      background: rgba(255,255,255,0.12);
+    }
+    .control-panel select option { background: var(--hr-purple); color: var(--hr-white); }
+
+    .control-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    .control-panel .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.8);
+      margin-top: 4px;
+      cursor: pointer;
+    }
+    .control-panel .checkbox-row input[type="checkbox"] {
+      width: auto;
+      margin: 0;
+      accent-color: var(--hr-gold);
+    }
+
+    /* ===== MARE SUMMARY ===== */
+    .mare-summary {
+      background: var(--hr-white);
+      border: 1px solid var(--hr-border);
+      border-left: 4px solid var(--hr-gold);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      display: none;
+    }
+    .mare-summary .stud-title {
+      font-family: 'Roboto', sans-serif;
+      font-weight: 700;
+      font-size: 17px;
+      color: var(--hr-purple);
+      border-bottom: 1px solid var(--hr-border);
+      padding-bottom: 6px;
+      margin-bottom: 8px;
+    }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px 20px;
+      font-size: 12px;
+    }
+    .summary-grid small { color: var(--hr-text-muted); margin-right: 4px; }
+    .summary-grid b { color: var(--hr-purple); }
+
+    /* ===== RESULT COUNT ===== */
+    #resultsCount {
+      font-size: 10px;
+      text-align: center;
+      margin-bottom: 10px;
+      font-weight: 700;
+      color: var(--hr-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* ===== RESULT CARDS ===== */
+    .card {
+      background: var(--hr-white);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 12px;
+      box-shadow: var(--hr-shadow);
+      border: 1px solid var(--hr-border);
+      border-left: 4px solid var(--hr-gold);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+      margin-bottom: 12px;
+    }
+
+    .stud-title {
+      font-family: 'Roboto', sans-serif;
+      font-weight: 700;
+      font-size: 17px;
+      color: var(--hr-purple);
+      line-height: 1.2;
+    }
+
+    .gp-container {
+      display: flex;
+      align-items: baseline;
+      gap: 3px;
+    }
+    .gp-num {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--hr-purple);
+    }
+    .gp-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      color: var(--hr-text-muted);
+      font-weight: 600;
+    }
+
+    /* ===== BADGES ===== */
+    .badge-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+      padding: 0 10px;
+      border-radius: 50px;
+      font-size: 10px;
+      font-weight: 700;
+      height: 22px;
+      border: 1px solid rgba(0,0,0,0.06);
+    }
+    .badge-confo { background: #fdfdfd; color: var(--hr-purple); border-left: 3px solid var(--hr-gold); }
+    .badge-vg    { background: var(--hr-purple); color: var(--hr-white); border: none; }
+    .badge-safe  { background: var(--hr-success-bg); color: var(--hr-success); border-left: 3px solid var(--hr-success); }
+
+    /* ===== VG BAR ===== */
+    .vg-bar-bg   { height: 6px; background: #eee; border-radius: 4px; overflow: hidden; margin: 8px 0; }
+    .vg-bar-fill { height: 100%; background: var(--hr-purple); transition: width 0.5s; }
+
+    /* ===== BASE STATS ===== */
+    .base-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      background: #f0f4f7;
+      padding: 8px;
+      border-radius: 6px;
+      margin-top: 10px;
+      justify-content: space-between;
+    }
+    .base-stat {
+      text-align: center;
+      flex: 1;
+      min-width: 35px;
+    }
+    .base-stat-label { font-size: 8px; color: var(--hr-text-muted); text-transform: uppercase; }
+    .base-stat-val   { font-size: 11px; font-weight: 700; color: var(--hr-text); }
+
+    /* ===== DISCIPLINE STATS ===== */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 15px;
+      padding: 10px;
+      background: #f5f7f9;
+      border-radius: 6px;
+      margin-top: 8px;
+    }
+    .stat-row { display: flex; justify-content: space-between; border-bottom: 1px solid #eee; padding: 4px 0; font-size: 12px; }
+    .stat-label { color: var(--hr-text-muted); }
+    .stat-val   { font-weight: 700; color: var(--hr-purple); }
+
+    /* ===== GENETICS BOX ===== */
+    .genetics-box {
+      background: #f8fafc;
+      padding: 12px;
+      border-radius: 8px;
+      margin: 10px 0;
+      border: 1px solid rgba(255, 161, 0, 0.2);
+    }
+    .genetics-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 1px solid #eee;
+      padding: 4px 0;
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+    .genetics-line:last-of-type { border-bottom: none; }
+    .genetics-line b {
+      font-size: 9px;
+      text-transform: uppercase;
+      color: var(--hr-gold);
+      letter-spacing: 1px;
+      margin-right: 8px;
+      flex-shrink: 0;
+    }
+    .gencode-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3px;
+      justify-content: flex-end;
+      max-width: 70%;
+    }
+    .gene-tag {
+      background: #e8f0f5;
+      color: var(--hr-purple);
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-family: monospace;
+      border: 1px solid rgba(11,44,65,0.15);
+      white-space: nowrap;
+    }
+
+    .color-result {
+      margin-top: 10px;
+      padding: 10px;
+      background: #f8fafc;
+      border-radius: 6px;
+      border-left: 3px solid var(--hr-gold);
+      font-size: 12px;
+      display: none;
+      line-height: 1.6;
+    }
+
+    /* ===== DETAILS / CONFO ===== */
+    details {
+      margin-top: 10px;
+      background: #f0f4f7;
+      border-radius: 6px;
+      border: 1px solid var(--hr-border);
+      overflow: hidden;
+    }
+    summary {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--hr-purple);
+      cursor: pointer;
+      padding: 10px 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    summary:hover { background: rgba(197,163,88,0.06); }
+
+    .confo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 4px;
+      font-size: 10px;
+      padding: 10px;
+      background: var(--hr-white);
+    }
+    .confo-row {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid #f0e8f0;
+      padding: 3px 0;
+    }
+    .confo-row span { color: var(--hr-text-muted); }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+      width: 100%;
+      padding: 10px;
+      border-radius: 7px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      text-transform: uppercase;
+      margin-top: 8px;
+      font-size: 11px;
+      font-family: 'Roboto', sans-serif;
+      letter-spacing: 1px;
+      transition: all 0.2s;
+    }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-gold {
+      background: var(--hr-gold);
+      color: var(--hr-white);
+      border: 1px solid var(--hr-gold-light);
+    }
+    .btn-gold:hover:not(:disabled) { background: var(--hr-gold-light); }
+
+    .btn-purple {
+      background: var(--hr-purple);
+      color: #ffffff;
+      border: 1px solid rgba(255,161,0,0.4);
+    }
+    .btn-purple:hover:not(:disabled) { background: var(--hr-gold); color: var(--hr-white); }
+
+    /* ===== LOADER ===== */
+    .loader {
+      text-align: center;
+      padding: 30px;
+      font-weight: 700;
+      color: var(--hr-purple);
+      font-size: 12px;
+      letter-spacing: 0.5px;
+    }
+
+    /* ===== SCROLLBAR ===== */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-thumb { background: var(--hr-gold); border-radius: 10px; }
+  </style>
+</head>
+<body>
+
+  <div class="control-panel">
+    <div class="panel-header">Breeding Optimizer</div>
+    <div class="panel-subtitle">Breeding Match Finder</div>
+
+    <label>1. Select Broodmare</label>
+    <input list="mareOptions" id="mareSearch" placeholder="Search by name..." oninput="onMareSearchInput()">
+    <datalist id="mareOptions"></datalist>
+
+    <div class="control-grid">
+      <div><label>Min. Foal GP</label><input type="number" id="minGP" value="0" onchange="findMatches()"></div>
+      <div><label>Min. Confo Score</label><input type="number" step="0.1" id="minConfo" value="0" onchange="findMatches()"></div>
+    </div>
+
+    <label>Sort By</label>
+    <select id="sortBy" onchange="findMatches()">
+      <option value="gp">Best GP Forecast</option>
+      <option value="confo">Best Confo Forecast</option>
+      <option value="vg">Most VGs</option>
+    </select>
+
+    <label class="checkbox-row">
+      <input type="checkbox" id="allowInbreeding" onchange="findMatches()">
+      Allow Inbreeding <span style="opacity:.6;">(strategic breeding)</span>
+    </label>
+
+    <label style="margin-top:8px;">Max. Stud Fee <span style="opacity:.6;">(outside studs only, leave empty for all)</span></label>
+    <input type="number" id="maxStudFee" placeholder="e.g. 5000" onchange="findMatches()" style="margin-bottom:0;">
+  </div>
+
+  <div id="mareSummary" class="mare-summary">
+    <div class="stud-title" id="msName"></div>
+    <div class="summary-grid">
+      <div><small>Breed:</small> <b id="msBreed"></b></div>
+      <div><small>GP:</small> <b id="msGP"></b></div>
+      <div><small>Confo:</small> <b id="msConfo"></b></div>
+      <div><small>VGs:</small> <b id="msVG"></b></div>
+    </div>
+  </div>
+
+  <div id="loader" class="loader">Loading data...</div>
+  <div id="resultsCount"></div>
+  <div id="results"></div>
+
+  <script>
+    let allData = {};
+    let currentMareId = null;
+
+    const confoLabelsStandard  = ["Walk","Trot","Canter","Gallop","Posture","Head","Neck","Back","Shoulders","Frontlegs","Hindquarters","Socks"];
+    const confoLabelsIcelandic = ["Walk","Trot","Canter","Tölt","Pace","Posture","Head","Neck","Back","Shoulders","Frontlegs","Hindquarters","Socks","Feather"];
+    const confoLabelsKathiawari = ["Walk","Trot","Canter","Revaal","Gallop","Posture","Head","Neck","Back","Shoulders","Frontlegs","Hindquarters","Socks"];
+
+    const disciplineLabels = { 'dressage':'Dressage','driving':'Driving','endurance':'Endurance','eventing':'Eventing','flat':'Flat Racing','jumping':'Jumping','reining':'Reining' };
+    const baseStatLabels   = { 'acceleration':'Acc','agility':'Agi','balance':'Bal','bascule':'Basc','pulling':'Pull','speed':'Spd','sprint':'Spr','stamina':'Sta','strength':'Str','surefoot':'Srft' };
+
+    window.onload = function() {
+      google.script.run.withSuccessHandler(data => {
+        allData = data;
+        document.getElementById('loader').style.display = 'none';
+        populateMares();
+      }).loadAllDataOptimized();
+    };
+
+    function populateMares() {
+      const list = document.getElementById('mareOptions');
+      Object.keys(allData.tracker).filter(id => allData.tracker[id].gender === 'Mare').forEach(id => {
+        const op = document.createElement('option');
+        op.value = allData.tracker[id].name;
+        list.appendChild(op);
+      });
+    }
+
+    function onMareSearchInput() {
+      const val = document.getElementById('mareSearch').value;
+      const id  = Object.keys(allData.tracker).find(i => allData.tracker[i].name === val);
+      if (id) { currentMareId = id; updateMareSummary(id); findMatches(); }
+    }
+
+    function updateMareSummary(id) {
+      const mare  = allData.tracker[id];
+      const stats = allData.stats[id];
+      const confoCount = stats.confoCount || 12;
+      const vgCount    = stats.confoRaw.filter(v => v >= 92.5).length;
+
+      document.getElementById('msName').innerText  = mare.name;
+      document.getElementById('msBreed').innerText = mare.breed;
+      document.getElementById('msGP').innerText    = Math.round(stats.gpTotal);
+      document.getElementById('msConfo').innerText = stats.confoScoreMax.toFixed(2);
+      document.getElementById('msVG').innerText    = vgCount + ' / ' + confoCount;
+      document.getElementById('mareSummary').style.display = 'block';
+    }
+
+    function calculateFoal(m, s) {
+      const foalRaw   = m.confoRaw.map((v, i) => (v + s.confoRaw[i]) / 2);
+      const disciplines = {};
+      for (let key in m.gpDisciplines) disciplines[key] = (m.gpDisciplines[key] + s.gpDisciplines[key]) / 2;
+      const baseStats = {};
+      if (m.gpStats && s.gpStats) for (let key in m.gpStats) baseStats[key] = (m.gpStats[key] + s.gpStats[key]) / 2;
+      return {
+        gpTotal:   (m.gpTotal + s.gpTotal) / 2,
+        confoMin:  (m.confoScoreMin + s.confoScoreMin) / 2,
+        confoMax:  (m.confoScoreMax + s.confoScoreMax) / 2,
+        vgCount:   foalRaw.filter(v => v >= 92.5).length,
+        raw:       foalRaw,
+        disciplines, baseStats,
+        confoCount: m.confoCount || 12
+      };
+    }
+
+    function findMatches() {
+      if (!currentMareId) return;
+      const mare            = allData.tracker[currentMareId];
+      const mareStats       = allData.stats[currentMareId];
+      const sortBy          = document.getElementById('sortBy').value;
+      const allowInbreeding = document.getElementById('allowInbreeding').checked;
+      const maxFeeRaw       = document.getElementById('maxStudFee').value;
+      const maxFee          = maxFeeRaw !== '' ? parseFloat(maxFeeRaw) : null;
+
+      let candidates  = [];
+      let stallionIds = [];
+
+      for (let id in allData.tracker) {
+        let stud      = allData.tracker[id];
+        let studStats = allData.stats[id];
+        if (stud.gender !== 'Stallion') continue;
+        if (stud.breed.trim().toLowerCase() !== mare.breed.trim().toLowerCase()) continue;
+        if (stud.age < 3) continue;
+        if (!studStats) continue;
+
+        // Stud Fee filter — only applies to outside studs (type === 'public')
+        if (stud.type === 'public' && maxFee !== null) {
+          const fee = parseFloat(stud.studFee) || 0;
+          if (fee > maxFee) continue;
+        }
+
+        let foal = calculateFoal(mareStats, studStats);
+        candidates.push({ id, name: stud.name, foal, studStats, isRelated: null,
+                          isPublic: stud.type === 'public', studFee: stud.studFee || null });
+        stallionIds.push(id);
+      }
+
+      document.getElementById('results').innerHTML = '<div class="loader">Checking bloodlines...</div>';
+
+      google.script.run
+        .withSuccessHandler(function(inbreedingResults) {
+          candidates.forEach(c => {
+            const r   = inbreedingResults[c.id];
+            c.isRelated        = r ? r.isRelated : false;
+            c.inbreedingReason = r ? r.reason    : '';
+          });
+
+          if (!allowInbreeding) candidates = candidates.filter(c => !c.isRelated);
+
+          if      (sortBy === 'gp')    candidates.sort((a, b) => b.foal.gpTotal    - a.foal.gpTotal);
+          else if (sortBy === 'confo') candidates.sort((a, b) => b.foal.confoMin   - a.foal.confoMin);
+          else if (sortBy === 'vg')    candidates.sort((a, b) => b.foal.vgCount    - a.foal.vgCount);
+
+          renderResults(candidates, 15);
+        })
+        .withFailureHandler(function(error) {
+          document.getElementById('results').innerHTML =
+            '<div style="text-align:center;padding:20px;color:var(--hr-danger);">Error checking bloodlines: ' + error + '</div>';
+        })
+        .batchCheckInbreeding(currentMareId, stallionIds);
+    }
+
+    function renderResults(list, limit = 15) {
+      const container  = document.getElementById('results');
+      const mareStats  = allData.stats[currentMareId];
+      const mareBreed  = allData.tracker[currentMareId].breed.toLowerCase();
+      const confoLabels = mareBreed.includes('icelandic') ? confoLabelsIcelandic
+                        : mareBreed.includes('kathiawari') ? confoLabelsKathiawari
+                        : confoLabelsStandard;
+      const confoCount = mareStats.confoCount || 12;
+
+      container.innerHTML = '';
+      const totalCount = list.length;
+      const visible    = list.slice(0, limit);
+
+      if (totalCount === 0) {
+        container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--hr-text-muted);font-weight:700;">No matching stallions found.</div>';
+        document.getElementById('resultsCount').innerText = '';
+        return;
+      }
+
+      document.getElementById('resultsCount').innerText =
+        totalCount + ' stallion' + (totalCount !== 1 ? 's' : '') + ' found' +
+        (totalCount > limit ? ' · showing top ' + limit : '');
+
+      const formatGenetics = (code) => {
+        if (!code || code === 'N/A') return '<span style="color:var(--hr-text-muted);">N/A</span>';
+        return `<div class="gencode-container">${code.split(/\s+/).map(g => `<span class="gene-tag">${g}</span>`).join('')}</div>`;
+      };
+
+      const checkBetter = (foalVal, mareVal) =>
+        foalVal > mareVal ? 'style="color:var(--hr-success);font-weight:700;"' : '';
+
+      visible.forEach(item => {
+        const usageCount = allData.stallionUsage[item.name] || 0;
+        const vgPct      = Math.round((item.foal.vgCount / confoCount) * 100);
+
+        let usageBadge = '';
+        if (usageCount >= 3) {
+          const c = usageCount >= 5 ? '#b71c1c' : 'var(--hr-warn)';
+          usageBadge = `<div class="badge" style="border:1px solid ${c};color:${c};background:rgba(255,255,255,0.9);">⚠ ${usageCount} mares</div>`;
+        }
+
+        let feeBadge = '';
+        if (item.isPublic && item.studFee) {
+          feeBadge = `<div class="badge" style="background:#fdf6e3;color:#7a5c00;border:1px solid var(--hr-gold);">💰 ${Number(item.studFee).toLocaleString()} Equus</div>`;
+        }
+
+        const card = `
+<div class="card">
+  <div class="card-header">
+    <div class="stud-title">${item.name}</div>
+    <div class="gp-container" ${checkBetter(item.foal.gpTotal, mareStats.gpTotal)}>
+      <span class="gp-num">${Math.round(item.foal.gpTotal)}</span>
+      <span class="gp-label">GP</span>
+    </div>
+  </div>
+
+  <div class="badge-row">
+    <div class="badge badge-confo">Confo: ${item.foal.confoMin.toFixed(2)}–${item.foal.confoMax.toFixed(2)}</div>
+    <div class="badge badge-vg">${item.foal.vgCount} / ${confoCount} VG</div>
+    ${item.isRelated
+      ? '<div class="badge" style="background:#ffebee;color:var(--hr-danger);border-left:3px solid var(--hr-danger);">⚠ Inbreeding</div>'
+      : '<div class="badge badge-safe">✓ Clean</div>'}
+    ${usageBadge}
+    ${feeBadge}
+  </div>
+
+  <div class="vg-bar-bg"><div class="vg-bar-fill" style="width:${vgPct}%"></div></div>
+
+  <div class="base-stats">
+    ${Object.keys(baseStatLabels).map(key => `
+      <div class="base-stat">
+        <div class="base-stat-label">${baseStatLabels[key]}</div>
+        <div class="base-stat-val" ${checkBetter(item.foal.baseStats[key], mareStats.gpStats[key])}>
+          ${Math.round(item.foal.baseStats[key] || 0)}
+        </div>
+      </div>`).join('')}
+  </div>
+
+  <div class="stats-grid">
+    ${Object.keys(disciplineLabels).map(key => `
+      <div class="stat-row">
+        <span class="stat-label">${disciplineLabels[key]}</span>
+        <span class="stat-val" ${checkBetter(item.foal.disciplines[key], mareStats.gpDisciplines[key])}>
+          ${Math.round(item.foal.disciplines[key])}
+        </span>
+      </div>`).join('')}
+  </div>
+
+  <div class="genetics-box">
+    <div class="genetics-line">
+      <b>Mare</b>${formatGenetics(allData.genetics[currentMareId])}
+    </div>
+    <div class="genetics-line">
+      <b>Stallion</b>${formatGenetics(allData.genetics[item.id])}
+    </div>
+    <button class="btn btn-gold" onclick="calculateColors('${currentMareId}','${item.id}',this)">Calculate Foal Colours</button>
+    <div id="colors_${item.id}" class="color-result"></div>
+  </div>
+
+  <details>
+    <summary>Conformation Forecast</summary>
+    <div class="confo-grid">
+      ${item.foal.raw.map((v, i) => `
+        <div class="confo-row">
+          <span>${(confoLabels[i] || 'Unk').substring(0,6)}</span>
+          <b style="color:${v>=92.5?'var(--hr-success)':v>=75?'var(--hr-purple)':'var(--hr-text-muted)'}">${v>=92.5?'VG':(v>=75?'G':'A')}</b>
+        </div>`).join('')}
+    </div>
+  </details>
+
+  <button class="btn btn-purple" onclick="bookPregnancy('${currentMareId}','${item.id}',this)">Book Breeding</button>
+</div>`;
+        container.insertAdjacentHTML('beforeend', card);
+      });
+    }
+
+    function bookPregnancy(mId, sId, btn) {
+      const orig = btn.textContent;
+      btn.textContent = 'Saving...';
+      btn.disabled = true;
+      google.script.run
+        .withSuccessHandler(response => {
+          btn.textContent  = '✓ ' + response;
+          btn.style.background = 'var(--hr-success)';
+          btn.style.color  = 'white';
+          const studName   = btn.closest('.card').querySelector('.stud-title').innerText;
+          allData.stallionUsage[studName] = (allData.stallionUsage[studName] || 0) + 1;
+          setTimeout(() => { btn.disabled = false; }, 3000);
+        })
+        .withFailureHandler(err => {
+          alert('Error saving: ' + err);
+          btn.textContent = orig;
+          btn.disabled = false;
+        })
+        .savePregnancy(mId, sId);
+    }
+
+    function calculateColors(mareId, studId, btn) {
+      const resultDiv = document.getElementById('colors_' + studId);
+      btn.textContent = 'Calculating...';
+      btn.disabled    = true;
+      resultDiv.style.display = 'block';
+      resultDiv.innerHTML = '<i style="color:var(--hr-text-muted);">Analysing genetics...</i>';
+      google.script.run
+        .withSuccessHandler(function(response) {
+          btn.textContent = 'Calculate Foal Colours';
+          btn.disabled    = false;
+          if (typeof response === 'object' && response.error) {
+            resultDiv.innerHTML = '<span style="color:var(--hr-danger);">⚠ ' + response.error + '</span>';
+          } else {
+            resultDiv.innerHTML = '<div style="line-height:1.6;">' + response + '</div>';
+          }
+        })
+        .withFailureHandler(function(err) {
+          btn.textContent = 'Calculate Foal Colours';
+          btn.disabled    = false;
+          resultDiv.innerHTML = '<span style="color:var(--hr-danger);">Error: ' + err.message + '</span>';
+        })
+        .calculateFoalColors(mareId, studId);
+    }
+  </script>
+</body>
+</html>
