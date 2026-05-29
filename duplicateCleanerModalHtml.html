@@ -1,0 +1,482 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --hr-purple:       #0b2c41;
+      --hr-purple-mid:   #081b28;
+      --hr-purple-light: #407f9c;
+      --hr-gold:         #ffa100;
+      --hr-bg:           #e4e8ec;
+      --hr-card:         #f5f7f9;
+      --hr-white:        #ffffff;
+      --hr-text:         #0b2c41;
+      --hr-text-muted:   #5a7a8a;
+      --hr-border:       rgba(255, 161, 0, 0.3);
+      --hr-shadow:       0 12px 30px rgba(8, 27, 40, 0.15);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: #e4e8ec;
+      padding: 15px;
+      color: var(--hr-text);
+      font-size: 13px;
+    }
+
+    .modal-frame {
+      background: var(--hr-card);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--hr-shadow);
+      border: 1px solid var(--hr-border);
+      max-width: 500px;
+      margin: auto;
+    }
+
+    /* Header */
+    .modal-header {
+      background: var(--hr-purple);
+      padding: 18px 20px;
+      text-align: center;
+      border-bottom: 3px solid var(--hr-gold);
+    }
+    .modal-header h1 {
+      font-family: 'Roboto', sans-serif;
+      font-weight: 700;
+      color: #ffffff;
+      font-size: 20px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 3px;
+    }
+    .modal-header .subtitle {
+      color: rgba(255,255,255,0.75);
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: 700;
+    }
+
+    /* Tabs */
+    .tabs {
+      display: flex;
+      background: var(--hr-purple-mid);
+    }
+    .tab {
+      flex: 1;
+      padding: 9px 4px;
+      border: none;
+      background: transparent;
+      color: rgba(255,255,255,0.6);
+      cursor: pointer;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-family: 'Roboto', sans-serif;
+      font-weight: 600;
+      transition: all 0.2s;
+      border-bottom: 2px solid transparent;
+    }
+    .tab:hover { color: rgba(255,255,255,0.9); }
+    .tab.active {
+      background: var(--hr-card);
+      color: var(--hr-text);
+      border-bottom: 2px solid var(--hr-gold);
+    }
+
+    /* Body */
+    .modal-body {
+      padding: 20px;
+    }
+
+    /* Section title */
+    .section-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--hr-text);
+      border-bottom: 1px solid rgba(255,161,0,0.3);
+      padding: 0 0 4px 0;
+      margin: 0 0 14px 0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .section-title::before {
+      content: '';
+      display: inline-block;
+      width: 3px; height: 12px;
+      background: var(--hr-gold);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    /* Tab content */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; }
+
+    /* Field label */
+    .field-label {
+      display: block;
+      font-size: 9px;
+      color: var(--hr-purple-light);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 4px;
+      font-weight: 700;
+    }
+
+    /* Select */
+    select {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-family: 'Roboto', sans-serif;
+      font-size: 13px;
+      color: var(--hr-text);
+      background: var(--hr-white);
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%230b2c41' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      padding-right: 28px;
+      cursor: pointer;
+      margin-bottom: 12px;
+      transition: border-color 0.2s;
+    }
+    select:focus {
+      outline: none;
+      border-color: var(--hr-gold);
+      box-shadow: 0 0 0 2px rgba(255,161,0,0.15);
+    }
+
+    /* Horse card */
+    .horse-card {
+      background: var(--hr-white);
+      border: 1px solid #eee;
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 14px;
+      font-size: 11px;
+      color: var(--hr-text-muted);
+      display: none;
+      align-items: center;
+      gap: 8px;
+    }
+    .horse-card.visible { display: flex; }
+    .horse-card strong { color: var(--hr-purple); font-size: 13px; display: block; margin-bottom: 2px; }
+    .horse-card code {
+      font-family: monospace;
+      background: #e8f0f5;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 11px;
+      color: var(--hr-purple-light);
+    }
+
+    /* Info boxes */
+    .info-box {
+      padding: 10px 12px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      font-size: 11px;
+      border-left: 3px solid var(--hr-gold);
+      background: rgba(255,161,0,0.06);
+      line-height: 1.5;
+      color: var(--hr-text);
+    }
+    .info-box.danger {
+      border-left-color: #c0392b;
+      background: #ffebee;
+      color: #7f1d1d;
+      font-weight: 600;
+    }
+
+    /* Buttons */
+    .btn {
+      width: 100%;
+      padding: 11px;
+      border: none;
+      border-radius: 7px;
+      cursor: pointer;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-size: 11px;
+      font-family: 'Roboto', sans-serif;
+      transition: all 0.2s;
+      margin-bottom: 8px;
+    }
+    .btn:last-child { margin-bottom: 0; }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+
+    .btn-primary {
+      background: var(--hr-purple);
+      color: #ffffff;
+      border: 1px solid rgba(255,161,0,0.4);
+    }
+    .btn-primary:hover:not(:disabled) { background: var(--hr-gold); color: white; }
+
+    .btn-warning {
+      background: #e65100;
+      color: white;
+      border: 1px solid #bf360c;
+    }
+    .btn-warning:hover:not(:disabled) { background: #bf360c; }
+
+    .btn-danger {
+      background: #b71c1c;
+      color: white;
+      border: 1px solid #7f0000;
+    }
+    .btn-danger:hover:not(:disabled) { background: #7f0000; }
+
+    /* Result */
+    #result {
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 6px;
+      font-size: 11px;
+      white-space: pre-wrap;
+      max-height: 180px;
+      overflow-y: auto;
+      display: none;
+      line-height: 1.6;
+      font-weight: 600;
+    }
+    .result-success { background: #d4edda; color: #155724; }
+    .result-warning { background: #fff3cd; color: #856404; }
+    .result-error   { background: #f8d7da; color: #721c24; }
+
+    /* Loader */
+    .loading {
+      text-align: center;
+      padding: 10px;
+      color: var(--hr-text-muted);
+      font-style: italic;
+      font-size: 11px;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="modal-frame">
+    <div class="modal-header">
+      <h1>Duplicate Cleaner</h1>
+      <div class="subtitle">Remove duplicate scores from results</div>
+    </div>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('single')">Single Horse</button>
+      <button class="tab" onclick="switchTab('all')">All Horses</button>
+    </div>
+
+    <div class="modal-body">
+
+      <!-- TAB 1: Single Horse -->
+      <div id="tab-single" class="tab-content active">
+        <div class="section-title">Clean Single Horse</div>
+
+        <div class="info-box">
+          Select a horse to check and remove duplicate scores from Conf. Results and Comp. Results.
+        </div>
+
+        <span class="field-label">Select Horse</span>
+        <select id="horseSelect" onchange="updateSelectedHorse()">
+          <option value="">— Choose a horse —</option>
+        </select>
+
+        <div id="selectedHorseInfo" class="horse-card">
+          <div>
+            <strong id="selectedHorseName"></strong>
+            ID: <code id="selectedHorseId"></code>
+          </div>
+        </div>
+
+        <button class="btn btn-primary" onclick="checkSelectedHorse()" id="checkBtn" disabled>
+          ✓ &nbsp;Check for Duplicates
+        </button>
+        <button class="btn btn-warning" onclick="cleanSelectedHorse()" id="cleanBtn" disabled>
+          × &nbsp;Remove Duplicates
+        </button>
+      </div>
+
+      <!-- TAB 2: All Horses -->
+      <div id="tab-all" class="tab-content">
+        <div class="section-title">Clean All Horses</div>
+
+        <div class="info-box">
+          Clean all horses in Conf. Results and Comp. Results at once.
+        </div>
+        <div class="info-box danger">
+          ⚠ Warning: This action cannot be undone!
+        </div>
+
+        <button class="btn btn-danger" onclick="cleanAllHorses()">
+          ! &nbsp;Clean All Horses
+        </button>
+      </div>
+
+      <!-- Result & Loader -->
+      <div id="result"></div>
+      <div id="loader" class="loading">Loading...</div>
+
+    </div>
+  </div>
+
+  <script>
+    let allHorses       = [];
+    let selectedHorseId = '';
+
+    window.onload = function() { loadHorses(); };
+
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      document.querySelector(`[onclick="switchTab('${tabName}')"]`).classList.add('active');
+      document.getElementById('tab-' + tabName).classList.add('active');
+      document.getElementById('result').style.display = 'none';
+    }
+
+    function loadHorses() {
+      showLoader(true);
+      google.script.run
+        .withSuccessHandler(function(result) {
+          showLoader(false);
+          if (!result.success) { loadTestHorses(); return; }
+          allHorses = result.horses || [];
+          populateSelect();
+        })
+        .withFailureHandler(function() {
+          showLoader(false);
+          loadTestHorses();
+        })
+        .getHorsesForDuplicateCleaner();
+    }
+
+    function loadTestHorses() {
+      allHorses = [
+        { id: "20487080", name: "Test Horse 1" },
+        { id: "20805304", name: "Solstice" },
+        { id: "21243353", name: "Code Black" }
+      ];
+      populateSelect();
+    }
+
+    function populateSelect() {
+      const select = document.getElementById('horseSelect');
+      select.innerHTML = '<option value="">— Choose a horse —</option>';
+      allHorses.forEach(horse => {
+        const opt = document.createElement('option');
+        opt.value = horse.id;
+        opt.textContent = horse.name + ' (ID: ' + horse.id + ')';
+        select.appendChild(opt);
+      });
+      if (allHorses.length > 0) {
+        select.value = allHorses[0].id;
+        updateSelectedHorse();
+      }
+    }
+
+    function updateSelectedHorse() {
+      const select = document.getElementById('horseSelect');
+      selectedHorseId = select.value;
+      const card = document.getElementById('selectedHorseInfo');
+
+      if (selectedHorseId) {
+        const horse = allHorses.find(h => h.id === selectedHorseId);
+        if (horse) {
+          document.getElementById('selectedHorseName').textContent = horse.name;
+          document.getElementById('selectedHorseId').textContent   = horse.id;
+          card.classList.add('visible');
+          document.getElementById('checkBtn').disabled = false;
+          document.getElementById('cleanBtn').disabled = false;
+        }
+      } else {
+        card.classList.remove('visible');
+        document.getElementById('checkBtn').disabled = true;
+        document.getElementById('cleanBtn').disabled = true;
+      }
+      document.getElementById('result').style.display = 'none';
+    }
+
+    function checkSelectedHorse() {
+      if (!selectedHorseId) return;
+      showLoader(true);
+      google.script.run
+        .withSuccessHandler(function(result) {
+          showLoader(false);
+          if (result.success) {
+            const msg = result.report + (result.hasDuplicates
+              ? '\n\n⚠ ' + result.duplicateCount + ' duplicates found!'
+              : '\n\n✓ No duplicates found.');
+            showResult(msg, result.hasDuplicates ? 'warning' : 'success');
+          } else {
+            showResult('Error: ' + result.error, 'error');
+          }
+        })
+        .withFailureHandler(function(err) {
+          showLoader(false);
+          showResult('Error: ' + err.message, 'error');
+        })
+        .checkSingleHorseDuplicates(selectedHorseId);
+    }
+
+    function cleanSelectedHorse() {
+      if (!selectedHorseId) return;
+      if (!confirm('Remove all duplicates for this horse?\n\nThis cannot be undone.')) return;
+      showLoader(true);
+      google.script.run
+        .withSuccessHandler(function(result) {
+          showLoader(false);
+          if (result && result.success) {
+            showResult(result.message, 'success');
+            setTimeout(checkSelectedHorse, 1000);
+          } else {
+            showResult('Error: ' + (result?.error || 'Unknown error'), 'error');
+          }
+        })
+        .withFailureHandler(function(err) {
+          showLoader(false);
+          showResult('Error: ' + err.message, 'error');
+        })
+        .cleanSingleHorse(selectedHorseId);
+    }
+
+    function cleanAllHorses() {
+      if (!confirm('Clean ALL horses at once?\n\n• All duplicates in Conf. Results & Comp. Results\n• This cannot be undone.\n\nProceed?')) return;
+      showLoader(true);
+      google.script.run
+        .withSuccessHandler(function(result) {
+          showLoader(false);
+          showResult(result.success ? result.message : 'Error: ' + result.error,
+                     result.success ? 'success' : 'error');
+        })
+        .withFailureHandler(function(err) {
+          showLoader(false);
+          showResult('Error: ' + err.message, 'error');
+        })
+        .cleanAllHorsesFast();
+    }
+
+    function showResult(message, type) {
+      const el = document.getElementById('result');
+      el.textContent  = message;
+      el.className    = 'result-' + (type || 'success');
+      el.style.display = 'block';
+      el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+
+    function showLoader(show) {
+      document.getElementById('loader').style.display = show ? 'block' : 'none';
+    }
+  </script>
+</body>
+</html>
