@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --purple:      #0b2c41;
+      --purple-mid:  #081b28;
+      --purple-light:#407f9c;
+      --gold:        #ffa100;
+      --bg:          #e4e8ec;
+      --card:        #f5f7f9;
+      --white:       #ffffff;
+      --text:        #0b2c41;
+      --text-muted:  #5a7a8a;
+      --border:      rgba(255, 161, 0, 0.3);
+      --shadow:      0 12px 30px rgba(8, 27, 40, 0.15);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: var(--bg);
+      padding: 15px;
+      color: var(--text);
+      font-size: 13px;
+    }
+
+    .modal-frame {
+      background: var(--card);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: var(--shadow);
+      border: 1px solid var(--border);
+      max-width: 480px;
+      margin: auto;
+    }
+
+    .modal-header {
+      background: var(--purple);
+      padding: 18px 20px;
+      text-align: center;
+      border-bottom: 3px solid var(--gold);
+    }
+    .modal-header h1 {
+      font-family: 'Roboto', sans-serif;
+      font-weight: 700;
+      color: var(--white);
+      font-size: 20px;
+      margin-bottom: 3px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .modal-header .subtitle {
+      color: rgba(255,255,255,0.7);
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: 700;
+    }
+
+    .modal-body { padding: 20px; }
+
+    .field-label {
+      display: block;
+      font-size: 9px;
+      color: var(--purple-light);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+      font-weight: 700;
+    }
+
+    .field-wrap { margin-bottom: 14px; }
+
+    input[type="text"],
+    select,
+    textarea {
+      width: 100%;
+      padding: 8px 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-family: 'Roboto', sans-serif;
+      font-size: 13px;
+      color: var(--text);
+      background: var(--white);
+      transition: border-color 0.2s;
+    }
+    input[type="text"]:focus,
+    select:focus,
+    textarea:focus {
+      outline: none;
+      border-color: var(--gold);
+      box-shadow: 0 0 0 2px rgba(255,161,0,0.15);
+    }
+
+    select {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%230b2c41' d='M6 8L0 0h12z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+      padding-right: 28px;
+      cursor: pointer;
+    }
+
+    textarea {
+      height: 120px;
+      font-family: monospace;
+      font-size: 12px;
+      resize: vertical;
+    }
+
+    .horse-card {
+      background: var(--white);
+      border: 1px solid #e0e6ea;
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin-bottom: 14px;
+      font-size: 11px;
+      color: var(--text-muted);
+      min-height: 40px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .horse-card .dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      background: #ddd;
+    }
+    .horse-card.found .dot   { background: #2d7a4f; }
+    .horse-card.missing .dot { background: #c0392b; }
+    .horse-card strong { color: var(--purple); font-size: 13px; }
+
+    .loading {
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-muted);
+      padding: 8px;
+      font-style: italic;
+    }
+
+    .save-btn {
+      width: 100%;
+      padding: 12px;
+      background: var(--purple);
+      color: var(--white);
+      border: 1px solid rgba(255,161,0,0.4);
+      border-radius: 8px;
+      font-weight: 700;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-size: 12px;
+      font-family: 'Roboto', sans-serif;
+      transition: all 0.2s;
+      margin-top: 4px;
+    }
+    .save-btn:hover:not(:disabled) { background: var(--gold); color: white; }
+    .save-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .status-msg {
+      margin-top: 12px;
+      padding: 10px 12px;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 12px;
+      font-weight: 600;
+      display: none;
+    }
+    .status-success { background: #d4edda; color: #155724; display: block; }
+    .status-error   { background: #f8d7da; color: #721c24; display: block; }
+    .status-loading { background: #fff3cd; color: #856404; display: block; }
+
+    .divider { height: 1px; background: var(--border); margin: 16px 0; }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-thumb { background: var(--gold); border-radius: 10px; }
+  </style>
+</head>
+<body>
+  <div class="modal-frame">
+    <div class="modal-header">
+      <h1>Score Entry</h1>
+      <div class="subtitle">Add Results to Database</div>
+    </div>
+
+    <div class="modal-body">
+
+      <div id="loader" class="loading">Loading horse list...</div>
+
+      <div class="field-wrap">
+        <span class="field-label">Horse</span>
+        <input list="horseList" id="horseSearch" type="text" placeholder="Type name to search..." autocomplete="off">
+        <datalist id="horseList"></datalist>
+      </div>
+
+      <div id="horseCard" class="horse-card">
+        <div class="dot"></div>
+        <span>No horse selected</span>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="field-wrap">
+        <span class="field-label">Target Sheet</span>
+        <select id="targetSheet">
+          <option value="comp">Competition Results</option>
+          <option value="conf">Conformation Results</option>
+        </select>
+      </div>
+
+      <div class="field-wrap">
+        <span class="field-label">Scores — one per line (e.g. 87.456)</span>
+        <textarea id="rawData" placeholder="87.456&#10;89.123&#10;92.345&#10;..."></textarea>
+      </div>
+
+      <button id="saveBtn" class="save-btn" onclick="processData()">Save Scores</button>
+      <div id="statusMsg" class="status-msg"></div>
+
+    </div>
+  </div>
+
+  <script>
+    let allHorses = [];
+
+    window.onload = function() {
+      google.script.run
+        .withSuccessHandler(function(list) {
+          allHorses = list;
+          const datalist = document.getElementById('horseList');
+          list.forEach(horse => {
+            const opt = document.createElement('option');
+            opt.value = horse.name + " (ID: " + horse.id + ")";
+            opt.dataset.id = horse.id;
+            datalist.appendChild(opt);
+          });
+          document.getElementById('loader').style.display = 'none';
+        })
+        .withFailureHandler(function(err) {
+          document.getElementById('loader').innerHTML = "✗ Failed to load: " + err.message;
+        })
+        .getHorseListForSearch();
+    };
+
+    document.getElementById('horseSearch').addEventListener('input', function() {
+      const val      = this.value;
+      const card     = document.getElementById('horseCard');
+      const selected = Array.from(document.querySelectorAll('#horseList option'))
+        .find(opt => opt.value === val);
+
+      if (selected) {
+        const id = selected.dataset.id;
+        document.getElementById('saveBtn').dataset.horseId = id;
+        card.className = 'horse-card found';
+        card.innerHTML = '<div class="dot"></div><span><strong>' + val.split(' (ID:')[0] + '</strong> &nbsp;·&nbsp; ID: ' + id + '</span>';
+      } else {
+        document.getElementById('saveBtn').dataset.horseId = '';
+        card.className = 'horse-card missing';
+        card.innerHTML = '<div class="dot"></div><span>Horse not found in database</span>';
+      }
+    });
+
+    function processData() {
+      const horseId = document.getElementById('saveBtn').dataset.horseId;
+      const rawText = document.getElementById('rawData').value;
+      const target  = document.getElementById('targetSheet').value;
+      const btn     = document.getElementById('saveBtn');
+
+      if (!horseId) { showStatus('Please select a valid horse first.', 'error'); return; }
+
+      const scores = rawText.match(/\d{1,3}[.,]\d{3}/g);
+      if (!scores || scores.length === 0) {
+        showStatus('No valid scores found. Expected format: XX.XXX', 'error');
+        return;
+      }
+
+      btn.disabled = true;
+      btn.textContent = 'Saving ' + scores.length + ' scores...';
+      showStatus('Saving...', 'loading');
+
+      google.script.run
+        .withSuccessHandler(function(result) {
+          showStatus('✓ ' + result.message, 'success');
+          setTimeout(function() { google.script.host.close(); }, 2000);
+        })
+        .withFailureHandler(function(err) {
+          showStatus('✗ ' + err.message, 'error');
+          btn.disabled = false;
+          btn.textContent = 'Save Scores';
+        })
+        .saveBulkScores({ id: horseId, scores: scores, target: target });
+    }
+
+    function showStatus(msg, type) {
+      const el = document.getElementById('statusMsg');
+      el.textContent = msg;
+      el.className = 'status-msg status-' + type;
+    }
+  </script>
+</body>
+</html>
