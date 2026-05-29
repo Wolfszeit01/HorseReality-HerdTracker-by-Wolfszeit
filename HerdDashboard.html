@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --hr-purple:       #0b2c41;
+      --hr-purple-mid:   #081b28;
+      --hr-purple-light: #407f9c;
+      --hr-gold:         #ffa100;
+      --hr-gold-light:   #ffb733;
+      --hr-bg:           #f5f7f9;
+      --hr-card:         #f5f7f9;
+      --hr-white:        #ffffff;
+      --hr-text:         #0b2c41;
+      --hr-text-muted:   #5a7a8a;
+      --hr-border:       rgba(255, 161, 0, 0.3);
+      --hr-shadow:       0 8px 24px rgba(8, 27, 40, 0.15);
+      --hr-success:      #2E7D32;
+      --hr-success-bg:   #d4edda;
+      --hr-danger:       #b71c1c;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: #e4e8ec;
+      color: var(--hr-text);
+      padding: 15px;
+      line-height: 1.4;
+    }
+
+    /* ===== HEADER ===== */
+    .dashboard-header {
+      background: var(--hr-purple);
+      border-radius: 12px;
+      padding: 20px 30px;
+      margin-bottom: 0;
+      border: 1px solid var(--hr-border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      box-shadow: var(--hr-shadow);
+      border-bottom: 3px solid var(--hr-gold);
+    }
+
+    .stuteri-logo { width: 72px; height: 72px; object-fit: contain; }
+
+    .header-center { flex-grow: 1; text-align: center; }
+    .header-center h1 {
+      font-family: 'Roboto', sans-serif;
+      font-weight: 700;
+      font-size: 22px;
+      color: #ffffff;
+      margin: 0 0 2px 0;
+    }
+    .header-center .subtitle {
+      color: rgba(255,255,255,0.75);
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: 700;
+    }
+    .last-update {
+      font-size: 9px;
+      color: rgba(255,161,0,0.7);
+      margin-top: 6px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+
+    /* ===== TABS ===== */
+    .nav-tabs {
+      display: flex;
+      background: var(--hr-purple-mid);
+      border-radius: 0;
+      gap: 0;
+      align-items: center;
+      padding: 0 10px;
+    }
+    .nav-tab {
+      padding: 10px 18px;
+      background: transparent;
+      color: rgba(255,255,255,0.6);
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 10px;
+      transition: all 0.2s;
+      border-bottom: 2px solid transparent;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      white-space: nowrap;
+      font-family: 'Roboto', sans-serif;
+      border: none;
+    }
+    .nav-tab:hover { color: rgba(255,255,255,0.9); }
+    .nav-tab.active {
+      background: var(--hr-card);
+      color: var(--hr-text);
+      border-bottom: 2px solid var(--hr-gold);
+      font-weight: 700;
+    }
+
+    .tab-controls {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 0;
+    }
+
+    select {
+      padding: 6px 28px 6px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--hr-border);
+      background: var(--hr-white);
+      color: var(--hr-purple);
+      font-family: 'Roboto', sans-serif;
+      font-weight: 600;
+      font-size: 11px;
+      cursor: pointer;
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%230b2c41' d='M5 6L0 0h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 8px center;
+    }
+
+    .refresh-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px; height: 32px;
+      border-radius: 6px;
+      border: 1px solid var(--hr-border);
+      background: var(--hr-white);
+      color: var(--hr-purple);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .refresh-btn:hover { background: var(--hr-gold); color: var(--hr-white); border-color: var(--hr-gold); }
+    .refresh-btn svg { width: 16px; height: 16px; fill: currentColor; }
+
+    /* ===== CONTENT ===== */
+    .content-container {
+      background: var(--hr-card);
+      border-radius: 0 0 12px 12px;
+      padding: 24px;
+      border: 1px solid var(--hr-border);
+      border-top: none;
+      min-height: 600px;
+      box-shadow: var(--hr-shadow);
+      position: relative;
+    }
+
+    /* ===== SECTION TITLE ===== */
+    .section-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--hr-text);
+      border-bottom: 1px solid rgba(255,161,0,0.3);
+      padding: 0 0 4px 0;
+      margin: 20px 0 14px 0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .section-title::before {
+      content: '';
+      display: inline-block;
+      width: 3px; height: 12px;
+      background: var(--hr-gold);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+    .section-title:first-child { margin-top: 0; }
+
+    /* ===== STAT CARDS ===== */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px; }
+    .stat-card {
+      background: var(--hr-white);
+      border-radius: 10px;
+      padding: 16px 12px;
+      text-align: center;
+      border: 1px solid rgba(0,0,0,0.04);
+      transition: transform 0.2s;
+    }
+    .stat-card.highlight {
+      background: var(--hr-purple);
+      border: 1px solid rgba(255,161,0,0.4);
+    }
+    .stat-value { font-size: 28px; font-weight: 700; color: var(--hr-purple); }
+    .stat-card.highlight .stat-value { color: var(--hr-gold); }
+    .stat-label {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--hr-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 4px;
+    }
+    .stat-card.highlight .stat-label { color: rgba(255,255,255,0.6); }
+
+    /* ===== STATUS SECTION ===== */
+    .status-section {
+      background: var(--hr-white);
+      padding: 16px;
+      border-radius: 10px;
+      border: 1px solid #eee;
+      margin-bottom: 20px;
+    }
+    .role-bar-container { height: 10px; display: flex; border-radius: 5px; overflow: hidden; background: #eee; margin-bottom: 10px; }
+    .pregnancy-bar-small { height: 5px; border-radius: 3px; background: #eee; overflow: hidden; width: 180px; margin-top: 4px; }
+    .role-legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; margin-top: 10px; letter-spacing: 0.5px; }
+
+    /* ===== TABLES ===== */
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      background: var(--hr-white);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-bottom: 14px;
+      border: 1px solid #eee;
+    }
+    th {
+      background: var(--hr-purple);
+      color: #ffffff;
+      padding: 12px 14px;
+      text-align: left;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    td { padding: 10px 14px; border-bottom: 1px solid #f5f5f5; font-size: 13px; }
+    tr:last-child td { border-bottom: none; }
+
+    /* ===== PROGRESS BARS ===== */
+    .progress-bar-bg { height: 7px; background: #eee; border-radius: 4px; overflow: hidden; margin: 6px 0; }
+    .progress-bar-fill { height: 100%; background: var(--hr-purple); transition: width 0.8s ease; }
+
+    /* ===== INFO PANEL ===== */
+    .info-panel {
+      background: var(--hr-white);
+      border-radius: 10px;
+      border: 1px solid #eee;
+      padding: 18px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 16px;
+    }
+    .info-group h4 {
+      color: var(--hr-text);
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+      border-bottom: 1px solid rgba(255,161,0,0.3);
+      padding-bottom: 4px;
+    }
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 12px;
+      padding: 4px 0;
+      border-bottom: 1px solid #fafafa;
+    }
+    .info-row span:first-child { color: var(--hr-text-muted); }
+    .info-row span:last-child { font-weight: 700; color: var(--hr-purple); }
+
+    /* ===== LOADING ===== */
+    .loading {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: rgba(245, 247, 249, 0.97);
+      border-radius: 0 0 12px 12px;
+      transition: opacity 0.4s;
+      font-weight: 700;
+      color: var(--hr-purple);
+      font-size: 12px;
+      letter-spacing: 0.5px;
+      gap: 16px;
+    }
+    .loading.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+    .loading-gif { width: 100px; height: auto; }
+
+    /* ===== TAB CONTENT ===== */
+    .tab-content { display: none; }
+    .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+    /* ===== STATUS DOT ===== */
+    .status-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; }
+
+    /* ===== BREED CARDS ===== */
+    #breedCards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+    .breed-card {
+      background: var(--hr-white);
+      border-radius: 10px;
+      padding: 14px 16px;
+      border: 1px solid var(--hr-border);
+      border-left: 4px solid var(--hr-gold);
+    }
+    .breed-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+    .breed-card-name { font-weight: 700; color: var(--hr-purple); font-size: 15px; }
+    .breed-card-count { font-size: 10px; font-weight: 700; color: var(--hr-text-muted); text-transform: uppercase; }
+    .breed-card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px;
+      font-size: 12px;
+    }
+    .breed-card-grid span { color: var(--hr-text-muted); }
+    .breed-card-grid b { color: var(--hr-purple); }
+
+    /* ===== SCROLLBAR ===== */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-thumb { background: var(--hr-gold); border-radius: 10px; }
+  </style>
+</head>
+<body>
+
+  <div class="dashboard-header">
+    
+    <div class="header-center">
+      <h1>Herd Manager</h1>
+      <div class="subtitle">Herd Tracker Dashboard</div>
+      <div class="last-update" id="lastUpdate">Synchronising...</div>
+    </div>
+    
+  </div>
+
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="switchTab('bestand', this)">Overview</button>
+    <button class="nav-tab" onclick="switchTab('quality', this)">Breeding Progress</button>
+    <button class="nav-tab" onclick="switchTab('lineage', this)">Bloodlines</button>
+    <button class="nav-tab" onclick="switchTab('timeline', this)">Births & Dates</button>
+    <button class="nav-tab" onclick="switchTab('elite', this)">Elite</button>
+    <div class="tab-controls">
+      <select id="breedFilter" onchange="renderTab()"></select>
+      <button onclick="loadData()" class="refresh-btn">
+        <svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+      </button>
+    </div>
+  </div>
+
+  <div class="content-container">
+    <div id="loading" class="loading">
+      <img src="https://images-wixmp-ed30a86b8c4ca887773594c2.wixmp.com/f/0e86a944-b978-44a5-b77f-b64b3adb8264/dkmtda9-ff95738f-bc5b-40e4-aa66-ec094dc03636.gif?token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1cm46YXBwOjdlMGQxODg5ODIyNjQzNzNhNWYwZDQxNWVhMGQyNmUwIiwiaXNzIjoidXJuOmFwcDo3ZTBkMTg4OTgyMjY0MzczYTVmMGQ0MTVlYTBkMjZlMCIsIm9iaiI6W1t7InBhdGgiOiIvZi8wZTg2YTk0NC1iOTc4LTQ0YTUtYjc3Zi1iNjRiM2FkYjgyNjQvZGttdGRhOS1mZjk1NzM4Zi1iYzViLTQwZTQtYWE2Ni1lYzA5NGRjMDM2MzYuZ2lmIn1dXSwiYXVkIjpbInVybjpzZXJ2aWNlOmZpbGUuZG93bmxvYWQiXX0.GIh0IeRN6bhaT8Q9zYOso5UvIMZlEg5zBicLR2GAIaQ"
+           class="loading-gif" alt="Loading...">
+      <span>Synchronising data...</span>
+    </div>
+
+    <!-- OVERVIEW -->
+    <div id="tab-bestand" class="tab-content active">
+      <div class="section-title">Herd Overview</div>
+      <div class="stats-grid" id="mainStats"></div>
+      <div class="section-title">Status & Occupancy</div>
+      <div class="status-section">
+        <div class="role-bar-container" id="roleBar"></div>
+        <div style="display:flex;align-items:center;gap:16px;margin-top:12px;">
+          <div class="pregnancy-bar-small" id="pregBar"></div>
+          <div id="pregInfo" style="font-size:12px;font-weight:700;color:var(--hr-purple);"></div>
+        </div>
+        <div class="role-legend" id="roleLegend"></div>
+      </div>
+      <div class="section-title" id="breedGroupTitle">Breed Groups</div>
+      <div id="breedCards"></div>
+      <div class="section-title">Demographics</div>
+      <div class="stats-grid" id="demographicStats"></div>
+    </div>
+
+    <!-- BREEDING PROGRESS -->
+    <div id="tab-quality" class="tab-content">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+        <div style="background:var(--hr-white);padding:20px;border-radius:10px;border:1px solid #eee;">
+          <h3 id="vgTitle" style="font-size:13px;margin-bottom:14px;color:var(--hr-purple);text-transform:uppercase;letter-spacing:1px;"></h3>
+          <div id="vgStats"></div>
+        </div>
+        <div id="genStats"></div>
+      </div>
+      <div class="section-title">Discipline Analysis</div>
+      <div id="disciplineStats"></div>
+      <div class="section-title">Colour Genetics</div>
+      <div id="colorStatsContainer" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:14px;"></div>
+    </div>
+
+    <!-- BLOODLINES -->
+    <div id="tab-lineage" class="tab-content">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+        <div id="sireLineStats"></div>
+        <div id="damLineStats"></div>
+      </div>
+    </div>
+
+    <!-- BIRTHS & DATES -->
+    <div id="tab-timeline" class="tab-content">
+      <div class="section-title">Upcoming Births & Breeding Checks</div>
+      <table id="birthTable">
+        <thead><tr><th>Date</th><th>Mare</th><th>Breed</th><th>Phase / Check</th><th>Countdown</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="section-title">Growth & Development</div>
+      <table id="growthTable">
+        <thead><tr><th>Horse</th><th>Event</th><th>Breed</th><th>Target Date</th><th>Countdown</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div class="section-title">In-Game Time Reference</div>
+      <div class="info-panel">
+        <div class="info-group">
+          <h4>Growth (after birth)</h4>
+          <div class="info-row"><span>Weaning (6 months)</span><span>+ 8 days</span></div>
+          <div class="info-row"><span>Adult (3 years)</span><span>+ 48 days</span></div>
+          <div class="info-row"><span>Clinic (7 years / Stallion)</span><span>+ 112 days</span></div>
+        </div>
+        <div class="info-group">
+          <h4>Breeding Checks (after covering)</h4>
+          <div class="info-row"><span>Check: Failed</span><span>48 hrs (2 days)</span></div>
+          <div class="info-row"><span>Check: Miscarriage</span><span>96 hrs (4 days)</span></div>
+          <div class="info-row"><span>Ultrasound possible</span><span>120 hrs (5 days)</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ELITE -->
+    <div id="tab-elite" class="tab-content">
+      <div class="section-title">Hall of Fame — Highest Genetic Potential</div>
+      <div class="stats-grid" id="eliteGP"></div>
+      <div class="section-title">Hall of Fame — Best Conformation</div>
+      <div class="stats-grid" id="eliteConfo"></div>
+    </div>
+  </div>
+
+  <script>
+    let rawData = null;
+    let currentTab = 'bestand';
+
+    window.onload = loadData;
+
+    function loadData() {
+      const loading = document.getElementById('loading');
+      loading.classList.remove('hidden');
+      google.script.run.withSuccessHandler(data => {
+        rawData = data;
+        loading.classList.add('hidden');
+        document.getElementById('lastUpdate').innerText = 'Last updated: ' + new Date().toLocaleString('en-GB');
+        fillBreedFilter();
+        renderTab();
+      }).getDashboardData();
+    }
+
+    function switchTab(t, el) {
+      currentTab = t;
+      document.querySelectorAll('.nav-tab').forEach(x => x.classList.remove('active'));
+      el.classList.add('active');
+      document.querySelectorAll('.tab-content').forEach(x => x.classList.remove('active'));
+      document.getElementById('tab-' + t).classList.add('active');
+      renderTab();
+    }
+
+    function fillBreedFilter() {
+      const s = document.getElementById('breedFilter');
+      s.innerHTML = '<option value="all">All Breeds</option>';
+      if (rawData && rawData.breeds) rawData.breeds.forEach(b => s.innerHTML += `<option value="${b}">${b}</option>`);
+    }
+
+    function renderTab() {
+      if (!rawData) return;
+      const f = document.getElementById('breedFilter').value;
+      if (currentTab === 'bestand')  renderBestand(f);
+      if (currentTab === 'quality')  renderQuality(f);
+      if (currentTab === 'lineage')  renderLineage(f);
+      if (currentTab === 'timeline') renderTimeline(f);
+      if (currentTab === 'elite')    renderElite(f);
+    }
+
+    function renderBestand(f) {
+      const d = rawData;
+      let display;
+      if (f === 'all') {
+        display = { total: d.totalHorses, h: d.stallions, m: d.mares, f: d.foals, p: d.pregnant, roles: d.roleStats, ratio: d.genderRatio, label: "Total Horses" };
+      } else {
+        const s = d.breedStats[f];
+        display = { total: s.total, h: s.stallions, m: s.mares, f: s.foals, p: s.pregnant, roles: s.roles, ratio: s.stallions + ":" + s.mares, label: f };
+      }
+
+      document.getElementById('mainStats').innerHTML = `
+        <div class="stat-card highlight"><div class="stat-value">${display.total}</div><div class="stat-label">${display.label}</div></div>
+        <div class="stat-card"><div class="stat-value">${display.h}</div><div class="stat-label">Stallions</div></div>
+        <div class="stat-card"><div class="stat-value">${display.m}</div><div class="stat-label">Mares</div></div>
+        <div class="stat-card"><div class="stat-value">${display.f}</div><div class="stat-label">Foals</div></div>`;
+
+      const r = display.roles;
+      const rt = (r.stud + r.broodmare + r.public + r.none) || 1;
+      document.getElementById('roleBar').innerHTML = `
+        <div style="width:${(r.stud/rt)*100}%;background:#1565C0"></div>
+        <div style="width:${(r.broodmare/rt)*100}%;background:#C2185B"></div>
+        <div style="width:${(r.public/rt)*100}%;background:#7B1FA2"></div>
+        <div style="width:${(r.none/rt)*100}%;background:#9E9E9E"></div>`;
+      document.getElementById('roleLegend').innerHTML = `
+        <span style="color:#1565C0">Stud (${r.stud})</span>
+        <span style="color:#C2185B">Broodmare (${r.broodmare})</span>
+        <span style="color:#7B1FA2">Public (${r.public})</span>
+        <span style="color:#9E9E9E">None (${r.none})</span>`;
+
+      const pp = Math.round((display.p / (display.m || 1)) * 100);
+      document.getElementById('pregBar').innerHTML = `<div style="height:100%;width:${pp}%;background:var(--hr-success);"></div>`;
+      document.getElementById('pregInfo').innerHTML = `${pp}% in foal (${display.p})`;
+
+      let bHtml = '';
+      for (let b in d.breedStats) {
+        if (f !== 'all' && b !== f) continue;
+        const s = d.breedStats[b];
+        bHtml += `
+          <div class="breed-card">
+            <div class="breed-card-header">
+              <div class="breed-card-name">${b}</div>
+              <div class="breed-card-count">${s.total} horses</div>
+            </div>
+            <div class="breed-card-grid">
+              <span>Stallions:</span><b>${s.stallions}</b>
+              <span>Avg GP:</span><b>${s.avgGP}</b>
+              <span>Mares:</span><b>${s.mares}</b>
+              <span>Avg VG:</span><b>${s.avgVG}</b>
+              <span>Foals:</span><b>${s.foals}</b>
+              <span>Avg Confo:</span><b>${s.avgConfo}</b>
+            </div>
+          </div>`;
+      }
+      document.getElementById('breedCards').innerHTML = bHtml;
+      document.getElementById('demographicStats').innerHTML = `
+        <div class="stat-card"><div class="stat-value">${display.f}</div><div class="stat-label">Foals</div></div>
+        <div class="stat-card"><div class="stat-value">${display.total - display.f}</div><div class="stat-label">Adults</div></div>
+        <div class="stat-card"><div class="stat-value">${display.ratio}</div><div class="stat-label">Gender Ratio</div></div>`;
+    }
+
+    function renderQuality(f) {
+      const breedKey = f === 'all' ? 'all' : f;
+      const allBreedStats = rawData.vgStats;
+
+      const getVGTarget = (breedName) => {
+        if (!breedName || breedName === 'all') return 12;
+        const bn = breedName.toLowerCase();
+        if (bn.includes('icelandic'))  return 14;
+        if (bn.includes('kathiawari')) return 13;
+        return 12;
+      };
+
+      document.getElementById('vgTitle').innerText = `VG Status (Target: ${getVGTarget(f)} VG)`;
+
+      let vgHtml = '';
+      for (let breed in allBreedStats) {
+        if (f !== 'all' && breed !== f) continue;
+        const v = allBreedStats[breed];
+        const t = v.totalWithStats || 1;
+        const target = getVGTarget(breed);
+        const p12 = Math.round(v.vg12 / t * 100);
+        vgHtml += `
+          <div style="margin-bottom:14px;">
+            <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:700;margin-bottom:4px;">
+              <span>${breed} (target: ${target} VG)</span><span>${p12}%</span>
+            </div>
+            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${p12}%"></div></div>
+            <small style="opacity:0.6;font-size:10px;">${target} VG: ${v.vg12} · ${target-1} VG: ${v.vg11} · ${target-2} VG: ${v.vg10}</small>
+          </div>`;
+      }
+      document.getElementById('vgStats').innerHTML = vgHtml;
+
+      const genData = (f === 'all' || !rawData.generationByBreed[f]) ? rawData.generationComparison : rawData.generationByBreed[f];
+      const better = (foal, adult) => foal >= adult ? `style="color:var(--hr-success);font-weight:700;"` : `style="color:var(--hr-danger);font-weight:700;"`;
+      document.getElementById('genStats').innerHTML = `
+        <table>
+          <tr><th>Metric</th><th>Adult</th><th>Foal</th></tr>
+          <tr><td>Avg GP</td><td>${Math.round(genData.adults.avgGP)}</td><td ${better(genData.foals.avgGP, genData.adults.avgGP)}>${Math.round(genData.foals.avgGP)}</td></tr>
+          <tr><td>Avg Confo</td><td>${genData.adults.avgConfo.toFixed(2)}</td><td ${better(genData.foals.avgConfo, genData.adults.avgConfo)}>${genData.foals.avgConfo.toFixed(2)}</td></tr>
+          <tr><td>Avg VG</td><td>${genData.adults.avgVG.toFixed(1)}</td><td ${better(genData.foals.avgVG, genData.adults.avgVG)}>${genData.foals.avgVG.toFixed(1)}</td></tr>
+        </table>`;
+
+      const disciplineData = rawData.disciplineFocus[breedKey] || {};
+      const sorted = Object.keys(disciplineData).sort((a, b) => disciplineData[b].count - disciplineData[a].count);
+      let discHtml = '<table><thead><tr><th>Discipline</th><th>Count</th><th>Avg GP</th><th>Avg Confo</th></tr></thead><tbody>';
+      if (!sorted.length) {
+        discHtml += '<tr><td colspan="4" style="text-align:center;opacity:0.5;">No discipline data available</td></tr>';
+      } else {
+        sorted.forEach(disc => {
+          const dd = disciplineData[disc];
+          discHtml += `<tr><td><b>${disc}</b></td><td>${dd.count}</td><td>${Math.round(dd.avgGP)}</td><td>${dd.avgConfo.toFixed(2)}</td></tr>`;
+        });
+      }
+      document.getElementById('disciplineStats').innerHTML = discHtml + '</tbody></table>';
+
+      const colorData = rawData.colorStats[breedKey] || { solid: [], patterned: [] };
+      const renderC = (title, list) => {
+        if (!list.length) return '';
+        let h = `<div style="background:var(--hr-white);padding:14px;border-radius:10px;border:1px solid #eee;">
+          <b style="font-size:10px;display:block;margin-bottom:10px;color:var(--hr-purple);text-transform:uppercase;letter-spacing:0.5px;">${title}</b>`;
+        list.forEach(c => h += `
+          <div style="margin-bottom:8px;">
+            <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;">
+              <span>${c.color}</span><b>${c.count} (${c.percentage}%)</b>
+            </div>
+            <div class="progress-bar-bg" style="height:4px;">
+              <div class="progress-bar-fill" style="width:${c.percentage}%;background:var(--hr-gold);"></div>
+            </div>
+          </div>`);
+        return h + '</div>';
+      };
+      document.getElementById('colorStatsContainer').innerHTML = renderC('Solid Colours', colorData.solid) + renderC('Patterns', colorData.patterned);
+    }
+
+    function renderLineage(f) {
+      const breedKey = f === 'all' ? 'all' : f;
+      const renderT = (dataMap, containerId, title) => {
+        const data = dataMap[breedKey] || [];
+        let h = `<div class="section-title">${title}</div>
+          <table><thead><tr><th>Line / Share</th><th style="text-align:center;">S / M</th><th>Status</th></tr></thead><tbody>`;
+        data.forEach(l => {
+          const warn = l.balanceWarning
+            ? `<svg style="width:13px;height:13px;fill:var(--hr-danger);margin-left:4px;vertical-align:middle;" viewBox="0 0 24 24"><path d="M12 2L1 21h22L12 2zm0 3.45l8.27 14.3H3.73L12 5.45zM11 10v4h2v-4h-2zm0 6v2h2v-2h-2z"/></svg>` : '';
+          h += `<tr>
+            <td>
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                <b>${l.name}</b><small>${l.share}%</small>
+              </div>
+              <div class="progress-bar-bg" style="height:4px;">
+                <div class="progress-bar-fill" style="width:${l.share}%;background:${l.domColor}"></div>
+              </div>
+            </td>
+            <td style="text-align:center;"><b>${l.stallions}/${l.mares}</b>${warn}</td>
+            <td style="color:${l.domColor};font-weight:700;font-size:10px;text-transform:uppercase;">${l.domLabel}</td>
+          </tr>`;
+        });
+        document.getElementById(containerId).innerHTML = h + '</tbody></table>';
+      };
+      renderT(rawData.sirelines, 'sireLineStats', 'Sire Lines');
+      renderT(rawData.damlines, 'damLineStats', 'Dam Lines');
+    }
+
+    function renderTimeline(f) {
+      const birthTb  = document.querySelector('#birthTable tbody');
+      const growthTb = document.querySelector('#growthTable tbody');
+      birthTb.innerHTML = ''; growthTb.innerHTML = '';
+
+      if (rawData.upcomingBirths) {
+        rawData.upcomingBirths.forEach(b => {
+          if (f !== 'all' && b.breed !== f) return;
+          const dotColor = b.phase.includes("Check") ? "var(--hr-danger)" : (b.phase.includes("Ultrasound") ? "var(--hr-gold)" : "transparent");
+          birthTb.innerHTML += `<tr><td><b>${b.dueDate}</b></td><td>${b.mareName}</td><td>${b.breed}</td><td><span class="status-dot" style="background:${dotColor}"></span>${b.phase}</td><td>In ${b.daysUntil} days</td></tr>`;
+        });
+      }
+      if (rawData.growthEvents) {
+        rawData.growthEvents.forEach(e => {
+          if (f !== 'all' && e.breed !== f) return;
+          const st = e.isUrgent ? "color:var(--hr-gold);font-weight:bold;background:rgba(255,161,0,0.05);" : "";
+          growthTb.innerHTML += `<tr style="${st}"><td><b>${e.name}</b></td><td>${e.type}</td><td>${e.breed}</td><td>${e.targetDate}</td><td>In <b>${e.daysLeft}</b> days</td></tr>`;
+        });
+      }
+    }
+
+    function renderElite(f) {
+      const d = rawData;
+      const renderList = (data, containerId, label, mainColor) => {
+        let html = '';
+        data.forEach((x, index) => {
+          if (f !== 'all' && x.breed !== f) return;
+          const rank = index + 1;
+          const rankStyle = rank === 1 ? "background:#D4AF37;color:white;"
+                          : rank === 2 ? "background:#C0C0C0;color:white;"
+                          : rank === 3 ? "background:#CD7F32;color:white;"
+                          : "background:#eee;color:#666;";
+          html += `
+            <div class="stat-card" style="${rank===1?'border:1px solid var(--hr-gold);':''}">
+              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                <span style="font-size:9px;font-weight:700;color:${mainColor};text-transform:uppercase;">${x.breed}</span>
+                <span style="font-size:10px;font-weight:800;padding:2px 7px;border-radius:4px;${rankStyle}">#${rank}</span>
+              </div>
+              <div class="stat-label" style="font-size:13px;text-align:left;margin-bottom:4px;">${x.name}</div>
+              <div class="stat-value" style="font-size:22px;text-align:left;color:${mainColor};">${containerId.includes('GP') ? Math.round(x.gp) : x.confoMax.toFixed(3)}</div>
+              <div style="font-size:8px;opacity:0.5;text-align:left;text-transform:uppercase;margin-top:2px;">${label}</div>
+            </div>`;
+        });
+        document.getElementById(containerId).innerHTML = html || '<p style="grid-column:1/-1;text-align:center;opacity:0.5;padding:20px;">No data available.</p>';
+      };
+      renderList(d.topGP, 'eliteGP', 'Genetic Potential', 'var(--hr-purple)');
+      renderList(d.topConfo, 'eliteConfo', 'Max Conformation', 'var(--hr-gold)');
+    }
+  </script>
+</body>
+</html>
