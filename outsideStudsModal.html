@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <base target="_top">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --hr-purple:       #0b2c41;
+      --hr-purple-mid:   #081b28;
+      --hr-purple-light: #407f9c;
+      --hr-gold:         #ffa100;
+      --hr-bg:           #e4e8ec;
+      --hr-card:         #f5f7f9;
+      --hr-white:        #ffffff;
+      --hr-text:         #0b2c41;
+      --hr-text-muted:   #5a7a8a;
+      --hr-border:       rgba(255, 161, 0, 0.3);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: var(--hr-bg);
+      padding: 10px;
+      color: var(--hr-text);
+      font-size: 12px;
+    }
+
+    .card {
+      background: var(--hr-card);
+      border-radius: 14px;
+      padding: 0;
+      box-shadow: 0 10px 32px rgba(8,27,40,0.18);
+      border: 1px solid var(--hr-border);
+      min-height: 800px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .header {
+      background: var(--hr-purple);
+      color: #ffffff;
+      padding: 14px 16px 10px;
+      text-align: center;
+      border-bottom: 2px solid var(--hr-gold);
+      flex-shrink: 0;
+    }
+    .header h1 {
+      font-size: 15px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+    }
+    .header p {
+      font-size: 9px;
+      opacity: 0.7;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      margin-top: 2px;
+    }
+
+    .tabs {
+      display: flex;
+      flex-shrink: 0;
+      background: var(--hr-purple-mid);
+    }
+    .tab {
+      flex: 1;
+      padding: 9px 4px;
+      border: none;
+      background: transparent;
+      color: rgba(255,255,255,0.6);
+      cursor: pointer;
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-family: 'Roboto', sans-serif;
+      font-weight: 600;
+      transition: all 0.2s;
+      border-bottom: 2px solid transparent;
+    }
+    .tab:hover { color: rgba(255,255,255,0.9); }
+    .tab.active {
+      background: var(--hr-card);
+      color: var(--hr-text);
+      border-bottom: 2px solid var(--hr-gold);
+    }
+
+    .content {
+      background: var(--hr-card);
+      padding: 14px;
+      flex-grow: 1;
+      overflow-y: auto;
+      display: none;
+    }
+    .content.active { display: block; }
+    .content::-webkit-scrollbar { width: 5px; }
+    .content::-webkit-scrollbar-thumb { background: var(--hr-gold); border-radius: 10px; }
+
+    .section-title {
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--hr-text);
+      border-bottom: 1px solid rgba(255,161,0,0.3);
+      padding: 0 0 4px 0;
+      margin: 14px 0 10px 0;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .section-title::before {
+      content: '';
+      display: inline-block;
+      width: 3px; height: 12px;
+      background: var(--hr-gold);
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+    .section-title:first-child { margin-top: 0; }
+
+    .subsection-title {
+      font-size: 9px;
+      font-weight: 700;
+      color: var(--hr-purple-light);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin: 10px 0 6px 0;
+      padding: 3px 6px;
+      background: rgba(255,161,0,0.08);
+      border-left: 2px solid var(--hr-gold);
+      border-radius: 0 3px 3px 0;
+    }
+
+    textarea {
+      width: 100%;
+      height: 58px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      font-family: monospace;
+      font-size: 10px;
+      padding: 6px;
+      margin-bottom: 6px;
+      background: #fefefe;
+      resize: vertical;
+      transition: border-color 0.2s;
+    }
+    textarea:focus {
+      outline: none;
+      border-color: #ffffff;
+      box-shadow: 0 0 0 2px rgba(255,161,0,0.15);
+    }
+
+    .field-label {
+      display: block;
+      font-size: 9px;
+      color: var(--hr-purple-light);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 3px;
+      font-weight: 700;
+    }
+
+    input[type="text"] {
+      width: 100%;
+      padding: 4px 7px;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      font-size: 11px;
+      font-family: 'Roboto', sans-serif;
+      height: 25px;
+      background: var(--hr-white);
+      color: var(--hr-text);
+      transition: border-color 0.2s;
+    }
+    input[type="text"]:focus {
+      border-color: #ffffff;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(255,161,0,0.15);
+    }
+
+    button.main {
+      width: 100%;
+      padding: 10px;
+      background: var(--hr-purple);
+      color: #ffffff;
+      border: 1px solid var(--hr-gold);
+      border-radius: 7px;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-size: 11px;
+      font-family: 'Roboto', sans-serif;
+      transition: all 0.2s;
+    }
+    button.main:hover { background: var(--hr-gold); color: white; }
+    button.main:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
+
+    .sub-grid {
+      display: grid;
+      grid-template-columns: 1fr 52px;
+      gap: 4px;
+      align-content: start;
+    }
+    .sub-grid label { line-height: 25px; font-size: 11px; }
+
+    .gen-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 4px 10px;
+    }
+    .gen-row { display: flex; align-items: center; gap: 5px; }
+    .gen-row label {
+      min-width: 52px;
+      font-size: 9px;
+      color: var(--hr-text-muted);
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+    .gen-row input { flex-grow: 1; min-width: 50px; }
+    .gen-row.kit input { background: #f0f4f7; border-color: #ffffff; }
+
+    .genetic-code-box {
+      background: #f0f4f7;
+      border: 1px solid var(--hr-gold);
+      border-radius: 6px;
+      padding: 10px;
+      font-family: monospace;
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--hr-purple);
+      letter-spacing: 1px;
+      min-height: 36px;
+      word-break: break-all;
+      margin-top: 6px;
+    }
+
+    /* Breed gaits */
+    .breed-gaits {
+      display: none;
+      margin-top: 6px;
+      padding: 8px 10px;
+      background: rgba(255,161,0,0.06);
+      border: 1px dashed rgba(255,161,0,0.4);
+      border-radius: 6px;
+    }
+
+    #status {
+      text-align: center;
+      padding: 8px;
+      font-weight: 700;
+      font-size: 11px;
+      border-top: 1px solid var(--hr-border);
+      flex-shrink: 0;
+      min-height: 32px;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <div class="header">
+      <h1>Outside Stud Import</h1>
+      <p>Paste · Review · Export</p>
+    </div>
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('paste')" id="btn-paste">1 · Paste Text</button>
+      <button class="tab" onclick="switchTab('preview')" id="btn-preview">2 · Review</button>
+      <button class="tab" onclick="switchTab('export')" id="btn-export">3 · Export</button>
+    </div>
+
+    <!-- TAB 1: PASTE -->
+    <div id="paste" class="content active">
+      <div class="section-title">Source Text</div>
+      <span class="field-label">Info Tab</span>
+      <textarea id="txt_info" placeholder="Paste Info tab content here..."></textarea>
+      <span class="field-label">Colour Tab</span>
+      <textarea id="txt_colour" placeholder="Paste Colour tab content here..."></textarea>
+      <span class="field-label">Stats Tab</span>
+      <textarea id="txt_stats" placeholder="Paste Stats tab content here..."></textarea>
+      <button class="main" onclick="generatePreview()">Generate Preview</button>
+    </div>
+
+    <!-- TAB 2: REVIEW -->
+    <div id="preview" class="content">
+
+      <!-- Basic Info -->
+      <div class="section-title">Basic Information</div>
+      <div class="grid-4">
+        <div><span class="field-label">ID</span><input type="text" id="prev_id"></div>
+        <div><span class="field-label">Name</span><input type="text" id="prev_name"></div>
+        <div><span class="field-label">Breed</span><input type="text" id="prev_breed"></div>
+        <div><span class="field-label">Gender</span><input type="text" id="prev_gender" style="background:#f5f5f5;" readonly></div>
+        <div><span class="field-label">Stud Fee</span><input type="text" id="prev_studfee" placeholder="e.g. 5000"></div>
+      </div>
+
+      <!-- Conformation -->
+      <div class="section-title">Conformation</div>
+      <div class="grid-2">
+        <div class="sub-grid">
+          <label>Walk</label><input type="text" data-cat="confo" data-key="Walk">
+          <label>Trot</label><input type="text" data-cat="confo" data-key="Trot">
+          <label>Canter</label><input type="text" data-cat="confo" data-key="Canter">
+          <label>Gallop</label><input type="text" data-cat="confo" data-key="Gallop">
+          <label>Posture</label><input type="text" data-cat="confo" data-key="Posture">
+          <label>Head</label><input type="text" data-cat="confo" data-key="Head">
+        </div>
+        <div class="sub-grid">
+          <label>Neck</label><input type="text" data-cat="confo" data-key="Neck">
+          <label>Back</label><input type="text" data-cat="confo" data-key="Back">
+          <label>Shoulders</label><input type="text" data-cat="confo" data-key="Shoulders">
+          <label>Front Legs</label><input type="text" data-cat="confo" data-key="Frontlegs">
+          <label>Hindquarters</label><input type="text" data-cat="confo" data-key="Hindquarters">
+          <label>Socks</label><input type="text" data-cat="confo" data-key="Socks">
+        </div>
+      </div>
+
+      <!-- Breed-specific gaits -->
+      <div id="breed-gaits" class="breed-gaits">
+        <div class="sub-grid" style="grid-template-columns:auto 52px auto 52px;gap:4px 14px;">
+          <label id="lbl_tolt" style="display:none;">Tölt</label>
+          <input type="text" id="input_tolt" data-cat="confo" data-key="Tolt" style="display:none;">
+          <label id="lbl_flp" style="display:none;">Flying Pace</label>
+          <input type="text" id="input_flp" data-cat="confo" data-key="FlyingPace" style="display:none;">
+        </div>
+      </div>
+
+      <!-- GP Stats -->
+      <div class="section-title">Genetic Potential</div>
+      <div class="grid-2">
+        <div class="sub-grid">
+          <label>Acceleration</label><input type="text" data-cat="gp" data-key="Acceleration">
+          <label>Agility</label><input type="text" data-cat="gp" data-key="Agility">
+          <label>Balance</label><input type="text" data-cat="gp" data-key="Balance">
+          <label>Bascule</label><input type="text" data-cat="gp" data-key="Bascule">
+          <label>Pulling Power</label><input type="text" data-cat="gp" data-key="Pulling power">
+        </div>
+        <div class="sub-grid">
+          <label>Speed</label><input type="text" data-cat="gp" data-key="Speed">
+          <label>Sprint</label><input type="text" data-cat="gp" data-key="Sprint">
+          <label>Stamina</label><input type="text" data-cat="gp" data-key="Stamina">
+          <label>Strength</label><input type="text" data-cat="gp" data-key="Strength">
+          <label>Surefootedness</label><input type="text" data-cat="gp" data-key="Surefootedness">
+        </div>
+      </div>
+
+      <!-- Scores -->
+      <div class="section-title">Scores</div>
+      <div class="grid-2">
+        <div><span class="field-label">Conf. MAX</span><input type="text" id="prev_confmax"></div>
+        <div><span class="field-label">Comp MAX</span><input type="text" id="prev_compmax"></div>
+      </div>
+
+      <!-- Genetics -->
+      <div class="section-title">Genetics</div>
+      <div class="grid-2">
+        <div>
+          <div class="subsection-title">Testable</div>
+          <div class="gen-grid">
+            <div class="gen-row"><label>Ext.</label><input type="text" data-cat="genetics" data-key="Extension"></div>
+            <div class="gen-row"><label>Agouti</label><input type="text" data-cat="genetics" data-key="Agouti"></div>
+            <div class="gen-row"><label>Grey</label><input type="text" data-cat="genetics" data-key="Grey"></div>
+            <div class="gen-row"><label>Dun</label><input type="text" data-cat="genetics" data-key="Dun"></div>
+            <div class="gen-row"><label>Cr/Prl</label><input type="text" data-cat="genetics" data-key="Creampearl"></div>
+            <div class="gen-row"><label>Champ.</label><input type="text" data-cat="genetics" data-key="Champagne"></div>
+            <div class="gen-row"><label>Silver</label><input type="text" data-cat="genetics" data-key="Silver"></div>
+            <div class="gen-row"><label>Mush.</label><input type="text" data-cat="genetics" data-key="Mushroom"></div>
+            <div class="gen-row"><label>Frame</label><input type="text" data-cat="genetics" data-key="Frame"></div>
+            <div class="gen-row"><label>Lp</label><input type="text" data-cat="genetics" data-key="Appaloosa"></div>
+            <div class="gen-row"><label>PATN1</label><input type="text" data-cat="genetics" data-key="PATN1"></div>
+            <div class="gen-row kit"><label>KIT</label><input type="text" data-cat="genetics" data-key="KIT"></div>
+            <div class="gen-row"><label>MITF</label><input type="text" data-cat="genetics" data-key="MITF"></div>
+            <div class="gen-row"><label>SW2</label><input type="text" data-cat="genetics" data-key="SW2"></div>
+          </div>
+        </div>
+        <div>
+          <div class="subsection-title">Non-Testable</div>
+          <div class="gen-grid">
+            <div class="gen-row"><label>PATN2</label><input type="text" data-cat="manual-gen" data-key="PATN2" placeholder="n/n"></div>
+            <div class="gen-row"><label>Pangare</label><input type="text" data-cat="manual-gen" data-key="Pangare" placeholder="n/n"></div>
+            <div class="gen-row"><label>Flaxen</label><input type="text" data-cat="manual-gen" data-key="Flaxen" placeholder="n/f"></div>
+            <div class="gen-row"><label>H.Sabino</label><input type="text" data-cat="manual-gen" data-key="HiddenSabino" placeholder="n/n"></div>
+            <div class="gen-row"><label>Sooty</label><input type="text" data-cat="manual-gen" data-key="Sooty" placeholder="Sty/n"></div>
+            <div class="gen-row"><label>Rabicano</label><input type="text" data-cat="manual-gen" data-key="Rabicano" placeholder="Rb/n"></div>
+            <div class="gen-row"><label>Markings</label><input type="text" data-cat="manual-gen" data-key="Markings" placeholder="yes/no"></div>
+          </div>
+          <div class="subsection-title" style="margin-top:12px;">Generated Genetic Code</div>
+          <div class="genetic-code-box" id="geneticCodePreview">—</div>
+        </div>
+      </div>
+
+    </div><!-- end preview -->
+
+    <!-- TAB 3: EXPORT -->
+    <div id="export" class="content">
+      <div class="section-title">Ready to Import</div>
+      <p style="font-size:11px;color:var(--hr-text-muted);margin-bottom:16px;line-height:1.6;">
+        Review the data above before confirming. The stud will be added to the <strong>Outside Studs</strong> sheet.
+      </p>
+      <button class="main" onclick="finalizeImport()">Save to Outside Studs</button>
+    </div>
+
+    <div id="status"></div>
+  </div>
+
+  <script>
+    let currentData = {};
+
+    function switchTab(id) {
+      document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      document.getElementById('btn-' + id).classList.add('active');
+    }
+
+    function generatePreview() {
+      const raw = {
+        info:   document.getElementById('txt_info').value,
+        colour: document.getElementById('txt_colour').value,
+        stats:  document.getElementById('txt_stats').value
+      };
+      const btn  = document.querySelector('#paste button.main');
+      const orig = btn.innerText;
+      btn.innerText = 'Loading...'; btn.disabled = true;
+
+      google.script.run
+        .withSuccessHandler(data => {
+          currentData = data;
+          render(data);
+          switchTab('preview');
+          btn.innerText = orig; btn.disabled = false;
+        })
+        .withFailureHandler(err => {
+          alert('Error: ' + err.message);
+          btn.innerText = orig; btn.disabled = false;
+        })
+        .getOutsideStudPreviewData(raw);
+    }
+
+    function render(d) {
+      const breed  = (d.breed || '').trim();
+      const isIce  = breed.includes('Icelandic Horse');
+
+      // Toggle breed gaits
+      const toggleEl = (id, show) => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = show ? 'block' : 'none';
+      };
+      toggleEl('lbl_tolt',   isIce);
+      toggleEl('input_tolt', isIce);
+      toggleEl('lbl_flp',    isIce);
+      toggleEl('input_flp',  isIce);
+      toggleEl('breed-gaits', isIce);
+
+      // Basic
+      document.getElementById('prev_id').value     = d.id       || '';
+      document.getElementById('prev_name').value   = d.name     || '';
+      document.getElementById('prev_breed').value  = d.breed    || '';
+      document.getElementById('prev_gender').value = d.gender   || '';
+      document.getElementById('prev_confmax').value = d.confoMax || '';
+      document.getElementById('prev_compmax').value = d.compMax  || '';
+
+      // Confo
+      document.querySelectorAll('input[data-cat="confo"]').forEach(i => i.value = d.confo[i.dataset.key] || '');
+
+      // GP
+      document.querySelectorAll('input[data-cat="gp"]').forEach(i => i.value = d.gp[i.dataset.key] || '');
+
+      // Genetics
+      document.querySelectorAll('input[data-cat="genetics"]').forEach(i => {
+        i.value = (d.genetics && d.genetics[i.dataset.key]) ? d.genetics[i.dataset.key] : 'n/n';
+      });
+
+      // Update genetic code preview
+      updateGeneticCodePreview(d.genetics);
+    }
+
+    function updateGeneticCodePreview(genetics) {
+      if (!genetics) return;
+      const order = ['Extension','Agouti','Grey','Creampearl','Dun','Champagne',
+                     'Silver','Mushroom','Frame','Appaloosa','PATN1','MITF','SW2','KIT'];
+      const parts = order
+        .map(k => genetics[k])
+        .filter(v => v && v !== 'n/n');
+      document.getElementById('geneticCodePreview').textContent = parts.join(' ') || '—';
+    }
+
+    // Update genetic code live when user edits genetics fields
+    document.addEventListener('input', function(e) {
+      if (e.target.dataset.cat === 'genetics') {
+        const gen = {};
+        document.querySelectorAll('input[data-cat="genetics"]').forEach(i => {
+          gen[i.dataset.key] = i.value;
+        });
+        updateGeneticCodePreview(gen);
+      }
+    });
+
+    function finalizeImport() {
+      // Collect all editable fields
+      currentData.id       = document.getElementById('prev_id').value;
+      currentData.name     = document.getElementById('prev_name').value;
+      currentData.breed    = document.getElementById('prev_breed').value;
+      currentData.gender   = document.getElementById('prev_gender').value;
+      currentData.studFee  = document.getElementById('prev_studfee').value;
+      currentData.confoMax = document.getElementById('prev_confmax').value;
+      currentData.compMax  = document.getElementById('prev_compmax').value;
+
+      document.querySelectorAll('input[data-cat="confo"]').forEach(i => {
+        if (!currentData.confo) currentData.confo = {};
+        currentData.confo[i.dataset.key] = i.value;
+      });
+      document.querySelectorAll('input[data-cat="gp"]').forEach(i => {
+        if (!currentData.gp) currentData.gp = {};
+        currentData.gp[i.dataset.key] = i.value;
+      });
+      document.querySelectorAll('input[data-cat="genetics"]').forEach(i => {
+        if (!currentData.genetics) currentData.genetics = {};
+        currentData.genetics[i.dataset.key] = i.value;
+      });
+
+      const manualGenes = {};
+      document.querySelectorAll('input[data-cat="manual-gen"]').forEach(i => {
+        manualGenes[i.dataset.key] = i.value.trim();
+      });
+
+      // Build genetic code string
+      const order = ['Extension','Agouti','Grey','Creampearl','Dun','Champagne',
+                     'Silver','Mushroom','Frame','Appaloosa','PATN1','MITF','SW2','KIT'];
+      const gen = currentData.genetics || {};
+      currentData.geneticCode = order.map(k => gen[k]).filter(v => v && v !== 'n/n').join(' ');
+
+      const status = document.getElementById('status');
+      status.innerText   = 'Saving...';
+      status.style.color = 'orange';
+
+      google.script.run
+        .withSuccessHandler(res => {
+          status.innerHTML   = '✓ ' + res;
+          status.style.color = 'green';
+          setTimeout(() => { google.script.host.close(); }, 2000);
+        })
+        .withFailureHandler(err => {
+          status.innerText   = '✗ Error: ' + err.message;
+          status.style.color = 'red';
+        })
+        .saveOutsideStud(currentData, manualGenes);
+    }
+  </script>
+</body>
+</html>
