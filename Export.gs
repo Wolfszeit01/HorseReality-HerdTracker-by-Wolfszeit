@@ -38,10 +38,47 @@ function getPreviewData(inputs) {
     const breedRegMatch = info.match(/Breed\s*registry\s*[\r\n]+([^\r\n]+)/i);
     if (breedRegMatch) {
       const br = breedRegMatch[1].trim();
-      if      (br.match(/Icelandic/i))  d.breed = 'Icelandic Horse';
-      else if (br.match(/Kathiawari/i)) d.breed = 'Kathiawari';
-      else if (br.match(/Finnhorse/i))  d.breed = 'Finnhorse';
-      else                              d.breed = br;
+      const breedMap = {
+        'akhal':      'Akhal-Teke',
+        'arabian':    'Arabian',
+        'brabant':    'Brabant',
+        'brumby':     'Brumby',
+        'camargue':   'Camargue',
+        'cleveland':  'Cleveland Bay',
+        'exmoor':     'Exmoor Pony',
+        'finnhorse':  'Finnhorse',
+        'fjord':      'Fjord Horse',
+        'friesian':   'Friesian',
+        'haflinger':  'Haflinger',
+        'icelandic':  'Icelandic Horse',
+        'irish cob':  'Irish Cob',
+        'kathiawari': 'Kathiawari',
+        'kladruber':  'Kladruber',
+        'knabstrupper':'Knabstrupper',
+        'lipizzaner': 'Lipizzaner',
+        'lusitano':   'Lusitano',
+        'mongolian':  'Mongolian Horse',
+        'mustang':    'Mustang',
+        'namib':      'Namib Desert Horse',
+        'noriker':    'Noriker',
+        'norman cob': 'Norman Cob',
+        'oldenburg':  'Oldenburg',
+        'pantaneiro': 'Pantaneiro',
+        'pre ':       'PRE',
+        'quarter':    'Quarter Horse',
+        'shetland':   'Shetland Pony',
+        'shire':      'Shire Horse',
+        'suffolk':    'Suffolk Punch',
+        'thoroughbred':'Thoroughbred',
+        'trakehner':  'Trakehner',
+        'welsh':      'Welsh Pony'
+      };
+      const brLow = br.toLowerCase();
+      let matched = false;
+      for (const [key, name] of Object.entries(breedMap)) {
+        if (brLow.includes(key)) { d.breed = name; matched = true; break; }
+      }
+      if (!matched) d.breed = br.replace(/\s*Horse\s*Society\s*/i, '').replace(/\s*Society\s*/i, '').trim();
     }
   }
 
@@ -60,28 +97,54 @@ function getPreviewData(inputs) {
   const pedStart = pedSplit.length > 1 ? pedSplit[1] : null;
   if (pedStart) {
     const pedLines = pedStart.split(/Pregnancy/i)[0].split(/\n/).map(l=>l.trim()).filter(l=>l.length>0&&!l.match(/^COI:/i));
-    const isStatLine = (l) => {
-      if (/^\d+\s*[\|\/]/.test(l)) return true; if (/\bGP\d{3,}\b/i.test(l)) return true;
-      if (/\d+VG\b/.test(l)) return true; if (/\d+:\d+/.test(l)) return true;
-      if (/\d{2,}\.\d{1,}/.test(l)) return true; if (/\d{3,}\s+\d+\s+\d/.test(l)) return true;
-      if (/FULLYTRAINED|BETA|Training/i.test(l)) return true;
-      if (/(Estate|Stables|Gardens|Meadows|Stuteri|Stable|Farm|Ranch|Stud|Park|Acres)\s*('s\s*\w+)?\s*$/i.test(l)) return true;
+    const isTagline = (l) => {
+      if (!l) return false;
+      if (/^\d+\s*[\|\/]/.test(l))      return true;
+      if (/\bGP\d{3,}\b/i.test(l))     return true;
+      if (/\d+VG\b/.test(l))           return true;
+      if (/\d+:\d+/.test(l))           return true;
+      if (/\d{2,}\.\d{1,}/.test(l))    return true;
+      if (/\d{3,}\s+\d+\s+\d/.test(l)) return true;
+      if (/^\d+$/.test(l))              return true;
+      if (/^[A-Z]{2,3}\d{3,}/.test(l)) return true;
+      if (/GP\d+\s*\|/.test(l))        return true;
+      if (/︱|︲/.test(l))               return true;
+      if (/FULLYTRAINED|BETA/i.test(l)) return true;
+      if (/^(Driving|Endurance|Training)\b/i.test(l)) return true;
+      if (/^\s*\|/.test(l))            return true;
+      if (/\d+,\d+\/\d+/.test(l))     return true;
       return false;
     };
+    const isPlaceholder = (l) => /^(Foundation Breeder|Unknown|n\/a)$/i.test(l.trim());
     const normalizeDecoName = (l) => l
       .replace(/[ℬℌℛℐℑℒℓ]/g,m=>({'ℬ':'B','ℌ':'H','ℛ':'R','ℐ':'I','ℑ':'I','ℒ':'L','ℓ':'l'}[m]||m))
       .replace(/[ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘǫʀꜱᴛᴜᴠᴡxʏᴢ]/g,c=>c.normalize('NFKD')[0]||c).replace(/[σ]/g,'s');
-    const horseNameLines = pedLines.filter(l=>!isStatLine(l)).map(normalizeDecoName);
-    if (horseNameLines.length >= 2) {
-      d.sire = cleanHorseName(horseNameLines[0]);
-      const damIdx = horseNameLines.length >= 8 ? 4 : Math.ceil(horseNameLines.length/2);
-      d.dam  = cleanHorseName(horseNameLines[damIdx]);
-      if (horseNameLines.length > 1)          d.gd_p = cleanHorseName(horseNameLines[1]);
-      if (horseNameLines.length > 2)          d.gs_p = cleanHorseName(horseNameLines[2]);
-      if (horseNameLines.length > damIdx + 1) d.gd_m = cleanHorseName(horseNameLines[damIdx+1]);
-      if (horseNameLines.length > damIdx + 2) d.gs_m = cleanHorseName(horseNameLines[damIdx+2]);
-    } else if (horseNameLines.length === 1) { d.sire = cleanHorseName(horseNameLines[0]); }
-    d.sireExists = checkHorseNameExists(d.sire); d.damExists = checkHorseNameExists(d.dam);
+
+    // Block-based parser: Name / Tagline / Stable = 3 lines, or Name / Stable = 2 lines
+    const slots = [];
+    let pi = 0;
+    while (pi < pedLines.length && slots.length < 14) {
+      const line = pedLines[pi];
+      if (isPlaceholder(line)) { slots.push(''); pi++; continue; }
+      if (isTagline(line)) { pi++; continue; }
+
+      const cleaned = cleanHorseName(normalizeDecoName(line));
+      slots.push(cleaned.length > 1 ? cleaned : '');
+
+      const nextLine = pedLines[pi + 1] || '';
+      pi += isTagline(nextLine) ? 3 : 2;
+    }
+
+    // Game slot mapping (14 slots):
+    // 0=Sire, 1=GS(P), 2=GGS(PP), 3=GGD(PP), 4=GD(P), 5=GGS(PM), 6=GGD(PM)
+    // 7=Dam,  8=GS(M), 9=GGS(MP), 10=GGD(MP), 11=GD(M), 12=GGS(MM), 13=GGD(MM)
+    const g = (idx) => slots[idx] || '';
+    d.sire = g(0);
+    d.dam  = g(7);
+    d.gs_p = g(1);   d.gd_p = g(4);
+    d.gs_m = g(8);   d.gd_m = g(11);
+    d.sireExists = checkHorseNameExists(d.sire);
+    d.damExists  = checkHorseNameExists(d.dam);
   }
 
   const pregMatch = info.match(/Pregnancy\s*[\r\n]+([\s\S]{0,300}?)(?=\n\n|\nHealth|\nGenetic|$)/i);
