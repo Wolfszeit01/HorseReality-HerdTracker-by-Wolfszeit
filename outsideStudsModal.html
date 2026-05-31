@@ -479,27 +479,29 @@
       });
 
       // Update genetic code preview
-      updateGeneticCodePreview(d.genetics);
+      updateGeneticCodePreview();
     }
 
-    function updateGeneticCodePreview(genetics) {
-      if (!genetics) return;
+    function updateGeneticCodePreview() {
       const order = ['Extension','Agouti','Grey','Creampearl','Dun','Champagne',
                      'Silver','Mushroom','Frame','Appaloosa','PATN1','MITF','SW2','KIT'];
-      const parts = order
-        .map(k => genetics[k])
-        .filter(v => v && v !== 'n/n');
-      document.getElementById('geneticCodePreview').textContent = parts.join(' ') || '—';
+      const manualOrder = ['PATN2','Pangare','Flaxen','HiddenSabino','Sooty','Rabicano'];
+      const testable = [];
+      document.querySelectorAll('input[data-cat="genetics"]').forEach(i => {
+        if (i.value && i.value !== 'n/n') testable.push(i.value);
+      });
+      const manual = [];
+      document.querySelectorAll('input[data-cat="manual-gen"]').forEach(i => {
+        if (i.value && i.value.trim() !== '' && i.value !== 'n/n' && i.value !== 'n/f' && i.dataset.key !== 'Markings')
+          manual.push(i.value.trim());
+      });
+      document.getElementById('geneticCodePreview').textContent = [...testable, ...manual].join(' ') || '—';
     }
 
-    // Update genetic code live when user edits genetics fields
+    // Update genetic code live when user edits any genetics field
     document.addEventListener('input', function(e) {
-      if (e.target.dataset.cat === 'genetics') {
-        const gen = {};
-        document.querySelectorAll('input[data-cat="genetics"]').forEach(i => {
-          gen[i.dataset.key] = i.value;
-        });
-        updateGeneticCodePreview(gen);
+      if (e.target.dataset.cat === 'genetics' || e.target.dataset.cat === 'manual-gen') {
+        updateGeneticCodePreview();
       }
     });
 
@@ -531,11 +533,14 @@
         manualGenes[i.dataset.key] = i.value.trim();
       });
 
-      // Build genetic code string
+      // Build genetic code string (testable + non-testable)
       const order = ['Extension','Agouti','Grey','Creampearl','Dun','Champagne',
                      'Silver','Mushroom','Frame','Appaloosa','PATN1','MITF','SW2','KIT'];
+      const manualOrder = ['PATN2','Pangare','Flaxen','HiddenSabino','Sooty','Rabicano'];
       const gen = currentData.genetics || {};
-      currentData.geneticCode = order.map(k => gen[k]).filter(v => v && v !== 'n/n').join(' ');
+      const testable = order.map(k => gen[k]).filter(v => v && v !== 'n/n');
+      const manual   = manualOrder.map(k => manualGenes[k]).filter(v => v && v !== 'n/n' && v !== 'n/f');
+      currentData.geneticCode = [...testable, ...manual].join(' ');
 
       const status = document.getElementById('status');
       status.innerText   = 'Saving...';
