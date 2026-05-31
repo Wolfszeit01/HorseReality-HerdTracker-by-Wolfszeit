@@ -1,1 +1,79 @@
-5.0.0
+5.0.1
+
+31.05.2026 V5.0.1
+
+- fixing Outside Stud Export
+
+- fixing Outside Stud Confo Stats
+
+-fixing FoalCalculator
+
+-fixing Problems with Ice & Kathis Stats
+
+30.05.2026 V5.0.0
+
+- fixing Formulas & bug with Import and breed reading﻿
+
+29.05.2026
+
+- Whole Redo with many new features
+
+-GitHub for Updating Scripts
+
+- Minor bug fix addressing missing formulas
+
+28.10.2025 V4.4.1
+- small bug fixing
+
+14.04.2025 V 4.4
+
+ - few bug fixes
+
+- Button to move sold/retired/passed horses automatically
+
+13.01.25 V4.3.1
+
+-fixing Foal Calulator
+
+01.01.25 V4.3
+
+- troubleshooting
+
+31.10.24 V4.2
+
+-Due Date Calculator
+
+-Troubleshooting the Calculation of the Purchase Price & Stud Prices
+
+-impromvents in Color Genetics with Sooty and adding SW2 & W20
+
+-Foal Coat Colour Calculator
+
+02.09.24 V4
+
+- some smaller improvements and bug fixing
+
+- Foal Calculator
+
+- Taglineprinter
+
+15.07.24 V3.1.1
+- New Feature: Stock Statistic
+
+14.07.24 V3.1
+-Bug fixing: Stud/Selling prices
+
+08.07.24 V 3
+- new option for Sorting and Grouping your horses
+- adjust selling prices to all breeds
+- "Clean Up" Tool for Confo/Competion Scores
+-adding "Stud/viral fee", "gencode", "Stud Page Link" to Pegnacy Section
+
+08.07.24 V 2.1.2
+- Bug fixing in 'Colour genetics' & Confo
+
+05.07.24 V.2.1.1
+- Bug Fixing in Selling Prices
+
+02.07.24 V.2.1 
+- Bug Fixing in "Paste your horses Infos"; adjust stud price
