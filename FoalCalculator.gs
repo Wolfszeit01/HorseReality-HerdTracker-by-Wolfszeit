@@ -4,7 +4,7 @@
 
 function openBreedingOptimizer() {
   const html = HtmlService.createTemplateFromFile('BreedingOptimizer').evaluate()
-    .setTitle('Breeding Optimizer');
+    .setTitle('Nordriska Breeding Optimizer');
   SpreadsheetApp.getUi().showSidebar(html);
 }
 
@@ -367,91 +367,87 @@ function loadAllDataOptimized() {
     // BO(66) = rec. discipline, BP(67) = Pred. Conf. Score
     // BQ(68) = Conf. MAX, BR(69) = Comp MAX, BS(70) = Genetic Code
     if (sheets.public) {
-      const data = sheets.public.getDataRange().getValues();
-      for (let i = 1; i < data.length; i++) {
-        const id    = String(data[i][1]).trim();
-        const name  = String(data[i][2]).trim();
-        const breed = String(data[i][3]).trim();
-        if (!id) continue;
+  const data = sheets.public.getDataRange().getValues();
+  for (let i = 1; i < data.length; i++) {
+    const id    = String(data[i][1]).trim();
+    const name  = String(data[i][2]).trim();
+    const breed = String(data[i][3]).trim();
+    if (!id) continue;
 
-        if (!output.tracker[id]) {
-          output.tracker[id] = {
-            name:     name,
-            breed:    breed,
-            gender:   "Stallion",
-            type:     'public',
-            age:      10,
-            dam:      "",
-            sire:     "",
-            studFee:  String(data[i][4] || '').trim()  // E = Stud Fee
-          };
-        }
+    // Rasse einmal bestimmen — außerhalb aller Loops
+    const isIcelandic  = breed.toLowerCase().includes("icelandic");
+    const isKathiawari = breed.toLowerCase().includes("kathiawari");
+    let confoCount = 12;
+    if (isIcelandic)  confoCount = 14;
+    else if (isKathiawari) confoCount = 13;
 
-        // Confo: G(6)–T(19), convert grade text to numbers
-        const confoRaw = [];
-        for (let j = 6; j < 20; j++) {
-          const val = data[i][j];
-          if      (val === "VG") confoRaw.push(100);
-          else if (val === "G+" || val === "G") confoRaw.push(87.5);
-          else if (val === "G-") confoRaw.push(76.5);
-          else if (val === "A")  confoRaw.push(75);
-          else if (val === "BA") confoRaw.push(49.5);
-          else                   confoRaw.push(Number(val) || 75);
-        }
-
-        // Base stats: AQ(42)–AZ(51)
-        const gpStats = {
-          acceleration: Number(data[i][42]) || 0,
-          agility:      Number(data[i][43]) || 0,
-          balance:      Number(data[i][44]) || 0,
-          bascule:      Number(data[i][45]) || 0,
-          pulling:      Number(data[i][46]) || 0,
-          speed:        Number(data[i][47]) || 0,
-          sprint:       Number(data[i][48]) || 0,
-          stamina:      Number(data[i][49]) || 0,
-          strength:     Number(data[i][50]) || 0,
-          surefoot:     Number(data[i][51]) || 0
-        };
-
-        // Total GP: BA(52)
-        const gpTotal = Number(data[i][52]) || 0;
-
-        // Discipline GPs: BB(53)=DR, BD(55)=DV, BF(57)=EN, BH(59)=EV, BJ(61)=RC, BL(63)=JMP, BN(65)=RE
-        const gpDisciplines = {
-          dressage:  Number(data[i][53]) || 0,
-          driving:   Number(data[i][55]) || 0,
-          endurance: Number(data[i][57]) || 0,
-          eventing:  Number(data[i][59]) || 0,
-          flat:      Number(data[i][61]) || 0,
-          jumping:   Number(data[i][63]) || 0,
-          reining:   Number(data[i][65]) || 0
-        };
-
-        // Pred. Conf. Score: BP(67)
-        const confoScore = Number(data[i][67]) || 0;
-
-        output.stats[id] = {
-          gpTotal:       gpTotal,
-          gpStats:       gpStats,
-          gpDisciplines: gpDisciplines,
-          confoRaw:      confoRaw,
-          confoScoreMin: confoScore,
-          confoScoreMax: confoScore,
-          confoCount:    12
-        };
-
-        // Genetic Code: BS(70)
-        const gencode = String(data[i][70] || "").trim();
-        if (gencode && gencode.includes("/")) output.genetics[id] = gencode;
-      }
+    if (!output.tracker[id]) {
+      output.tracker[id] = {
+        name, breed, gender: "Stallion", type: 'public',
+        age: 10, dam: "", sire: "",
+        studFee: String(data[i][4] || '').trim()
+      };
     }
 
-    // 5. COLOUR GENETICS — genetic code at index 57
+    // Confo: Tölt(j=10) und Pace(j=11) nur für passende Rassen
+    const confoRaw = [];
+    for (let j = 6; j < 20; j++) {
+      if (j === 10 && !isIcelandic && !isKathiawari) continue;
+      if (j === 11 && !isIcelandic) continue;
+      const val = data[i][j];
+      if      (val === "VG")              confoRaw.push(100);
+      else if (val === "G+" || val === "G") confoRaw.push(87.5);
+      else if (val === "G-")              confoRaw.push(76.5);
+      else if (val === "A")               confoRaw.push(75);
+      else if (val === "BA")              confoRaw.push(49.5);
+      else                                confoRaw.push(Number(val) || 75);
+    }
+
+    const gpStats = {
+      acceleration: Number(data[i][41]) || 0,
+      agility:      Number(data[i][42]) || 0,
+      balance:      Number(data[i][43]) || 0,
+      bascule:      Number(data[i][44]) || 0,
+      pulling:      Number(data[i][45]) || 0,
+      speed:        Number(data[i][46]) || 0,
+      sprint:       Number(data[i][47]) || 0,
+      stamina:      Number(data[i][48]) || 0,
+      strength:     Number(data[i][49]) || 0,
+      surefoot:     Number(data[i][50]) || 0
+    };
+
+    const gpTotal = Number(data[i][51]) || 0;
+
+    const gpDisciplines = {
+      dressage:  Number(data[i][52]) || 0,
+      driving:   Number(data[i][54]) || 0,
+      endurance: Number(data[i][56]) || 0,
+      eventing:  Number(data[i][58]) || 0,
+      flat:      Number(data[i][60]) || 0,
+      jumping:   Number(data[i][62]) || 0,
+      reining:   Number(data[i][64]) || 0
+    };
+
+    const confoScore = Number(data[i][68]) || 0;
+
+    output.stats[id] = {
+      gpTotal, gpStats, gpDisciplines,
+      confoRaw,
+      confoScoreMin: confoScore,
+      confoScoreMax: confoScore,
+      confoCount     // ← jetzt die berechnete Variable, nicht hardcoded 12
+    };
+
+    const gencode = String(data[i][71] || "").trim();
+    if (gencode && gencode.includes("/")) output.genetics[id] = gencode;
+  }
+}
+    // 5. COLOUR GENETICS — genetic code at index 79 (column CB)
     if (sheets.color) {
       const data = sheets.color.getDataRange().getValues();
       for (let i = 1; i < data.length; i++) {
         const id   = String(data[i][1]).trim();
-        const code = String(data[i][57]).trim();
+        const code = String(data[i][79]).trim();
         if (id && code && !output.genetics[id]) output.genetics[id] = code;
       }
     }
@@ -704,29 +700,29 @@ function parseAge(ageStr) {
 
 function normalizeGender(g) {
   const s = String(g).toLowerCase().trim();
-  if (s.includes("stallion") || s === "m") return "Stallion";
-  if (s.includes("mare")     || s === "f") return "Mare";
+  if (s.includes("stallion") || s.includes("hengst") || s === "m") return "Stallion";
+  if (s.includes("mare")     || s.includes("stute")  || s === "f") return "Mare";
   return "Other";
 }
 
 function getGeneticsForId(ss, id, sColor) {
-  // 1. Check Colour Genetics sheet (index 57)
+  // 1. Check Colour Genetics sheet (index 79 = column CB)
   if (sColor) {
     const data = sColor.getDataRange().getValues();
     for (let i = 1; i < data.length; i++) {
       if (String(data[i][1]).trim() === String(id).trim()) {
-        const code = String(data[i][57]).trim();
+        const code = String(data[i][79]).trim();
         if (code) return code;
       }
     }
   }
-  // 2. Check Outside Studs sheet — Genetic Code at BS (index 70)
+  // 2. Check Outside Studs sheet — Genetic Code at BT (index 71)
   const sPublic = ss.getSheetByName("Outside Studs") || ss.getSheetByName("Public Studs");
   if (sPublic) {
     const data = sPublic.getDataRange().getValues();
     for (let i = 1; i < data.length; i++) {
       if (String(data[i][1]).trim() === String(id).trim()) {
-        return data[i].length > 70 ? String(data[i][70] || "").trim() : "";
+        return data[i].length > 71 ? String(data[i][71] || "").trim() : "";
       }
     }
   }
