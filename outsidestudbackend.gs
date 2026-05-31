@@ -89,6 +89,12 @@ function getOutsideStudPreviewData(inputs) {
     rawConfo.FlyingPace = (paceM  && paceM[1])  ? paceM[1].trim()  : '';
   }
 
+  // Kathiawari gait
+  if (d.breed && d.breed.includes('Kathiawari')) {
+    const revaalM = statTxt.match(/Revaal[^a-zA-Z0-9]*(Very good|Good|Average|Below average|Poor)/i);
+    rawConfo.Revaal = (revaalM && revaalM[1]) ? revaalM[1].trim() : '';
+  }
+
   d.confo = applyOutsideStudConfoLogic(rawConfo, fullAnalysisText);
 
   // --- GP ---
@@ -205,6 +211,7 @@ function applyOutsideStudConfoLogic(base, text) {
 
   final.Tolt       = shortenGradeOutside(base.Tolt);
   final.FlyingPace = shortenGradeOutside(base.FlyingPace);
+  final.Revaal     = shortenGradeOutside(base.Revaal);
 
   return final;
 }
@@ -228,14 +235,14 @@ function shortenGradeOutside(grade) {
  * G(7)=WLK, H(8)=TRT, I(9)=CNT, J(10)=GLP, K(11)=Tölt, L(12)=FLP
  * M(13)=Posture, N(14)=HED, O(15)=NECK, P(16)=BCK, Q(17)=SHLD, R(18)=FLgs, S(19)=HD, T(20)=Socks
  * U–AI = skip (hidden columns, formulas)
- * AJ(36)=#VG, AK(37)=#G+, AL(38)=#G, AM(39)=#G-, AN(40)=#A, AO(41)=#BA, AP(42)=#P
- * AQ(43)=Acc, AR(44)=Agi, AS(45)=Bal, AT(46)=Basc, AU(47)=Pull
- * AV(48)=Spd, AW(49)=Spr, AX(50)=Sta, AY(51)=Str, AZ(52)=Srft
- * BA(53)=Total GP
- * BB–BN = Discipline GPs (skip — calculated by formulas)
+ * AJ(36)=#VG, AK(37)=#G+, AL(38)=#G, AM(39)=#G-, AN(40)=#A, AO(41)=#BA
+ * AP(42)=Acc, AQ(43)=Agi, AR(44)=Bal, AS(45)=Basc, AT(46)=Pull
+ * AU(47)=Spd, AV(48)=Spr, AW(49)=Sta, AX(50)=Str, AY(51)=Srft
+ * AZ(52)=Total GP
+ * BA–BN = Discipline GPs (skip — calculated by formulas)
  * BO(67)=rec. discipline (skip — formula)
  * BP(68)=Pred. Conf. Score (skip — formula)
- * BQ(69)=Conf. MAX, BR(70)=Comp MAX, BS(71)=Genetic Code
+ * BQ(69)=skip, BR(70)=Conf. MAX, BS(71)=Comp MAX, BT(72)=Genetic Code
  */
 function saveOutsideStud(data, manualGenes) {
   try {
@@ -245,9 +252,10 @@ function saveOutsideStud(data, manualGenes) {
 
     const isIce = (data.breed || '').includes('Icelandic Horse');
 
-    // Find existing row by ID or use next empty row
+    // Find existing row by ID, or first empty row in column B
     const lastRow = sheet.getLastRow();
-    let targetRow = lastRow + 1;
+    let targetRow = -1;
+
     if (lastRow >= 2) {
       const ids = sheet.getRange(2, 2, lastRow - 1, 1).getValues();
       for (let i = 0; i < ids.length; i++) {
@@ -256,7 +264,17 @@ function saveOutsideStud(data, manualGenes) {
           break;
         }
       }
+      // If not found, find first empty row in column B
+      if (targetRow === -1) {
+        for (let i = 0; i < ids.length; i++) {
+          if (!ids[i][0] || ids[i][0].toString().trim() === '') {
+            targetRow = i + 2;
+            break;
+          }
+        }
+      }
     }
+    if (targetRow === -1) targetRow = lastRow + 1;
 
     const set = (col, val) => sheet.getRange(targetRow, col).setValue(val !== undefined && val !== null ? val : '');
 
@@ -273,8 +291,9 @@ function saveOutsideStud(data, manualGenes) {
     set(8,  c.Trot          || '');
     set(9,  c.Canter        || '');
     set(10, c.Gallop        || '');
+   const isKath = (data.breed || '').includes('Kathiawari');
     set(11, isIce ? (c.Tolt       || '') : ''); // Tölt — Icelandic only
-    set(12, isIce ? (c.FlyingPace || '') : ''); // FLP  — Icelandic only
+    set(12, isIce ? (c.FlyingPace || '') : isKath ? (c.Revaal || '') : ''); // FLP / Revaal
     set(13, c.Posture       || '');
     set(14, c.Head          || '');
     set(15, c.Neck          || '');
@@ -283,33 +302,32 @@ function saveOutsideStud(data, manualGenes) {
     set(18, c.Frontlegs     || '');
     set(19, c.Hindquarters  || '');
     set(20, c.Socks         || '');
-    // U(21)–AI(35) = skip (hidden, formula columns)
-    // AJ(36)–AP(42) = VG counts — skip (calculated by formulas)
+    // U(21)–AO(41) = skip (hidden, formula columns)
 
-    // ── GP base stats ────────────────────────────────────────
+    // ── GP base stats (AP–AY) ─────────────────────────────
     const gp = data.gp || {};
-    set(43, gp['Acceleration']   || ''); // AQ
-    set(44, gp['Agility']        || ''); // AR
-    set(45, gp['Balance']        || ''); // AS
-    set(46, gp['Bascule']        || ''); // AT
-    set(47, gp['Pulling power']  || ''); // AU
-    set(48, gp['Speed']          || ''); // AV
-    set(49, gp['Sprint']         || ''); // AW
-    set(50, gp['Stamina']        || ''); // AX
-    set(51, gp['Strength']       || ''); // AY
-    set(52, gp['Surefootedness'] || ''); // AZ
+    set(42, gp['Acceleration']   || ''); // AP
+    set(43, gp['Agility']        || ''); // AQ
+    set(44, gp['Balance']        || ''); // AR
+    set(45, gp['Bascule']        || ''); // AS
+    set(46, gp['Pulling power']  || ''); // AT
+    set(47, gp['Speed']          || ''); // AU
+    set(48, gp['Sprint']         || ''); // AV
+    set(49, gp['Stamina']        || ''); // AW
+    set(50, gp['Strength']       || ''); // AX
+    set(51, gp['Surefootedness'] || ''); // AY
 
-    // BA(53) = Total GP — sum of base stats
+    // AZ(52) = Total GP — sum of base stats
     const gpVals = Object.values(gp).map(v => parseFloat(v)).filter(v => !isNaN(v));
     const totalGP = gpVals.length > 0 ? Math.round(gpVals.reduce((a, b) => a + b, 0)) : '';
-    set(53, totalGP); // BA
+    set(52, totalGP); // AZ
 
-    // BB(54)–BP(68) = Discipline GPs + rec. discipline + Pred. Conf. Score — skip (formulas)
+    // BA(53)–BQ(69) = Discipline GPs + rec. discipline + Pred. Conf. Score — skip (formulas)
 
     // ── Results & Genetics ───────────────────────────────────
-    set(69, data.confoMax    || ''); // BQ
-    set(70, data.compMax     || ''); // BR
-    set(71, data.geneticCode || ''); // BS
+    set(70, data.confoMax    || ''); // BR = Conf. MAX
+    set(71, data.compMax     || ''); // BS = Comp MAX
+    set(72, data.geneticCode || ''); // BT = Genetic Code
 
     return '✓ ' + data.name + ' saved to Outside Studs (row ' + targetRow + ')';
 
