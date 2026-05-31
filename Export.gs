@@ -116,6 +116,10 @@ function getPreviewData(inputs) {
       return false;
     };
     const isPlaceholder = (l) => /^(Foundation Breeder|Unknown|n\/a)$/i.test(l.trim());
+    const isStableName = (l) => {
+      if (!l) return false;
+      return /(Estate|Stables|Gardens|Meadows|Stuteri|Stable|Farm|Ranch|Stud\b|Park|Acres|Solitude|National|Breeding\s+Stud|hevostalli|hevostila)/i.test(l);
+    };
     const normalizeDecoName = (l) => l
       .replace(/[ℬℌℛℐℑℒℓ]/g,m=>({'ℬ':'B','ℌ':'H','ℛ':'R','ℐ':'I','ℑ':'I','ℒ':'L','ℓ':'l'}[m]||m))
       .replace(/[ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘǫʀꜱᴛᴜᴠᴡxʏᴢ]/g,c=>c.normalize('NFKD')[0]||c).replace(/[σ]/g,'s');
@@ -125,8 +129,9 @@ function getPreviewData(inputs) {
     let pi = 0;
     while (pi < pedLines.length && slots.length < 14) {
       const line = pedLines[pi];
-      if (isPlaceholder(line)) { slots.push(''); pi++; continue; }
-      if (isTagline(line)) { pi++; continue; }
+      if (isPlaceholder(line))  { slots.push(''); pi++; continue; }
+      if (isTagline(line))      { pi++; continue; }
+      if (isStableName(line))   { pi++; continue; }
 
       const cleaned = cleanHorseName(normalizeDecoName(line));
       slots.push(cleaned.length > 1 ? cleaned : '');
@@ -216,14 +221,18 @@ function getPreviewData(inputs) {
     }
   });
 
-  let showPart = statTxt.split(/show\s+results/i)[1]||""; showPart=showPart.split(/competition/i)[0];
-  d.showScores = [...new Set(showPart.match(/\b\d{1,3}[.,]\d{3}\b/g)||[])];
-  const compParts = statTxt.split(/competition\s+results/i);
-  if (compParts.length>1) {
-    d.compScores = [...new Set((compParts[1].split(/Health|Genetic/i)[0].match(/\b\d{1,3}[.,]\d{3,4}\b/g)||[]))]
-      .filter(s=>{const v=parseFloat(s.replace(',','.'));return v>10&&v<150;}).slice(0,25);
-  }
+  let showPart = statTxt.split(/show\s+results/i)[1] || "";
+showPart = showPart.split(/competition/i)[0];
+d.showScores = (showPart.match(/\d{1,3}[.,]\d{3}/g) || []);
 
+const compParts = statTxt.split(/competition\s+results/i);
+if (compParts.length > 1) {
+  const compPart = compParts[1].split(/Health|Genetic/i)[0];
+  d.compScores = (compPart.match(/\d{1,3}[.,]\d{3,4}/g) || []).filter(score => {
+    const val = parseFloat(score.replace(',', '.'));
+    return val > 10 && val < 150;
+  }).slice(0, 25);
+}
   d.allHorses = getDropdownNames(ss);
   return d;
 }
@@ -337,7 +346,7 @@ function processFinalImport(data, opts, manual) {
         statSheet.getRange(row,4,1,confo.length).setValues([confo]);
         const gpCol=isIce?37:(isKath?36:35);
         statSheet.getRange(row,gpCol,1,10).setValues([[data.gp['Acceleration']||"",data.gp['Agility']||"",data.gp['Balance']||"",data.gp['Bascule']||"",data.gp['Pulling power']||"",data.gp['Speed']||"",data.gp['Sprint']||"",data.gp['Stamina']||"",data.gp['Strength']||"",data.gp['Surefootedness']||""]]);
-        const achMap=isIce?{'Day Champion':69,'1st Premium':70,'2nd Premium':71,'3rd Premium':72,'1st Prize':76,'2nd Prize':77,'3rd Prize':78}:isKath?{'Day Champion':67,'1st Premium':68,'2nd Premium':69,'3rd Premium':70,'1st Prize':74,'2nd Prize':75,'3rd Prize':76}:{'Day Champion':65,'1st Premium':66,'2nd Premium':67,'3rd Premium':68,'1st Prize':72,'2nd Prize':73,'3rd Prize':74};
+        const achMap=isIce?{'Day Champion':69,'1st Premium':70,'2nd Premium':71,'3rd Premium':72,'1st Prize':76,'2nd Prize':77,'3rd Prize':78}:isKath?{'Day Champion':66,'1st Premium':67,'2nd Premium':68,'3rd Premium':69,'1st Prize':73,'2nd Prize':74,'3rd Prize':75}:{'Day Champion':65,'1st Premium':66,'2nd Premium':67,'3rd Premium':68,'1st Prize':72,'2nd Prize':73,'3rd Prize':74};
         Object.entries(achMap).forEach(([key,col])=>statSheet.getRange(row,col).setValue(data.achieve[key]||"0"));
         results.push("✓ "+targetSheetName+" updated");
       }
