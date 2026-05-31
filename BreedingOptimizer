@@ -605,7 +605,7 @@
 
         let feeBadge = '';
         if (item.isPublic && item.studFee) {
-          feeBadge = `<div class="badge" style="background:#fdf6e3;color:#7a5c00;border:1px solid var(--hr-gold);">💰 ${Number(item.studFee).toLocaleString()} Equus</div>`;
+          feeBadge = `<div class="badge" style="background:#fdf6e3;color:#7a5c00;border:1px solid var(--hr-gold);"> ${Number(item.studFee).toLocaleString()} HCR</div>`;
         }
 
         const card = `
