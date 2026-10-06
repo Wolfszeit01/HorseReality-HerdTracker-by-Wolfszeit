@@ -2,363 +2,904 @@
 <html>
 <head>
   <base target="_top">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --hr-purple:       #0b2c41;
-      --hr-purple-mid:   #081b28;
-      --hr-purple-light: #407f9c;
-      --hr-gold:         #ffa100;
-      --hr-gold-light:   #ffb733;
-      --hr-bg:           #f5f7f9;
-      --hr-card:         #f5f7f9;
-      --hr-white:        #ffffff;
-      --hr-text:         #0b2c41;
-      --hr-text-muted:   #5a7a8a;
-      --hr-border:       rgba(255, 161, 0, 0.3);
-      --hr-shadow:       0 8px 24px rgba(8, 27, 40, 0.15);
-      --hr-success:      #2E7D32;
-      --hr-success-bg:   #d4edda;
-      --hr-danger:       #b71c1c;
-    }
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Finlandica:wght@400;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+  <link href="https://fonts.cdnfonts.com/css/elometha" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/gh/mats-k/sweden-sans@master/sweden-sans.css" rel="stylesheet" />
+  <?!= renderThemeVariables(); ?>
+<style>
+    /* ══════════════════════════════════════════════════════════════
+   1. VARIABLEN
+   ══════════════════════════════════════════════════════════════ */
+:root {
+  --font-brand: 'Sweden Sans', sans-serif;
+  --fw-semibold: 600;
+  --ls-brand: 0.15em;
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+  /* Aliase auf Theme-Bridge-Variablen — der Rest der Datei bleibt unangetastet
+     und zieht bei Theme-Wechsel automatisch mit. */
+  --hr-purple:            var(--primary-deep);
+  --hr-purple-mid:        var(--primary-dark);
+  --hr-purple-light:      var(--primary-mid);
+  --hr-rosa:              color-mix(in srgb, var(--primary-mid) 20%, var(--neutrals-white));
+  --hr-gold:              var(--secondary-base);
+  --hr-white:             var(--neutrals-white);
+  --hr-bg:                color-mix(in srgb, var(--primary-ultramuted) 70%, var(--neutrals-white));
+  --hr-border:            color-mix(in srgb, var(--secondary-base) 25%, transparent);
+  --hr-shadow:            0 8px 24px color-mix(in srgb, var(--primary-deep) 15%, transparent);
+  --hr-text:              var(--primary-deep);
+  --hr-text-muted:        color-mix(in srgb, var(--primary-mid) 76%, var(--neutrals-white));
+  --hr-success:           var(--tertiary-deep);
+  --hr-success-bg:        var(--primary-lightmuted);
+  --hr-danger:            var(--accent-2);
+}
 
-    body {
-      font-family: 'Roboto', sans-serif;
-      background: #e4e8ec;
-      color: var(--hr-text);
-      padding: 15px;
-      line-height: 1.4;
-    }
+/* ══════════════════════════════════════════════════════════════
+   2. BASIS 
+   ══════════════════════════════════════════════════════════════ */
+  * {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  }
 
-    /* ===== HEADER ===== */
-    .dashboard-header {
-      background: var(--hr-purple);
+  body {
+  font-family: 'Sweden Sans', sans-serif;
+  letter-spacing: normal;
+  line-height: 1.5;
+  background: var(--neutrals-white);
+  padding: 15px;
+  color: var(--primary-deep);
+  }
+
+  ::-webkit-scrollbar { width: 5px; }
+  ::-webkit-scrollbar-thumb { background: var(--secondary-base); border-radius: 10px; }
+
+/* ══════════════════════════════════════════════════════════════
+   3. DASHBOARD-KARTE (äußerer Rahmen)
+   ══════════════════════════════════════════════════════════════ */
+  .dashboard-card {
+      background-color: var(--primary-ultramuted);
       border-radius: 12px;
-      padding: 20px 30px;
-      margin-bottom: 0;
-      border: 1px solid var(--hr-border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      box-shadow: var(--hr-shadow);
-      border-bottom: 3px solid var(--hr-gold);
-    }
-
-    .stuteri-logo { width: 72px; height: 72px; object-fit: contain; }
-
-    .header-center { flex-grow: 1; text-align: center; }
-    .header-center h1 {
-      font-family: 'Roboto', sans-serif;
-      font-weight: 700;
-      font-size: 22px;
-      color: #ffffff;
-      margin: 0 0 2px 0;
-    }
-    .header-center .subtitle {
-      color: rgba(255,255,255,0.75);
-      font-size: 9px;
-      text-transform: uppercase;
-      letter-spacing: 2px;
-      font-weight: 700;
-    }
-    .last-update {
-      font-size: 9px;
-      color: rgba(255,161,0,0.7);
-      margin-top: 6px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    /* ===== TABS ===== */
-    .nav-tabs {
-      display: flex;
-      background: var(--hr-purple-mid);
-      border-radius: 0;
-      gap: 0;
-      align-items: center;
-      padding: 0 10px;
-    }
-    .nav-tab {
-      padding: 10px 18px;
-      background: transparent;
-      color: rgba(255,255,255,0.6);
-      cursor: pointer;
-      font-weight: 600;
-      font-size: 10px;
-      transition: all 0.2s;
-      border-bottom: 2px solid transparent;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      white-space: nowrap;
-      font-family: 'Roboto', sans-serif;
-      border: none;
-    }
-    .nav-tab:hover { color: rgba(255,255,255,0.9); }
-    .nav-tab.active {
-      background: var(--hr-card);
-      color: var(--hr-text);
-      border-bottom: 2px solid var(--hr-gold);
-      font-weight: 700;
-    }
-
-    .tab-controls {
-      margin-left: auto;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 6px 0;
-    }
-
-    select {
-      padding: 6px 28px 6px 10px;
-      border-radius: 6px;
-      border: 1px solid var(--hr-border);
-      background: var(--hr-white);
-      color: var(--hr-purple);
-      font-family: 'Roboto', sans-serif;
-      font-weight: 600;
-      font-size: 11px;
-      cursor: pointer;
-      appearance: none;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%230b2c41' d='M5 6L0 0h10z'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 8px center;
-    }
-
-    .refresh-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      width: 32px; height: 32px;
-      border-radius: 6px;
-      border: 1px solid var(--hr-border);
-      background: var(--hr-white);
-      color: var(--hr-purple);
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .refresh-btn:hover { background: var(--hr-gold); color: var(--hr-white); border-color: var(--hr-gold); }
-    .refresh-btn svg { width: 16px; height: 16px; fill: currentColor; }
-
-    /* ===== CONTENT ===== */
-    .content-container {
-      background: var(--hr-card);
-      border-radius: 0 0 12px 12px;
-      padding: 24px;
-      border: 1px solid var(--hr-border);
-      border-top: none;
-      min-height: 600px;
-      box-shadow: var(--hr-shadow);
+      box-shadow: 0 6px 20px color-mix(in srgb, var(--primary-deep) 10%, transparent);
+      overflow: hidden !important;
       position: relative;
     }
 
-    /* ===== SECTION TITLE ===== */
-    .section-title {
-      font-size: 10px;
-      font-weight: 700;
-      color: var(--hr-text);
-      border-bottom: 1px solid rgba(255,161,0,0.3);
-      padding: 0 0 4px 0;
-      margin: 20px 0 14px 0;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .section-title::before {
-      content: '';
-      display: inline-block;
-      width: 3px; height: 12px;
-      background: var(--hr-gold);
-      border-radius: 2px;
-      flex-shrink: 0;
-    }
-    .section-title:first-child { margin-top: 0; }
+/* ══════════════════════════════════════════════════════════════
+   4. HEADER
+   ══════════════════════════════════════════════════════════════ */
+.dashboard-header {
+  background: 
+    linear-gradient(135deg, var(--primary-deep), var(--primary-dark));
+  border-radius: 12px 12px 0 0;
+  padding: 24px 0 0 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  min-height: 180px;
+}
 
-    /* ===== STAT CARDS ===== */
-    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 20px; }
-    .stat-card {
-      background: var(--hr-white);
-      border-radius: 10px;
-      padding: 16px 12px;
-      text-align: center;
-      border: 1px solid rgba(0,0,0,0.04);
-      transition: transform 0.2s;
-    }
-    .stat-card.highlight {
-      background: var(--hr-purple);
-      border: 1px solid rgba(255,161,0,0.4);
-    }
-    .stat-value { font-size: 28px; font-weight: 700; color: var(--hr-purple); }
-    .stat-card.highlight .stat-value { color: var(--hr-gold); }
-    .stat-label {
-      font-size: 10px;
-      font-weight: 700;
-      color: var(--hr-text-muted);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-top: 4px;
-    }
-    .stat-card.highlight .stat-label { color: rgba(255,255,255,0.6); }
+.header-center {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
 
-    /* ===== STATUS SECTION ===== */
-    .status-section {
-      background: var(--hr-white);
-      padding: 16px;
-      border-radius: 10px;
-      border: 1px solid #eee;
-      margin-bottom: 20px;
-    }
-    .role-bar-container { height: 10px; display: flex; border-radius: 5px; overflow: hidden; background: #eee; margin-bottom: 10px; }
-    .pregnancy-bar-small { height: 5px; border-radius: 3px; background: #eee; overflow: hidden; width: 180px; margin-top: 4px; }
-    .role-legend { display: flex; flex-wrap: wrap; gap: 12px; font-size: 10px; font-weight: 700; text-transform: uppercase; margin-top: 10px; letter-spacing: 0.5px; }
+.stuteri-logo-center {
+  height: 75px;
+  width: auto;
+  margin-bottom: 8px;
+  filter: drop-shadow(0 2px 4px color-mix(in srgb, var(--primary-deep) 25%, transparent));
+}
 
-    /* ===== TABLES ===== */
-    table {
-      width: 100%;
-      border-collapse: separate;
-      border-spacing: 0;
-      background: var(--hr-white);
-      border-radius: 10px;
-      overflow: hidden;
-      margin-bottom: 14px;
-      border: 1px solid #eee;
-    }
-    th {
-      background: var(--hr-purple);
-      color: #ffffff;
-      padding: 12px 14px;
-      text-align: left;
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-    }
-    td { padding: 10px 14px; border-bottom: 1px solid #f5f5f5; font-size: 13px; }
-    tr:last-child td { border-bottom: none; }
+.title-container {
+  position: relative;
+  display: inline-block;
+  margin: 10px 0 6px 0;
+}
 
-    /* ===== PROGRESS BARS ===== */
-    .progress-bar-bg { height: 7px; background: #eee; border-radius: 4px; overflow: hidden; margin: 6px 0; }
-    .progress-bar-fill { height: 100%; background: var(--hr-purple); transition: width 0.8s ease; }
+.title-container h1 {
+  font-family: 'Sweden Sans', sans-serif;
+  font-weight: 600;
+  font-size: 1.75em;
+  color: var(--secondary-base);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin: 0;
+  line-height: 1.2;
+}
 
-    /* ===== INFO PANEL ===== */
-    .info-panel {
-      background: var(--hr-white);
-      border-radius: 10px;
-      border: 1px solid #eee;
-      padding: 18px;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 24px;
-      margin-top: 16px;
-    }
-    .info-group h4 {
-      color: var(--hr-text);
-      font-size: 10px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin-bottom: 8px;
-      border-bottom: 1px solid rgba(255,161,0,0.3);
-      padding-bottom: 4px;
-    }
-    .info-row {
-      display: flex;
-      justify-content: space-between;
-      font-size: 12px;
-      padding: 4px 0;
-      border-bottom: 1px solid #fafafa;
-    }
-    .info-row span:first-child { color: var(--hr-text-muted); }
-    .info-row span:last-child { font-weight: 700; color: var(--hr-purple); }
+.script-text {
+  font-family: 'Elometha', cursive;
+  font-weight: 400;
+  letter-spacing: normal;
+  line-height: 1.2;
+  color: var(--neutrals-white);
+  position: absolute;
+  pointer-events: none;
+  white-space: nowrap;
+  
+}
 
-    /* ===== LOADING ===== */
-    .loading {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      z-index: 999;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background: rgba(245, 247, 249, 0.97);
-      border-radius: 0 0 12px 12px;
-      transition: opacity 0.4s;
-      font-weight: 700;
-      color: var(--hr-purple);
-      font-size: 12px;
-      letter-spacing: 0.5px;
-      gap: 16px;
-    }
-    .loading.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
-    .loading-gif { width: 100px; height: auto; }
+.stuteri-text {
+  bottom: -24px;
+  right: -30px;
+  font-size: 27px;
+}
 
-    /* ===== TAB CONTENT ===== */
-    .tab-content { display: none; }
-    .tab-content.active { display: block; animation: fadeIn 0.3s ease; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+.header-center .subtitle {
+  font-family: 'Cinzel', 'Montserrat', sans-serif;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--hr-white) 95%, transparent);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+}
 
-    /* ===== STATUS DOT ===== */
-    .status-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; }
+/* ══════════════════════════════════════════════════════════════
+   5. NAVIGATION (Tabs + Controls)
+   ══════════════════════════════════════════════════════════════ */
+.nav-bar {
+  width: 100%;
+  display: grid;
+  justify-content: space-between;
+  align-items: flex-end;
+  padding: 0 16px 0px 16px;
+  background: transparent !important;
+  box-sizing: border-box;
+}
 
-    /* ===== BREED CARDS ===== */
-    #breedCards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
-    .breed-card {
-      background: var(--hr-white);
-      border-radius: 10px;
-      padding: 14px 16px;
-      border: 1px solid var(--hr-border);
-      border-left: 4px solid var(--hr-gold);
-    }
-    .breed-card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: 10px;
-    }
-    .breed-card-name { font-weight: 700; color: var(--hr-purple); font-size: 15px; }
-    .breed-card-count { font-size: 10px; font-weight: 700; color: var(--hr-text-muted); text-transform: uppercase; }
-    .breed-card-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 4px;
-      font-size: 12px;
-    }
-    .breed-card-grid span { color: var(--hr-text-muted); }
-    .breed-card-grid b { color: var(--hr-purple); }
+.nav-tabs {
+  display: flex;
+  gap: 4px;
+  align-items: flex-end;
+  padding: 0;
+  overflow-x: auto;
+  white-space: nowrap;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  justify-self: center;
+  box-shadow: none;
+  -webkit-tap-highlight-color: transparent;
+}
 
-    /* ===== SCROLLBAR ===== */
-    ::-webkit-scrollbar { width: 5px; }
-    ::-webkit-scrollbar-thumb { background: var(--hr-gold); border-radius: 10px; }
-  </style>
+.nav-tabs::-webkit-scrollbar {
+  display: none; 
+}
+
+.nav-tab {
+  font-family: 'Sweden Sans', sans-serif;
+  background: transparent;
+  border: none;
+  color: var(--neutrals-white);
+  height: 32px;
+  padding: 0 12px;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 6px 6px 0 0;
+  opacity: 0.85;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  outline: none;
+  flex-shrink: 0;
+}
+
+.nav-tab:focus-visible {
+  outline: 2px solid var(--secondary-base);
+  outline-offset: -2px;
+}
+
+.nav-tab:hover {
+  opacity: 1;
+  background-color: var(--primary-ultramuted);
+  color: var(--primary-deep);
+  font-weight: 600;
+}
+
+.nav-tab::before {
+  content: attr(data-step) " · ";
+  font-weight: 700;
+  margin-right: 3px;
+  opacity: 0.75;
+}
+
+.nav-tab.active::before {
+  opacity: 1;
+}
+
+.nav-tab.active {
+  background: var(--primary-ultramuted) !important;
+  color: var(--primary-dark) !important;
+  border-radius: 8px 8px 0 0;
+  font-weight: 700;
+  position: relative;
+  z-index: 2;
+  opacity: 1;
+  height: 32px;
+  margin-bottom: 0;
+}
+
+.tab-controls {
+  grid-column: 3;
+  justify-self: end;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  margin-bottom: 8px; 
+  padding-bottom: 0px;
+}
+
+.tab-controls-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sync-time {
+  font-family: 'Sweden Sans', sans-serif;
+  font-size: 9px;
+  font-weight: 500;
+  color: var(--neutrals-white);
+  white-space: nowrap;
+  padding-left: 5px;
+}
+
+select {
+  height: 28px;
+  padding: 2px 28px 2px 12px;
+  border-radius: 8px;
+  border: 1px solid var(--primary-deep);
+  background: var(--neutrals-white);
+  color: var(--primary-deep);
+  font-family: 'Sweden Sans', sans-serif;
+  font-weight: 600;
+  font-size: 11px;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath fill='%234A233C' d='M5 6L0 0h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 10px center;
+  box-sizing: border-box;
+  transition: all 0.2s ease;
+}
+
+select:hover {
+  border-color: var(--secondary-base);
+}
+
+.refresh-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 25px;
+  height: 26px;
+  border-radius: 8px;
+  border: 1px solid var(--primary-deep);
+  background: var(--neutrals-white);
+  color: var(--primary-deep);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.refresh-btn:hover {
+  border-color: var(--secondary-base);
+  
+}
+
+.refresh-btn svg,
+.refresh-btn i[data-lucide] {
+  width: 14px;
+  height: 14px;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  fill: none;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   6. CONTENT-GRUNDGERÜST (Container, Loading, Tabs, Fehler)
+   ══════════════════════════════════════════════════════════════ */
+
+
+.manager-progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--hr-border);
+}
+.manager-progress .mp-level {
+  font-family: 'Finlandica', sans-serif;
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--hr-purple-mid);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+.manager-progress .mp-bar-bg {
+  flex: 1;
+  height: 8px;
+  border-radius: 3px;
+  background: var(--hr-border);
+  overflow: hidden;
+}
+.manager-progress .mp-bar-fill {
+  height: 100%;
+  background: var(--hr-gold);
+  border-radius: 3px;
+}
+.manager-progress .mp-xp {
+  font-family: 'Finlandica', sans-serif;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--hr-text-muted);
+  white-space: nowrap;
+}
+
+
+.content-container {
+  background-size: cover, 48% auto, 26% auto, 32% auto;
+  background-repeat: repeat, repeat, repeat, repeat;
+  border-radius: 0 0 12px 12px;
+  padding: 24px;
+  border: 1px solid var(--hr-border);
+  border-top: none;
+  min-height: 600px;
+  box-shadow: var(--hr-shadow);
+  position: relative;
+}
+
+.loading {
+  position: absolute;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--hr-rosa);
+  border-radius: 0 0 12px 12px;
+  transition: opacity 0.4s;
+  font-weight: 700;
+  color: var(--hr-purple);
+  font-size: 12px;
+  letter-spacing: 0.5px;
+  gap: 16px;
+}
+.loading.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+.loading-gif { width: 100px; height: auto; }
+
+.tab-content { display: none; }
+.tab-content.active { display: block; animation: fadeIn 0.3s ease; }
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+.error-box { background: color-mix(in srgb, var(--hr-danger) 18%, white); color: var(--hr-danger); padding: 16px; border-radius: 8px; font-weight: 700; font-family: 'Finlandica', sans-serif; }
+.status-dot { display: inline-block; width: 7px; height: 7px; border-radius: 50%; margin-right: 6px; }
+
+.two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+
+details { border-top: 1px solid var(--hr-border); }
+details summary { list-style: none; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+details summary::-webkit-details-marker { display: none; }
+details summary::before { content: '▸'; font-size: 9px; color: var(--hr-gold); transition: transform 0.15s ease; display: inline-block; }
+details[open] summary::before { transform: rotate(90deg); }
+details[open] summary { color: var(--hr-purple); }
+
+/* ══════════════════════════════════════════════════════════════
+   7. ÜBERSCHRIFTEN / SECTION-TITEL
+   ══════════════════════════════════════════════════════════════ */
+.section-title, .card-header-title {
+  font-family: 'Sweden Sans', sans-serif;
+  font-size: 10px; 
+  font-weight: 700; 
+  color: var(--hr-purple);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+
+  display: flex; 
+  align-items: center; 
+  gap: 6px;
+}
+.section-title::before, .card-header-title::before { 
+  content: ''; 
+  display: inline-block; 
+  width: 2px; height: 12px; 
+  background: var(--hr-gold);
+  border-radius: 2px; 
+  flex-shrink: 0; }
+  
+.section-title:first-child { margin-top: 0; }
+
+/* ══════════════════════════════════════════════════════════════
+   8. STAT-KARTEN
+   ══════════════════════════════════════════════════════════════ */
+.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 18px; }
+.stats-grid-wrap { position: relative; }
+
+.stat-card { 
+  background: var(--hr-white); 
+  border-radius: 10px; 
+  padding: 14px 16px; 
+  text-align: left; 
+  border: 1px solid color-mix(in srgb, var(--primary-deep) 6%, transparent); 
+  box-shadow: 0 1px 4px color-mix(in srgb, var(--primary-deep) 6%, transparent);
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  position: relative;
+   }
+
+.stat-card:hover, .breed-card:hover { transform: translateY(-2px); box-shadow: 0 6px 16px color-mix(in srgb, var(--primary-deep) 12%, transparent); }
+.stat-card.highlight { background: var(--hr-purple-mid); border: 1px solid var(--hr-gold); }
+
+.stat-header { display: flex; align-items: center; gap: 7px; }
+.stat-icon { width: 18px; height: 18px; color: var(--hr-purple); margin-bottom: 0; flex-shrink: 0; }
+.stat-icon svg { width: 100%; height: 100%; stroke: currentColor; fill: none; stroke-width: 2; }
+.stat-card.highlight .stat-icon { color: var(--hr-gold); }
+
+.stat-label { font-size: 12px; font-weight: 600; color: var(--hr-text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.stat-card.highlight .stat-label { color: color-mix(in srgb, var(--neutrals-white) 85%, transparent); }
+
+.stat-value { 
+  font-family: 'Cinzel', 'Montserrat', sans-serif;
+  font-size: 35px; 
+  font-weight: 600; 
+  color: var(--hr-purple); }
+.stat-value-compact { font-size: 15px; }
+.stat-card.highlight .stat-value { color: var(--hr-gold); }
+.stat-value.positive { color: var(--hr-success); }
+.stat-value.negative { color: var(--hr-danger); }
+
+.stat-percent { font-size: 9px; font-weight: 500; color: var(--hr-text-muted); }
+.stat-card.highlight .stat-percent { color: color-mix(in srgb, var(--neutrals-white) 75%, transparent); }
+
+/* ══════════════════════════════════════════════════════════════
+   9. INFO-TOOLTIPS
+   ══════════════════════════════════════════════════════════════ */
+.info-tip {
+  position: relative; 
+  display: inline-flex; 
+  align-items: center; 
+  justify-content: center;
+  width: 15px; 
+  height: 15px; 
+  border-radius: 50%; 
+  background: transparent;
+  border: 1.3px solid var(--hr-purple-mid); 
+  color: var(--hr-purple);
+  font-size: 10px; 
+  font-weight: 700; 
+  line-height: 1;
+  cursor: help; 
+  flex-shrink: 0;
+  vertical-align: middle;
+  transform: translateY(-1px);
+}
+.info-tip .tip-text {
+  visibility: hidden; opacity: 0; position: absolute !important; bottom: 130%; left: 50%; transform: translateX(-50%);
+  background: var(--hr-purple); color: var(--neutrals-white); font-size: 12.5px; font-weight: 500; text-transform: none; letter-spacing: normal;
+  padding: 11px 13px; border-radius: 6px; width: max-content; max-width: 240px; line-height: 1.65;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--primary-deep) 20%, transparent); z-index: 50; transition: opacity 0.15s ease;
+}
+.info-tip .tip-text::after { content: ''; position: absolute; top: 100%; left: 50%; margin-left: -4px; border: 4px solid transparent; border-top-color: var(--hr-purple); }
+.info-tip:hover .tip-text { visibility: visible; opacity: 1; }
+
+.info-tip:hover {
+  background: var(--hr-purple);
+  color: var(--hr-white);
+  border-color: var(--hr-purple);
+}
+
+/* ══════════════════════════════════════════════════════════════
+   10. BADGES
+   ══════════════════════════════════════════════════════════════ */
+.badge { display: inline-block; padding: 2px 8px; border-radius: 5px; font-size: 9px; font-weight: 700; font-family: 'Finlandica', sans-serif; text-transform: uppercase; letter-spacing: 0.3px; }
+.badge-gold { background: color-mix(in srgb, var(--secondary-base) 16%, white); color: var(--secondary-base); border: 1px solid color-mix(in srgb, var(--secondary-base) 35%, white); }
+.badge-danger { background: var(--accent-2); color: var(--neutrals-white); }
+.badge-warn { background: var(--accent-6); color: var(--neutrals-white); }
+.badge-success { background: var(--tertiary-deep); color: var(--neutrals-white); }
+.badge-growth { background: color-mix(in srgb, var(--hr-purple) 12%, white); color: var(--hr-purple); }
+.badge-pasture { background: color-mix(in srgb, var(--accent-4) 14%, white); color: var(--accent-4); }
+.badge-clinic { background: color-mix(in srgb, var(--secondary-base) 22%, white); color: var(--secondary-base); }
+.badge-check { background: color-mix(in srgb, var(--accent-2) 10%, white); color: var(--accent-2); border: 1px solid color-mix(in srgb, var(--accent-2) 30%, white); }
+
+/* ══════════════════════════════════════════════════════════════
+   11. SUCHFELDER / FILTER / QUICK-FILTER-BUTTONS
+   ══════════════════════════════════════════════════════════════ */
+.search-wrap { position: relative; flex-grow: 1; }
+.search-wrap input { width: 100%; padding-left: 32px !important; }
+.search-wrap::before { content: '⌕'; position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: var(--hr-text-muted); font-size: 14px; pointer-events: none; }
+.activity-controls input:focus, .activity-controls select:focus { outline: none; border-color: var(--hr-gold); box-shadow: 0 0 0 2px color-mix(in srgb, var(--secondary-base) 18%, transparent); }
+
+.quick-filters { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.quick-filters button { padding: 5px 12px; border-radius: 6px; border: 1px solid var(--hr-border); background: var(--hr-white); color: var(--hr-purple); font-family: 'Sweden Sans', sans-serif; font-weight: 700; font-size: 10px; cursor: pointer; transition: all 0.15s; }
+.quick-filters button:hover { border-color: var(--hr-gold); }
+.quick-filters button.active { background: var(--hr-purple); color: var(--hr-gold); border-color: var(--hr-purple); }
+
+.filter-buttons { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 12px; }
+.filter-buttons button { padding: 5px 14px; border-radius: 6px; border: 1px solid var(--hr-border); background: var(--hr-white); color: var(--hr-purple); font-family: 'Sweden Sans', sans-serif; font-weight: 700; font-size: 10px; cursor: pointer; transition: all 0.15s; }
+.filter-buttons button:hover { border-color: var(--hr-gold); }
+.filter-buttons button.active { background: var(--hr-purple); color: var(--hr-gold); border-color: var(--hr-purple); }
+
+.activity-controls { display: flex; gap: 10px; margin-bottom: 14px; }
+.activity-controls input, .activity-controls select {
+  padding: 8px 12px; border-radius: 8px; border: 1px solid var(--hr-border);
+  background: var(--hr-white); color: var(--hr-text); font-family: 'Sweden Sans', sans-serif; font-size: 12px;
+}
+.activity-controls input { flex-grow: 1; }
+
+.scroll-capped { max-height: 340px; overflow-y: auto; }
+.scroll-capped table { margin-bottom: 0; }
+.scroll-capped thead th { position: sticky; top: 0; z-index: 2; }
+
+/* ══════════════════════════════════════════════════════════════
+   12. STATUS-SEKTION (Herd Overview: Rollen + Trächtigkeit)
+   ══════════════════════════════════════════════════════════════ */
+.status-section { 
+  background: var(--hr-white); 
+  padding: 16px; 
+  border-radius: 10px; 
+  border: 1px solid var(--hr-border); 
+ }
+.role-bar-container { height: 10px; display: flex; border-radius: 5px; overflow: hidden; background: var(--hr-border); margin-bottom: 10px; }
+.role-legend-dots { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 10px; font-weight: 700; font-family: 'Finlandica', sans-serif; margin-top: 12px; letter-spacing: 0.3px; }
+.role-legend-dots .dot-item { display: inline-flex; align-items: center; gap: 5px; color: var(--hr-text-muted); }
+.role-legend-dots .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.occupancy-extra { display: flex; gap: 10px; margin-top: 16px; }
+.occupancy-mini-card { flex: 1; background: var(--hr-bg); border-radius: 8px; padding: 10px 12px; display: flex; align-items: center; gap: 10px; }
+.occupancy-mini-icon { width: 18px; height: 18px; color: var(--hr-gold); flex-shrink: 0; }
+.occupancy-mini-icon svg { width: 100%; height: 100%; }
+.occupancy-mini-value { font-family:'cinzel' ;font-size: 20px; font-weight: 700; color: var(--hr-purple); line-height: 1; }
+.occupancy-mini-label { font-size: 9px; font-weight: 700; color: var(--hr-text-muted); text-transform: uppercase; letter-spacing: 0.4px; margin-top: 2px; }
+
+.card-header-row { 
+  display: flex; 
+  align-items: center;
+   justify-content: space-between; 
+   margin-bottom: 12px; }
+
+.occupancy-agenda-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 18px; }
+.overview-bottom-grid { 
+  display: grid; 
+  grid-template-columns: 1fr 1fr; 
+  gap: 16px; 
+  margin-bottom: 18px;
+  align-items: stretch; }
+.overview-col { 
+  min-width: 0; }
+@media (max-width: 900px) { .occupancy-agenda-grid, .overview-bottom-grid { grid-template-columns: 1fr; } }
+
+.agenda-list-card { background: var(--hr-white); padding: 16px; border-radius: 10px; border: 1px solid var(--hr-border); display: flex; flex-direction: column; }
+.agenda-list-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 1px solid var(--hr-border); }
+.agenda-list-row:last-of-type { border-bottom: none; }
+.agenda-list-icon { width: 16px; height: 16px; color: var(--hr-gold); flex-shrink: 0; }
+.agenda-list-icon svg { width: 100%; height: 100%; }
+.agenda-list-label { flex: 1; font-size: 12px; font-weight: 600; color: var(--hr-purple); }
+.agenda-list-value { font-size: 12px; font-weight: 700; font-family: 'Finlandica', sans-serif; color: var(--hr-purple); }
+.agenda-list-arrow { color: var(--hr-gold); font-size: 12px; }
+.agenda-link { display: inline-flex; align-items: center; gap: 4px; margin-top: 10px; font-size: 11px; font-weight: 700; color: var(--hr-gold); cursor: pointer; text-decoration: none; }
+.agenda-link:hover { text-decoration: underline; }
+
+/* ══════════════════════════════════════════════════════════════
+   22. QUOTE BLOCK (Roles-Card, Overview)
+   ══════════════════════════════════════════════════════════════ */
+.quote-block {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding-top: 10px;
+}
+.quote-image {
+  width: 74px;
+  height: 74px;
+  object-fit: cover;
+  flex-shrink: 0;
+  align-self: flex-start; 
+  margin-top: -15px;
+}
+.quote-text { flex: 1; min-width: 0; }
+.quote-quote {
+  font-family: 'Sweden Sans', sans-serif;
+  font-size: 14px;
+  font-style: italic;
+  color: var(--hr-text-muted);
+  line-height: 1.5;
+}
+.quote-author {
+  font-family: 'Elometha', cursive;
+  font-size: 16px;
+  color: var(--hr-purple);
+  text-align: right;
+  margin-top: 6px;
+}
+
+
+/* ══════════════════════════════════════════════════════════════
+   Donut
+   ══════════════════════════════════════════════════════════════ */
+
+  /* Der äußere Rahmen (Karten-Style) */
+.donut-card-wrapper {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  padding: 0;
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 240px;
+  flex: 1; /* Füllt die Karte nach unten hin aus */
+}
+
+/* Das Chart selbst darf 100% Breite nutzen */
+.chart-card-container {
+  width: 100%;
+  height: 100%;
+}
+
+/* Die Zahl zentriert exakt in der Donut-Mitte */
+.donut-center-info {
+  position: absolute;
+  top: 45%; /* Falls nötig leicht verschieben (z.B. 38% - 42%), bis es perfekt im Loch sitzt */
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  pointer-events: none; /* Klicks gehen durch auf das Chart */
+}
+
+.donut-total-val {
+  display: block;
+  font-family: 'Cinzel', Georgia, serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--hr-purple);
+  line-height: 1;
+}
+
+.donut-total-lbl {
+  display: block;
+  font-size: 8px;
+  font-weight: 700;
+  color: var(--hr-text-muted);
+  letter-spacing: 1.2px;
+  margin-top: 3px;
+}
+
+.overview-col-card {
+  background: var(--hr-white);
+  border-radius: 12px;
+  padding: 16px;
+  border: 1px solid var(--hr-border);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--primary-deep) 2%, transparent);
+  display: flex;
+  flex-direction: column;
+}
+
+/* ══════════════════════════════════════════════════════════════
+   13. TABELLEN
+   ══════════════════════════════════════════════════════════════ */
+table { width: 100%; border-collapse: separate; border-spacing: 0; background: var(--hr-white); border-radius: 10px; overflow: hidden; margin-bottom: 18px; border: 1px solid var(--hr-border); }
+th { background: var(--hr-purple); color: var(--hr-gold); padding: 10px 14px; text-align: left; font-size: 10px; text-transform: uppercase; letter-spacing: 0.5px; }
+td { padding: 9px 14px; border-bottom: 1px solid var(--hr-border); font-size: 12.5px; }
+tr:last-child td { border-bottom: none; }
+tr:nth-child(even) td { background: color-mix(in srgb, var(--primary-deep) 1.7999999999999998%, transparent); }
+th.sortable { cursor: pointer; user-select: none; }
+th.sortable:hover { color: var(--hr-white); }
+tr.row-urgent td { background: color-mix(in srgb, var(--accent-2) 6%, transparent); }
+tr.row-overdue td { background: color-mix(in srgb, var(--secondary-base) 8%, transparent); }
+
+/* ══════════════════════════════════════════════════════════════
+   14. PROGRESS BARS
+   ══════════════════════════════════════════════════════════════ */
+.progress-bar-bg { height: 7px; background: var(--hr-border); border-radius: 4px; overflow: hidden; margin: 6px 0; }
+.progress-bar-fill { height: 100%; background: var(--hr-purple); transition: width 0.8s ease; }
+
+/* ══════════════════════════════════════════════════════════════
+   15. INFO-PANEL (z.B. In-Game Time Reference)
+   ══════════════════════════════════════════════════════════════ */
+.info-panel { background: var(--hr-white); border-radius: 10px; border: 1px solid var(--hr-border); padding: 18px; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; margin-top: 16px; }
+.info-group h4 { color: var(--hr-purple); font-size: 10px; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 8px; border-bottom: 1px solid var(--hr-gold); padding-bottom: 4px; }
+.info-row { display: flex; justify-content: space-between; font-size: 12px; padding: 4px 0; border-bottom: 1px solid var(--hr-border); }
+.info-row span:first-child { color: var(--hr-text-muted); }
+.info-row span:last-child { font-weight: 700; font-family: 'Finlandica', sans-serif; color: var(--hr-purple); }
+
+/* ══════════════════════════════════════════════════════════════
+   16. BREED CARDS
+   ══════════════════════════════════════════════════════════════ */
+#breedCards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.breed-card { 
+  background: var(--hr-white); 
+  border-radius: 10px; 
+  padding: 10px 14px; border: 0px solid var(--hr-border); border-left: 4px solid var(--hr-gold); }
+.breed-card-header { display: flex; justify-content: space-between; align-items: flex-start; }
+.breed-card-name { font-weight: 600; color: var(--hr-purple); font-size: 15px; font-family: 'Sweden Sans', sans-serif ; }
+.breed-card-count { font-size: 8px; font-weight: 500; color: var(--hr-text-muted); text-transform: uppercase; }
+.breed-card-row { 
+  display: flex; 
+  flex-wrap: wrap; 
+  align-items: center; 
+  gap: 5px; 
+  font-size: 10px; 
+  color: var(--hr-text-muted); 
+  letter-spacing: 0.5px;
+  margin-bottom: 10px; 
+}
+.breed-card-row b { 
+  color: var(--hr-purple);
+   font-weight: 700; 
+   font-family: 'Cinzel', Georgia, serif;
+   font-size: 11px;
+   }
+.breed-card-row .sep { color: var(--hr-border); }
+.breed-card-avg-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; font-size: 10.5px; }
+.breed-card-avg-row .avg-item { text-align: center; background: var(--hr-bg); border-radius: 6px; padding: 4px 2px; }
+.breed-card-avg-row .avg-label { color: var(--hr-text-muted); font-size: 9px; text-transform: uppercase; letter-spacing: 0.3px; }
+.breed-card-avg-row .avg-value { color: var(--hr-purple); font-weight: 700; font-size: 15px; font-family: 'Cinzel', Georgia, serif;}
+
+/* ══════════════════════════════════════════════════════════════
+   17. TYPE TAGS (Activity Log / Finance)
+   ══════════════════════════════════════════════════════════════ */
+.type-tag { display: inline-block; padding: 2px 8px; border-radius: 5px; font-size: 9px; font-weight: 700; font-family: 'Finlandica', sans-serif; text-transform: capitalize; letter-spacing: 0.3px; color: white; }
+.type-conf { background: var(--primary-mid); } .type-comp { background: var(--accent-3); }
+.type-stud_in { background: var(--accent-1); } .type-stud_out { background: var(--primary-deep); }
+.type-sale { background: var(--secondary-base); } .type-birth { background: var(--tertiary-deep); }
+.type-chores { background: var(--tertiary-mid); } .type-interest { background: var(--accent-4); }
+.type-show_fee { background: var(--secondary-base); } .type-comp_fee { background: color-mix(in srgb, var(--accent-3) 70%, black); }
+.type-colour_test { background: var(--accent-6); } .type-ultrasound { background: color-mix(in srgb, var(--accent-1) 60%, var(--primary-deep) 40%); }
+.type-foal_pastures { background: color-mix(in srgb, var(--tertiary-deep) 80%, black); } .type-purchase { background: color-mix(in srgb, var(--accent-6) 70%, black); }
+.type-exchange { background: color-mix(in srgb, var(--primary-deep) 90%, var(--secondary-base) 10%); } .type-refund { background: color-mix(in srgb, var(--tertiary-deep) 60%, black); }
+.type-savings_in { background: color-mix(in srgb, var(--accent-4) 70%, black); } .type-savings_out { background: color-mix(in srgb, var(--accent-4) 50%, black); }
+.type-covering_failed { background: var(--accent-2); } .type-deloryan { background: color-mix(in srgb, var(--secondary-base) 70%, black); }
+
+/* Vereinheitlichte Finance-Kontext-Tags */
+.finance-income .type-tag { background: var(--hr-success) !important; }
+.finance-expense .type-tag { background: var(--hr-danger) !important; }
+
+.amount { font-weight: 700; font-family: 'Finlandica', sans-serif; }
+.amount.positive { color: var(--hr-success); }
+.amount.negative { color: var(--hr-danger); }
+
+/* ══════════════════════════════════════════════════════════════
+   20. BREEDING SNAPSHOT MINI CARDS
+   ══════════════════════════════════════════════════════════════ */
+.breeding-mini-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(100px, 1fr)); gap: 10px; margin-bottom: 18px; }
+.breeding-mini-card { background: var(--hr-white); border-radius: 8px; padding: 10px; text-align: center; border: 1px solid var(--hr-border); }
+.breeding-mini-card .num { font-size: 22px; font-weight: 700; font-family: 'Finlandica', sans-serif; color: var(--hr-purple); }
+.breeding-mini-card .lbl { font-size: 9px; font-weight: 700; color: var(--hr-text-muted); text-transform: uppercase; letter-spacing: 0.3px; }
+
+/* ══════════════════════════════════════════════════════════════
+   21. RECORDS / HALL OF FAME
+   ══════════════════════════════════════════════════════════════ */
+.record-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 12px; }
+.record-card { background: var(--hr-white); border-radius: 10px; padding: 14px 16px; border: 1px solid var(--hr-border); border-left: 4px solid var(--hr-gold); }
+.record-card .record-label { font-size: 9px; font-weight: 700; color: var(--hr-text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+.record-card .record-value { font-size: 20px; font-weight: 700; font-family: 'Finlandica', sans-serif; color: var(--hr-purple); margin: 2px 0; }
+.record-card .record-horse { font-size: 12px; color: var(--hr-text-muted); }
+.record-card .record-breed { display: block; font-size: 9px; font-weight: 600; color: var(--hr-text-muted); opacity: 0.65; text-transform: uppercase; letter-spacing: 0.4px; margin-top: 1px; }
+/* ══════════════════════════════════════════════════════════════
+   FONT-BUG-SCHUTZ: Sweden Sans Bold hat kaputte Glyphen bei Ziffern
+   und Klammern (siehe Projekt-Notizen). Diese Regel fängt ALLE
+   Inline-"font-weight:700"-Stellen ab (davon gibt's im Dashboard
+   sehr viele, meist Zahlen/Prozentwerte) und erzwingt Arial dafür —
+   auch für künftig neu hinzugefügte Stellen, ohne jede einzeln
+   nachpflegen zu müssen.
+   ══════════════════════════════════════════════════════════════ */
+[style*="font-weight:700"], [style*="font-weight: 700"] {
+  font-family: 'Finlandica', sans-serif !important;
+}
+/* Shared typography and responsive spacing; dashboard retains its own hero. */
+body, input, select, table, .badge, .stat-percent { font-family: 'Finlandica', sans-serif; font-variant-numeric: tabular-nums; }
+.stat-value, .avg-value, .occupancy-mini-value { font-family: 'Cinzel', 'Finlandica', serif; font-weight: 600; }
+.nav-tab::before { content: none; }
+.nav-bar { grid-template-columns: minmax(0, 1fr) auto; gap: 16px; }
+.nav-tabs { min-width: 0; max-width: 100%; justify-self: start; }
+.tab-controls { grid-column: 2; }
+button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--secondary-base); outline-offset: 2px; }
+@media (max-width: 1050px) {
+  .nav-bar { display: flex; flex-direction: column-reverse; align-items: stretch; gap: 10px; }
+  .tab-controls { align-self: flex-end; }
+}
+@media (max-width: 650px) {
+  body { padding: 8px; }
+  .info-panel, #breedCards { grid-template-columns: 1fr; }
+  .title-container h1 { font-size: 1.3rem; }
+  .stuteri-text { right: 0; }
+}
+.dashboard-icon { width:18px; height:18px; vertical-align:middle; flex-shrink:0; }
+.record-label { display:flex; align-items:center; gap:8px; }
+.record-label .dashboard-icon { color:var(--hr-gold); }
+.record-card .record-value { font-family:'Cinzel','Finlandica',serif; font-variant-numeric:tabular-nums; }
+.generation-grid { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+.generation-card { background:var(--hr-white); border:1px solid var(--hr-border); border-radius:10px; padding:18px; }
+.generation-card .card-header-title { margin-bottom:16px; }
+.generation-row { display:grid; grid-template-columns:44px minmax(0,1fr) 65px; align-items:center; gap:10px; margin:10px 0; font-family:'Finlandica',sans-serif; }
+.generation-row b { text-align:right; }
+.generation-track { background:var(--hr-bg); border-radius:4px; overflow:hidden; height:9px; }
+.generation-bar { height:100%; border-radius:4px; }
+.generation-bar.adults { background:var(--hr-purple); }
+.generation-bar.foals { background:var(--secondary-base); }
+.generation-delta,.generation-note { font-size:12px; color:var(--hr-text-muted); margin-top:12px; }
+@media(max-width:650px) { .generation-grid { grid-template-columns:1fr; } }
+.manager-progress { display:grid; grid-template-columns:auto minmax(60px,1fr); }
+.manager-progress .mp-xp { grid-column:1 / -1; text-align:right; font-variant-numeric:tabular-nums; }
+.sync-time, .quick-filters button, .filter-buttons button, .activity-controls input, .activity-controls select { font-family:'Finlandica',sans-serif; font-variant-numeric:tabular-nums; }
+.info-tip { font-family:'Finlandica',Arial,sans-serif; font-style:normal; font-weight:600; letter-spacing:0; text-indent:0; padding:0; line-height:1; transform:none; align-self:center; }
+.info-tip .tip-text { font-family:'Finlandica',Arial,sans-serif; font-style:normal; }
+.update-help-row { display:flex; align-items:center; gap:8px; }
+.update-help-row .info-tip { color:var(--secondary-base); border-color:var(--secondary-base); cursor:pointer; width:18px; height:18px; }
+#dashboardHelpPanel { position:fixed; inset:12px 12px auto auto; margin:0; width:min(440px,calc(100vw - 24px)); max-height:calc(100vh - 24px); overflow:auto; border:1px solid var(--secondary-base); border-radius:12px; background:var(--neutrals-white); color:var(--primary-deep); padding:14px; box-shadow:var(--hr-shadow); }
+#dashboardHelpPanel .hm-help { margin:0; padding:4px; border:0; }
+#dashboardHelpPanel .hm-help>summary { display:none; }
+#dashboardHelpClose { display:block; margin-left:auto; padding:5px 12px; border:1px solid var(--primary-mid); border-radius:6px; background:var(--neutrals-white); color:var(--primary-dark); font:14px Finlandica,Arial,sans-serif; cursor:pointer; }
+</style>
+
+<style>
+.stuteri-logo-left { max-width:90px; object-fit:contain; }
+.stuteri-logo-center { max-width:130px; object-fit:contain; }
+.sidebar-brand img { max-width:60px; object-fit:contain; }
+.header-brand-title, .brand-name { overflow-wrap:anywhere; }
+</style>
 </head>
 <body>
 
+<div class="dashboard-card">
+
   <div class="dashboard-header">
-    
+
     <div class="header-center">
-      <h1>Herd Manager</h1>
-      <div class="subtitle">Herd Tracker Dashboard</div>
-      <div class="last-update" id="lastUpdate">Synchronising...</div>
+    <?!= renderPublicLogo_('stuteri-logo-center'); ?>
+
+     <div class="title-container">
+      <h1><?= getBranding_().name ?></h1>
+      <span class="script-text stuteri-text"><?= getBranding_().signature ?></span>
     </div>
-    
+    <div class="subtitle"><?= getBranding_().subtitle ?></div>
   </div>
 
+
+<div class="nav-bar">
   <div class="nav-tabs">
-    <button class="nav-tab active" onclick="switchTab('bestand', this)">Overview</button>
-    <button class="nav-tab" onclick="switchTab('quality', this)">Breeding Progress</button>
-    <button class="nav-tab" onclick="switchTab('lineage', this)">Bloodlines</button>
-    <button class="nav-tab" onclick="switchTab('timeline', this)">Births & Dates</button>
-    <button class="nav-tab" onclick="switchTab('elite', this)">Elite</button>
-    <div class="tab-controls">
-      <select id="breedFilter" onchange="renderTab()"></select>
-      <button onclick="loadData()" class="refresh-btn">
-        <svg viewBox="0 0 24 24"><path d="M17.65 6.35C16.2 4.9 14.21 4 12 4c-4.42 0-7.99 3.58-7.99 8s3.57 8 7.99 8c3.73 0 6.84-2.55 7.73-6h-2.08c-.82 2.33-3.04 4-5.65 4-3.31 0-6-2.69-6-6s2.69-6 6-6c1.66 0 3.14.69 4.22 1.78L13 11h7V4l-2.35 2.35z"/></svg>
+      <button class="nav-tab active" onclick="switchTab('overview', this)">Overview</button>
+      <button class="nav-tab" onclick="switchTab('breeding', this)">Breeding</button>
+      <button class="nav-tab" onclick="switchTab('genetics', this)">Genetics</button>
+      <button class="nav-tab" onclick="switchTab('bloodlines', this)">Bloodlines</button>
+      <button class="nav-tab" onclick="switchTab('performance', this)">Performance</button>
+      <button class="nav-tab" onclick="switchTab('calendar', this)">Calendar</button>
+      <button class="nav-tab" onclick="switchTab('finances', this)">Finances</button>
+      <button class="nav-tab" onclick="switchTab('records', this)">Records</button>
+    </div>
+     <div class="tab-controls">
+      <div class="update-help-row"><span class="sync-time" id="lastUpdate">Not loaded yet</span><button type="button" id="dashboardHelpButton" class="info-tip" aria-label="Dashboard help" aria-controls="dashboardHelpPanel" aria-expanded="false">?</button></div>
+      <div class="tab-controls-row">
+      <select id="breedFilter" onchange="renderTab()">
+        <option value="all">All Breeds</option>
+      </select>
+      <button class="refresh-btn" title="Refresh" onclick="loadData()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.93 1 6.74 2.74L21 8"/>
+          <path d="M21 3v5h-5"/>
+        </svg>
       </button>
     </div>
+</div>
   </div>
+   </div>
 
   <div class="content-container">
     <div id="loading" class="loading">
@@ -366,103 +907,370 @@
            class="loading-gif" alt="Loading...">
       <span>Synchronising data...</span>
     </div>
+    <div id="errorContainer"></div>
 
-    <!-- OVERVIEW -->
-    <div id="tab-bestand" class="tab-content active">
-      <div class="section-title">Herd Overview</div>
-      <div class="stats-grid" id="mainStats"></div>
-      <div class="section-title">Status & Occupancy</div>
-      <div class="status-section">
-        <div class="role-bar-container" id="roleBar"></div>
-        <div style="display:flex;align-items:center;gap:16px;margin-top:12px;">
-          <div class="pregnancy-bar-small" id="pregBar"></div>
-          <div id="pregInfo" style="font-size:12px;font-weight:700;color:var(--hr-purple);"></div>
-        </div>
-        <div class="role-legend" id="roleLegend"></div>
+   <!-- TAB 1: OVERVIEW -->
+<div id="tab-overview" class="tab-content active">
+
+  <!-- 1. HERD OVERVIEW (Top Stats Cards) -->
+<div class="stats-grid-wrap">
+  <div class="stats-grid" id="mainStats"></div>
+</div>
+
+
+  <!-- 2. STATUS & OCCUPANCY + AGENDA (nebeneinander) -->
+  <div class="occupancy-agenda-grid">
+
+    <!-- Role card -->
+    <div class="status-section">
+      <div class="card-header-row">
+        <div class="card-header-title">Status & Occupancy</div>
+        <span class="info-tip">?<span class="tip-text">Role assignment, stable occupancy and XP progress </span></span>
       </div>
-      <div class="section-title" id="breedGroupTitle">Breed Groups</div>
-      <div id="breedCards"></div>
-      <div class="section-title">Demographics</div>
-      <div class="stats-grid" id="demographicStats"></div>
+      <div class="role-bar-container" id="roleBar"></div>
+      <div class="role-legend-dots" id="roleLegend"></div>
+      <div class="occupancy-extra" id="occupancyExtra"></div>
+      <div class="manager-progress" id="managerProgress"></div>
+
+      <div class="quote-block">
+      
+        <div class="quote-text">
+          <p class="quote-quote">"I call horses 'divine mirrors' — they reflect back the emotions you put in. If you put in love and respect and kindness and curiosity, the horse will return that."</p>
+          <p class="quote-author">— Allan Hamilton</p>
+        </div>
+      </div>
     </div>
 
-    <!-- BREEDING PROGRESS -->
-    <div id="tab-quality" class="tab-content">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
-        <div style="background:var(--hr-white);padding:20px;border-radius:10px;border:1px solid #eee;">
-          <h3 id="vgTitle" style="font-size:13px;margin-bottom:14px;color:var(--hr-purple);text-transform:uppercase;letter-spacing:1px;"></h3>
-          <div id="vgStats"></div>
-        </div>
-        <div id="genStats"></div>
+    <!-- Today's Agenda -->
+    <div class="agenda-list-card">
+      <div class="card-header-row">
+        <span class="card-header-title">Today's Agenda</span>
+        <span class="info-tip">?<span class="tip-text">What's due: mares in foal, ultrasounds, births, rideable foals, pasture returns.</span></span>
       </div>
-      <div class="section-title">Discipline Analysis</div>
-      <div id="disciplineStats"></div>
-      <div class="section-title">Colour Genetics</div>
+      <div id="agendaList"></div>
+      <a class="agenda-link" onclick="goToCalendar()">Go to calendar →</a>
+    </div>
+
+  </div>
+
+
+  <!-- 3. ZWEIER-GRID: Breed Cards (links) | Breed Distribution (rechts) -->
+<div class="overview-bottom-grid">
+
+  <!-- Links: Nur die Rassen-Karten -->
+  <div class="overview-col-left">
+    <div id="breedCards"></div>
+    <div style="text-align:center; margin-top: 8px;">
+      <button id="breedCardsMoreBtn" onclick="toggleBreedCards()" style="display:none; min-width:180px; padding:6px 16px; border-radius:6px; border:1px solid var(--hr-border); background:var(--hr-white); color:var(--hr-purple); font-family:Finlandica, sans-serif; font-weight:700; font-size:10px; cursor:pointer;">Show more...</button>
+    </div>
+  </div>
+
+  <!-- Rechts: Die weiße Karte für das Donut-Chart -->
+  <div class="overview-col-card">
+    <div class="card-header-row">
+      <div class="section-title">Breed Distribution</div>
+      <span class="info-tip">?<span class="tip-text">Visual breakdown of breed proportions in your herd.</span></span>
+    </div>
+
+    <div class="donut-card-wrapper">
+      <div id="chartBreedDistribution" class="chart-card-container"></div>
+      <div class="donut-center-info">
+        <span class="donut-total-val" id="donutTotalVal"></span>
+        <span class="donut-total-lbl">TOTAL</span>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+    <!-- TAB 2: BREEDING -->
+    <div id="tab-breeding" class="tab-content">
+      <div class="section-title">Breeding Snapshot <span class="info-tip">?<span class="tip-text">Quick overview of breeding status: pregnant, covered, available mares/studs.</span></span></div>
+      <div class="breeding-mini-grid" id="breedingSnapshot"></div>
+
+      <div class="section-title">Foal Gender Prediction <span class="info-tip">?<span class="tip-text">Predicted gender of foals from confirmed and covered pregnancies.</span></span></div>
+      <div class="stats-grid" id="foalGenderStats"></div>
+
+      <div class="section-title">Upcoming Births & Breeding Checks <span class="info-tip">?<span class="tip-text">Confirmed pregnancies and their next check/due date, soonest first.</span></span></div>
+      <table id="birthTable">
+        <thead><tr><th>Date</th><th>Mare</th><th>Breed</th><th>Stud</th><th>Gender</th><th>Phase / Check</th><th>Countdown</th></tr></thead>
+        <tbody></tbody>
+      </table>
+
+      <div class="section-title">Breeding Success Rate <span class="info-tip">?<span class="tip-text">Mares with covering failures are shown first — sorted by problem cases.</span></span></div>
+      <div class="stats-grid" id="breedingSuccessStats"></div>
+      <table id="breedingSuccessTable">
+        <thead><tr><th>Mare</th><th>Births</th><th>Failures</th><th>Rate</th></tr></thead>
+        <tbody id="breedingSuccessProblemBody"></tbody>
+      </table>
+      <details id="breedingSuccessOkWrap" style="display:none;">
+        <summary style="cursor:pointer;font-size:10px;font-weight:700;color:var(--hr-text-muted);text-transform:uppercase;letter-spacing:1px;padding:6px 0;">Show 100% Success Mares...</summary>
+        <table style="margin-top:8px;"><tbody id="breedingSuccessOkBody"></tbody></table>
+      </details>
+
+      <div class="section-title">Stud Utilization <span class="info-tip">?<span class="tip-text">Booking activity per stud, incoming vs. outgoing coverings.</span></span></div>
+      <table id="studUtilTable">
+        <thead><tr><th>Stud</th><th>7d</th><th>30d</th><th>Total</th><th>Earnings</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <!-- TAB 3: GENETICS -->
+    <div id="tab-genetics" class="tab-content">
+      <div class="section-title">Genetic Overview <span class="info-tip">?<span class="tip-text">VG Status, GP, Confo Score and Comp Score overview.</span></span></div>
+      <div class="stats-grid" id="geneticStats"></div>
+
+      <div class="section-title">VG Status <span class="info-tip">?<span class="tip-text">Progress toward VG targets per breed.</span></span></div>
+      <div id="vgStats" style="margin-bottom:16px;"></div>
+
+      <div class="section-title">Adult vs Foal Progress <span class="info-tip">?<span class="tip-text">Average GP, Conformation score and VG-trait count, comparing adults to foals. Positive Δ = foals outperform adults.</span></span></div>
+      <div id="genChart"></div>
+
+      <div class="section-title">Colour Genetics <span class="info-tip">?<span class="tip-text">Coat colour distribution, split into solid colours and patterns. Top 5 shown by default.</span></span></div>
       <div id="colorStatsContainer" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-top:14px;"></div>
     </div>
 
-    <!-- BLOODLINES -->
-    <div id="tab-lineage" class="tab-content">
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;">
+    <!-- TAB 4: BLOODLINES -->
+    <div id="tab-bloodlines" class="tab-content">
+      <div class="section-title">Bloodline Performance <span class="info-tip">?<span class="tip-text">Sire and Dam lines with VG, GP, Confo and Comp scores.</span></span></div>
+      <div class="two-col">
         <div id="sireLineStats"></div>
         <div id="damLineStats"></div>
       </div>
     </div>
 
-    <!-- BIRTHS & DATES -->
-    <div id="tab-timeline" class="tab-content">
-      <div class="section-title">Upcoming Births & Breeding Checks</div>
-      <table id="birthTable">
-        <thead><tr><th>Date</th><th>Mare</th><th>Breed</th><th>Phase / Check</th><th>Countdown</th></tr></thead>
-        <tbody></tbody>
-      </table>
-      <div class="section-title">Growth & Development</div>
-      <table id="growthTable">
-        <thead><tr><th>Horse</th><th>Event</th><th>Breed</th><th>Target Date</th><th>Countdown</th></tr></thead>
-        <tbody></tbody>
-      </table>
-      <div class="section-title">In-Game Time Reference</div>
-      <div class="info-panel">
-        <div class="info-group">
-          <h4>Growth (after birth)</h4>
-          <div class="info-row"><span>Weaning (6 months)</span><span>+ 8 days</span></div>
-          <div class="info-row"><span>Adult (3 years)</span><span>+ 48 days</span></div>
-          <div class="info-row"><span>Clinic (7 years / Stallion)</span><span>+ 112 days</span></div>
-        </div>
-        <div class="info-group">
-          <h4>Breeding Checks (after covering)</h4>
-          <div class="info-row"><span>Check: Failed</span><span>48 hrs (2 days)</span></div>
-          <div class="info-row"><span>Check: Miscarriage</span><span>96 hrs (4 days)</span></div>
-          <div class="info-row"><span>Ultrasound possible</span><span>120 hrs (5 days)</span></div>
-        </div>
+    <!-- TAB 5: PERFORMANCE -->
+    <div id="tab-performance" class="tab-content">
+      <div class="section-title">Discipline Analysis <span class="info-tip">?<span class="tip-text">Horses grouped by recommended/trained discipline, with average GP and Conformation. Gold badge = top performer.</span></span></div>
+      <div id="disciplineStats"></div>
+
+      <div class="section-title">Conformation Overview <span class="info-tip">?<span class="tip-text">Median and best conformation score across the filtered population, plus strongest/weakest trait.</span></span></div>
+      <div class="stats-grid" id="confoOverviewStats"></div>
+
+      <div class="section-title">Score by Category <span class="info-tip">?<span class="tip-text">Each dot is one horse's highest recorded score, grouped by Stallion/Mare/Colt/Filly.</span></span></div>
+      <div class="filter-buttons" id="scoreFilterButtons">
+        <button class="active" data-score="confo" onclick="setScoreFilter('confo')">Confo Score</button>
+        <button data-score="comp" onclick="setScoreFilter('comp')">Comp Score</button>
+      </div>
+      <div id="scoreStripChart" style="background:var(--hr-white);border-radius:10px;border:1px solid var(--hr-border);padding:16px;margin-bottom:14px;"></div>
+      <table id="confoDistTable"><thead><tr><th>Category</th><th>N</th><th>Lowest</th><th>Median</th><th>Highest</th></tr></thead><tbody></tbody></table>
+
+      <div class="section-title">Top / Bottom Quarter <span class="info-tip">?<span class="tip-text">Top and bottom 10 horses by highest score, compared to the herd median.</span></span></div>
+      <div class="two-col">
+        <div><h4 style="font-size:11px;color:var(--hr-purple);margin-bottom:8px;">Top 10</h4><table id="confoTopTable"><thead><tr><th>Horse</th><th>Breed</th><th>Score</th><th>Δ vs. Median<span class="info-tip" style="margin-left:4px;">?<span class="tip-text">Difference between this horse's score and the herd median score.</span></span></th></tr></thead><tbody></tbody></table></div>
+        <div><h4 style="font-size:11px;color:var(--hr-purple);margin-bottom:8px;">Bottom 10</h4><table id="confoBottomTable"><thead><tr><th>Horse</th><th>Breed</th><th>Score</th><th>Δ vs. Median<span class="info-tip" style="margin-left:4px;">?<span class="tip-text">Difference between this horse's score and the herd median score.</span></span></th></tr></thead><tbody></tbody></table></div>
+      </div>
+
+      <div class="section-title">GP vs Score <span class="info-tip">?<span class="tip-text">Genetic Potential vs. highest score. Hover a point for horse details.</span></span></div>
+      <div class="filter-buttons" id="gpScoreFilterButtons">
+        <button class="active" data-score="confo" onclick="setGpScoreFilter('confo')">Confo Score</button>
+        <button data-score="comp" onclick="setGpScoreFilter('comp')">Comp Score</button>
+      </div>
+      <div id="chartGpScore" style="background:var(--hr-white);border-radius:10px;border:1px solid var(--hr-border);min-height:280px;margin-bottom:14px;"></div>
+
+      <div class="section-title">Trait Grade Mix — Weakest to Strongest <span class="info-tip">?<span class="tip-text">Each trait's grade distribution (VG → P). Hover a segment for the exact count.</span></span></div>
+      <div id="traitGradeLegend" style="font-size:9px;font-weight:700;color:var(--hr-text-muted);text-transform:uppercase;letter-spacing:0.3px;margin-bottom:8px;"></div>
+      <div id="traitBars" style="margin:14px 0;"></div>
+
+      <div class="section-title">Health Overview <span class="info-tip">?<span class="tip-text">Share of horses with all health tests completed vs. untested.</span></span></div>
+      <div class="stats-grid" id="healthOverviewStats"></div>
+
+      <div class="section-title">Health Test Coverage</div>
+      <div id="healthCoverageBars" style="margin:14px 0;"></div>
+
+      <div class="section-title">Health Action Needed <span class="info-tip">?<span class="tip-text">Adult horses missing one or more health tests, paginated.</span></span></div>
+      <table id="actionNeededTable"><thead><tr><th>Horse</th><th>Breed</th><th>Missing Tests</th></tr></thead><tbody></tbody></table>
+      <div style="display:flex;justify-content:center;align-items:center;gap:10px;margin-top:8px;">
+        <button id="actionNeededPrevBtn" onclick="actionNeededPage(-1)" style="padding:5px 14px;border-radius:6px;border:1px solid var(--hr-border);background:var(--hr-white);color:var(--hr-purple);font-family:Finlandica, sans-serif;font-weight:700;font-size:10px;cursor:pointer;">‹ Previous</button>
+        <span id="actionNeededPageInfo" style="font-size:10px;font-weight:700;color:var(--hr-text-muted);"></span>
+        <button id="actionNeededNextBtn" onclick="actionNeededPage(1)" style="padding:5px 14px;border-radius:6px;border:1px solid var(--hr-border);background:var(--hr-white);color:var(--hr-purple);font-family:Finlandica, sans-serif;font-weight:700;font-size:10px;cursor:pointer;">Next ›</button>
       </div>
     </div>
 
-    <!-- ELITE -->
-    <div id="tab-elite" class="tab-content">
-      <div class="section-title">Hall of Fame — Highest Genetic Potential</div>
-      <div class="stats-grid" id="eliteGP"></div>
-      <div class="section-title">Hall of Fame — Best Conformation</div>
-      <div class="stats-grid" id="eliteConfo"></div>
-    </div>
-  </div>
+    <!-- TAB 6: CALENDAR -->
+    <div id="tab-calendar" class="tab-content">
+      <div class="section-title">Upcoming Events & Dates <span class="info-tip">?<span class="tip-text">All upcoming growth milestones, foal pasture returns and breeding checks, sorted by how soon they occur.</span></span></div>
+      <div class="activity-controls" style="display:flex;gap:10px;margin-bottom:14px;">
+        <div class="search-wrap"><input type="text" id="datesSearch" placeholder="Search horse..." oninput="renderDates(document.getElementById('breedFilter').value)"></div>
+      </div>
+      <div class="quick-filters" id="datesQuickFilters" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
+        <button class="active" data-qf="all" onclick="setDatesQuickFilter('all')">Alle</button>
+        <button data-qf="pasture" onclick="setDatesQuickFilter('pasture')">Nur Weide</button>
+        <button data-qf="rideable" onclick="setDatesQuickFilter('rideable')">Nur Reitbar</button>
+        <button data-qf="checks" onclick="setDatesQuickFilter('checks')">Nur Kontrollen</button>
+        <button data-qf="health" onclick="setDatesQuickFilter('health')">Health Checks</button>
+      </div>
+      <table id="timelineTable">
+        <thead><tr><th>Horse</th><th>Event Type</th><th>Details / Status</th><th>Target Date</th><th>Countdown</th></tr></thead>
+        <tbody></tbody>
+      </table>
+      <div style="text-align:center;margin:-4px 0 16px;"><button id="datesShowMoreBtn" onclick="datesShowMore()" style="display:none;padding:6px 16px;border-radius:6px;border:1px solid var(--hr-border);background:var(--hr-white);color:var(--hr-purple);font-family:Finlandica, sans-serif;font-weight:700;font-size:10px;cursor:pointer;">Show more...</button></div>
 
+      <details style="background:var(--hr-white);border:1px solid var(--hr-border);border-radius:10px;padding:12px 16px;">
+        <summary style="cursor:pointer;font-size:10px;font-weight:700;color:var(--hr-purple);text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;gap:6px;">In-Game Time Reference <span class="info-tip">?<span class="tip-text">Reference table for how in-game days map to real milestones.</span></span></summary>
+        <div class="info-panel" style="margin-top:10px;box-shadow:none;border:none;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:24px;">
+          <div class="info-group">
+            <h4 style="color:var(--hr-purple);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;border-bottom:1px solid var(--hr-gold);padding-bottom:4px;">Growth (after birth)</h4>
+            <div class="info-row" style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid var(--hr-border);"><span>Weaning (6 months)</span><span>+ 8 days</span></div>
+            <div class="info-row" style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid var(--hr-border);"><span>Adult (3 years)</span><span>+ 48 days</span></div>
+            <div class="info-row" style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid var(--hr-border);"><span>Clinic (7 years / Stallion)</span><span>+ 112 days</span></div>
+          </div>
+          <div class="info-group">
+            <h4 style="color:var(--hr-purple);font-size:10px;text-transform:uppercase;letter-spacing:1px;margin-bottom:8px;border-bottom:1px solid var(--hr-gold);padding-bottom:4px;">Breeding Checks (after covering)</h4>
+            <div class="info-row" style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid var(--hr-border);"><span>Check: Failed</span><span>48 hrs (2 days)</span></div>
+            <div class="info-row" style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid var(--hr-border);"><span>Check: Miscarriage</span><span>96 hrs (4 days)</span></div>
+            <div class="info-row" style="display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid var(--hr-border);"><span>Ultrasound possible</span><span>120 hrs (5 days)</span></div>
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <!-- TAB 7: FINANCES -->
+    <div id="tab-finances" class="tab-content">
+      <div class="section-title">Holdings <span class="info-tip">?<span class="tip-text">Your current HRC, DP, FT, WT balances and total estimated net worth.</span></span></div>
+      <div class="stats-grid" id="balanceStats"></div>
+
+      <div class="section-title">Daily Passive Income (30d avg) <span class="info-tip">?<span class="tip-text">Average daily income from Chores and Savings Interest over the last 30 days.</span></span></div>
+      <div class="stats-grid" id="passiveIncomeStats"></div>
+
+      <div class="section-title">Net Worth Trend <span class="info-tip">?<span class="tip-text">Net worth over time, one data point per day.</span></span></div>
+      <div id="chartNetWorth" style="background:var(--hr-white);border-radius:10px;border:1px solid var(--hr-border);min-height:250px;margin-bottom:14px;"></div>
+      <table id="trendTable"><thead><tr><th>Date</th><th>Net Worth</th><th>Change / Day</th></tr></thead><tbody></tbody></table>
+
+      <div class="section-title">Income & Expenses <span class="info-tip">?<span class="tip-text">Net HRC flow grouped by activity type — green bars are income, red bars are expenses.</span></span></div>
+      <div id="chartIncomeExpenses" style="background:var(--hr-white);border-radius:10px;border:1px solid var(--hr-border);min-height:280px;margin-bottom:14px;"></div>
+      <div class="two-col">
+        <div>
+          <h4 style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--hr-success);margin-bottom:8px;">Income</h4>
+          <table id="incomeTable"><thead><tr><th>Type</th><th>Count</th><th>Total HRC</th></tr></thead><tbody></tbody></table>
+        </div>
+        <div>
+          <h4 style="font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--hr-danger);margin-bottom:8px;">Expenses</h4>
+          <table id="expenseTable"><thead><tr><th>Type</th><th>Count</th><th>Total HRC</th></tr></thead><tbody></tbody></table>
+        </div>
+      </div>
+
+      <div class="section-title">Breeding Costs Breakdown <span class="info-tip">?<span class="tip-text">Cumulative spend on ultrasounds, colour tests, stud fees and foal pastures.</span></span></div>
+      <div class="stats-grid" id="breedingCostStats"></div>
+
+      <div class="section-title">Market & Sales <span class="info-tip">?<span class="tip-text">Sale prices grouped by breed, resolved dynamically from herd master data.</span></span></div>
+      <div class="stats-grid" id="marketValueStats"></div>
+      <table id="marketValueTable">
+        <thead><tr><th>Breed</th><th>Sales</th><th>Avg Price</th><th>Min</th><th>Max</th></tr></thead>
+        <tbody></tbody>
+      </table>
+
+      <div class="section-title">Recent Sales</div>
+      <table id="recentSalesTable">
+        <thead><tr><th>Date</th><th>Horse</th><th>Breed</th><th>Buyer</th><th>Price</th></tr></thead>
+        <tbody></tbody>
+      </table>
+
+      <div class="section-title">ROI by Sire Line <span class="info-tip">?<span class="tip-text">Total and average show/comp earnings attributed to each sire line.</span></span></div>
+      <table id="roiTable">
+        <thead><tr><th>Sire Line</th><th>Horses</th><th>Total Earnings</th><th>Avg / Horse</th></tr></thead>
+        <tbody></tbody>
+      </table>
+
+      <div class="section-title">Activity Log</div>
+      <div class="activity-controls" style="display:flex;gap:10px;margin-bottom:14px;">
+        <div class="search-wrap"><input type="text" id="activitySearch" placeholder="Search horse or text..." oninput="activityFilterChanged()"></div>
+        <select id="activityTypeFilter" onchange="activityFilterChanged()">
+          <option value="all">All Types</option>
+        </select>
+      </div>
+      <table id="activityTable">
+        <thead><tr>
+          <th class="sortable" onclick="setSort('date')">Date <span id="sortIcon-date"></span></th>
+          <th>Type</th><th>Horse</th><th>Detail</th>
+          <th class="sortable" onclick="setSort('amount')">Amount <span id="sortIcon-amount"></span></th>
+        </tr></thead>
+        <tbody></tbody>
+      </table>
+      <div style="display:flex;justify-content:center;align-items:center;gap:12px;margin-top:-4px;">
+        <button id="activityPrevBtn" onclick="activityPage(-1)" style="padding:5px 14px;border-radius:6px;border:1px solid var(--hr-border);background:var(--hr-white);color:var(--hr-purple);font-family:Finlandica, sans-serif;font-weight:700;font-size:10px;cursor:pointer;">‹ Previous</button>
+        <span id="activityPageInfo" style="font-size:10px;font-weight:700;color:var(--hr-text-muted);"></span>
+        <button id="activityNextBtn" onclick="activityPage(1)" style="padding:5px 14px;border-radius:6px;border:1px solid var(--hr-border);background:var(--hr-white);color:var(--hr-purple);font-family:Finlandica, sans-serif;font-weight:700;font-size:10px;cursor:pointer;">Next ›</button>
+      </div>
+    </div>
+
+    <!-- TAB 8: RECORDS -->
+    <div id="tab-records" class="tab-content">
+      <div class="section-title">Hall of Fame</div>
+      <div class="record-grid" id="recordsGrid"></div>
+    </div>
+
+  </div>
+    </div>
   <script>
     let rawData = null;
-    let currentTab = 'bestand';
+    let currentTab = 'overview';
+    let activitySort = { key: 'date', dir: -1 };
+    let chartsReady = false;
+    let scoreFilter = 'confo';
+    let gpScoreFilter = 'confo';
+    let datesQuickFilter = 'all';
+    let datesShowCount = 15;
+    const DATES_PAGE_SIZE = 15;
+    let breedCardsShowAll = false;
+    const BREED_CARDS_LIMIT = 4;
+    let activityPageNum = 0;
+    const ACTIVITY_PAGE_SIZE = 12;
+
+    try {
+      const chartScript = document.createElement('script');
+      chartScript.src = 'https://www.gstatic.com/charts/loader.js';
+      chartScript.onload = function() {
+        try {
+          google.charts.load('current', { packages: ['corechart', 'bar'] });
+          google.charts.setOnLoadCallback(() => { chartsReady = true; if (rawData) renderTab(); });
+        } catch(e) {}
+      };
+      chartScript.onerror = function() {
+        ['chartBreedDistribution','chartNetWorth','chartIncomeExpenses','chartGpScore'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) el.textContent = 'Chart unavailable. Tables and figures remain available.';
+        });
+      };
+      document.head.appendChild(chartScript);
+    } catch(e) {}
 
     window.onload = loadData;
 
-    function loadData() {
-      const loading = document.getElementById('loading');
-      loading.classList.remove('hidden');
-      google.script.run.withSuccessHandler(data => {
-        rawData = data;
-        loading.classList.add('hidden');
-        document.getElementById('lastUpdate').innerText = 'Last updated: ' + new Date().toLocaleString('en-GB');
-        fillBreedFilter();
-        renderTab();
-      }).getDashboardData();
+
+let dashboardRequest = 0;
+function loadData() {
+  const request = ++dashboardRequest;
+  const ld = document.getElementById('loading');
+  ld.classList.remove('hidden');
+  document.getElementById('errorContainer').innerHTML = '';
+
+  google.script.run
+    .withSuccessHandler(function(data) {
+      if (request !== dashboardRequest) return;
+      if (!data || data.error) { dashboardLoadError(data && data.error || "No data returned"); return; }
+      ld.classList.add('hidden');
+      rawData = data;
+      document.getElementById('lastUpdate').innerText =
+        'Last updated: ' + new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+      fillBreedFilter();
+      fillActivityTypeFilter();
+      renderTab();
+    })
+    .withFailureHandler(function(err) {
+      if (request !== dashboardRequest) return;
+      dashboardLoadError(err.message || String(err));
+    })
+    .getDashboardData();
+}
+
+    function dashboardLoadError(message) {
+      document.getElementById('loading').classList.add('hidden');
+      const box = document.createElement('div');
+      box.className = 'error-box';
+      box.textContent = 'Could not refresh dashboard: ' + message;
+      document.getElementById('errorContainer').replaceChildren(box);
     }
 
     function switchTab(t, el) {
@@ -476,175 +1284,347 @@
 
     function fillBreedFilter() {
       const s = document.getElementById('breedFilter');
+      const previous = s.value;
       s.innerHTML = '<option value="all">All Breeds</option>';
-      if (rawData && rawData.breeds) rawData.breeds.forEach(b => s.innerHTML += `<option value="${b}">${b}</option>`);
+      if (rawData && rawData.breeds) rawData.breeds.forEach(b => s.add(new Option(b, b)));
+      if ([...s.options].some(o => o.value === previous)) s.value = previous;
+    }
+
+    function fillActivityTypeFilter() {
+      if (!rawData || !rawData.recentActivity) return;
+      const types = [...new Set(rawData.recentActivity.map(a => a.type))].sort();
+      const sel = document.getElementById('activityTypeFilter');
+      sel.innerHTML = '<option value="all">All Types</option>';
+      types.forEach(t => {
+        const label = rawData.recentActivity.find(a => a.type === t);
+        sel.innerHTML += '<option value="' + t + '">' + (label ? label.typeLabel : t) + '</option>';
+      });
     }
 
     function renderTab() {
       if (!rawData) return;
       const f = document.getElementById('breedFilter').value;
-      if (currentTab === 'bestand')  renderBestand(f);
-      if (currentTab === 'quality')  renderQuality(f);
-      if (currentTab === 'lineage')  renderLineage(f);
-      if (currentTab === 'timeline') renderTimeline(f);
-      if (currentTab === 'elite')    renderElite(f);
+      const tabs = {
+        overview: renderOverview,
+        breeding: renderBreeding,
+        genetics: renderGenetics,
+        bloodlines: renderBloodlines,
+        performance: renderPerformance,
+        calendar: renderDates,
+        finances: renderFinances,
+        records: renderRecords
+      };
+      if (tabs[currentTab]) tabs[currentTab](f);
     }
 
-    function renderBestand(f) {
+    function agendaRow(icon, label, value) {
+      const svg = icon.replace('<div class="stat-icon">', '').replace(/<\/div>$/, '');
+      return '<div class="agenda-list-row"><span class="agenda-list-icon">' + svg + '</span>' +
+        '<span class="agenda-list-label">' + label + '</span>' +
+        '<span class="agenda-list-value">' + value + '</span></div>';
+    }
+
+    function goToCalendar() {
+      const btn = [...document.querySelectorAll('.nav-tab')].find(b => b.textContent.trim() === 'Calendar');
+      if (btn) switchTab('calendar', btn);
+    }
+
+    function fmt(n) { return Math.round(n).toLocaleString('en-US'); }
+    function renderManagerProgress() {
+      const xp = rawData.xp;
+      const el = document.getElementById('managerProgress');
+      if (!xp || !xp.level) { el.innerHTML = ''; return; }
+      const pct = Math.min(100, Math.max(0, (Number(xp.percent) || 0) * 100));
+      el.innerHTML =
+        '<span class="mp-level">Level ' + xp.level + '</span>' +
+        '<div class="mp-bar-bg"><div class="mp-bar-fill" style="width:' + pct.toFixed(0) + '%;"></div></div>' +
+        '<span class="mp-xp">' + pct.toFixed(0) + '% · ' + fmt(xp.tilNextLevel || 0) + ' XP to next</span>';
+    }
+    function fmtPct(n) { return Number(n).toFixed(1) + '%'; }
+    function amtClass(n) { return n >= 0 ? 'positive' : 'negative'; }
+    function median_(arr) { if (!arr.length) return 0; const s = [...arr].sort((a,b)=>a-b); const m = Math.floor(s.length/2); return s.length % 2 ? s[m] : (s[m-1]+s[m])/2; }
+
+    /* ============================================================
+       TAB 1: OVERVIEW
+    ============================================================ */
+    function renderOverview(f) {
       const d = rawData;
       let display;
       if (f === 'all') {
         display = { total: d.totalHorses, h: d.stallions, m: d.mares, f: d.foals, p: d.pregnant, roles: d.roleStats, ratio: d.genderRatio, label: "Total Horses" };
       } else {
         const s = d.breedStats[f];
+        if (!s) return;
         display = { total: s.total, h: s.stallions, m: s.mares, f: s.foals, p: s.pregnant, roles: s.roles, ratio: s.stallions + ":" + s.mares, label: f };
       }
 
-      document.getElementById('mainStats').innerHTML = `
-        <div class="stat-card highlight"><div class="stat-value">${display.total}</div><div class="stat-label">${display.label}</div></div>
-        <div class="stat-card"><div class="stat-value">${display.h}</div><div class="stat-label">Stallions</div></div>
-        <div class="stat-card"><div class="stat-value">${display.m}</div><div class="stat-label">Mares</div></div>
-        <div class="stat-card"><div class="stat-value">${display.f}</div><div class="stat-label">Foals</div></div>`;
+      const genderTotal = (display.h + display.m) || 1;
+      const hPct = Math.round((display.h / genderTotal) * 100);
+      const mPct = Math.round((display.m / genderTotal) * 100);
+      const ratioSimplified = display.m > 0 ? (display.h / display.m).toFixed(1) + ' : 1' : display.h + ' : 0';
 
+      const total = display.total || 1;
+const pctOf = n => Math.round((n / total) * 100) + '% of herd';
+
+document.getElementById('mainStats').innerHTML =
+  '<div class="stat-card highlight"><div class="stat-header">' + ICONS.house +
+    '<span class="stat-label">' + display.label + '</span></div>' +
+    '<div class="stat-value">' + display.total + '</div>' +
+    '<div class="stat-percent">incl. ' + display.f + ' foals</div>' +
+  '</div>' +
+  '<div class="stat-card"><div class="stat-header">' + ICONS.mars +
+    '<span class="stat-label">Stallions</span></div>' +
+    '<div class="stat-value">' + display.h + '</div>' +
+    '<div class="stat-percent">' + pctOf(display.h) + '</div>' +
+  '</div>' +
+  '<div class="stat-card"><div class="stat-header">' + ICONS.venus +
+    '<span class="stat-label">Mares</span></div>' +
+    '<div class="stat-value">' + display.m + '</div>' +
+    '<div class="stat-percent">' + pctOf(display.m) + '</div>' +
+  '</div>' +
+  '<div class="stat-card"><div class="stat-header">' + ICONS.horse +
+    '<span class="stat-label">Foals</span></div>' +
+    '<div class="stat-value">' + display.f + '</div>' +
+    '<div class="stat-percent">' + pctOf(display.f) + '</div>' +
+  '</div>' +
+  '<div class="stat-card">' +
+    '<div class="stat-header" style="width:100%;">' + ICONS.scale + '<span class="stat-label">Gender Ratio</span>' +
+    '<span class="info-tip" style="margin-left:auto;">?<span class="tip-text">Ratio of stallions to mares</span></span></div>' +
+    '<div class="stat-value">' + ratioSimplified + '</div>' +
+    '<div class="stat-percent">' + hPct + '% ♂ / ' + mPct + '% ♀</div>' +
+  '</div>';
+
+      // Status & Occupancy
       const r = display.roles;
       const rt = (r.stud + r.broodmare + r.public + r.none) || 1;
-      document.getElementById('roleBar').innerHTML = `
-        <div style="width:${(r.stud/rt)*100}%;background:#1565C0"></div>
-        <div style="width:${(r.broodmare/rt)*100}%;background:#C2185B"></div>
-        <div style="width:${(r.public/rt)*100}%;background:#7B1FA2"></div>
-        <div style="width:${(r.none/rt)*100}%;background:#9E9E9E"></div>`;
-      document.getElementById('roleLegend').innerHTML = `
-        <span style="color:#1565C0">Stud (${r.stud})</span>
-        <span style="color:#C2185B">Broodmare (${r.broodmare})</span>
-        <span style="color:#7B1FA2">Public (${r.public})</span>
-        <span style="color:#9E9E9E">None (${r.none})</span>`;
+      document.getElementById('roleBar').innerHTML =
+        '<div style="width:' + (r.stud/rt)*100 + '%;background:var(--hr-purple);height:100%;"></div>' +
+        '<div style="width:' + (r.broodmare/rt)*100 + '%;background:var(--hr-gold);height:100%;"></div>' +
+        '<div style="width:' + (r.public/rt)*100 + '%;background:var(--hr-purple-light);height:100%;"></div>' +
+        '<div style="width:' + (r.none/rt)*100 + '%;background:color-mix(in srgb, var(--primary-mid) 30%, var(--neutrals-white));height:100%;"></div>';
+      document.getElementById('roleLegend').innerHTML =
+        '<span class="dot-item"><span class="dot" style="background:var(--hr-purple);"></span>Stud (' + r.stud + ')</span>' +
+        '<span class="dot-item"><span class="dot" style="background:var(--hr-gold);"></span>Broodmare (' + r.broodmare + ')</span>' +
+        '<span class="dot-item"><span class="dot" style="background:var(--hr-purple-light);"></span>Public (' + r.public + ')</span>' +
+        '<span class="dot-item"><span class="dot" style="background:color-mix(in srgb, var(--primary-mid) 30%, var(--neutrals-white));"></span>None (' + r.none + ')</span>';
 
+      // Stallbelegung (automatisch) & Weide/Kapazität (manuell im Daily Snapshot gepflegt)
+      const xp = rawData.xp || {};
+      const totalStalls = xp.totalStalls || 0;
+      const onPasture = xp.horsesOnPasture || 0;
+      const stallsInUse = Math.max(0, rawData.totalHorses - onPasture);
+      document.getElementById('occupancyExtra').innerHTML =
+        '<div class="occupancy-mini-card">' + ICONS.house.replace('stat-icon','occupancy-mini-icon') +
+          '<div><div class="occupancy-mini-value">' + stallsInUse + (totalStalls ? ' / ' + totalStalls : '') + '</div><div class="occupancy-mini-label">Stalls in Use · All Breeds</div></div>' +
+        '</div>' +
+        '<div class="occupancy-mini-card">' + ICONS.homeEco.replace('stat-icon','occupancy-mini-icon') +
+          '<div><div class="occupancy-mini-value">' + onPasture + '</div><div class="occupancy-mini-label">On Pasture · All Breeds</div></div>' +
+        '</div>';
+      renderManagerProgress();
+
+      // Today's Agenda (inkl. In Foal)
+      const agenda = rawData.agenda || { ultrasounds: 0, births: 0, rideableFoals: 0, pastureReturns: 0 };
       const pp = Math.round((display.p / (display.m || 1)) * 100);
-      document.getElementById('pregBar').innerHTML = `<div style="height:100%;width:${pp}%;background:var(--hr-success);"></div>`;
-      document.getElementById('pregInfo').innerHTML = `${pp}% in foal (${display.p})`;
+      document.getElementById('agendaList').innerHTML =
+        agendaRow(ICONS.horse, 'In Foal', pp + '% · ' + display.p) +
+        agendaRow(ICONS.heartbeat, 'Ultrasounds', agenda.ultrasounds) +
+        agendaRow(ICONS.hearts, 'Births', agenda.births) +
+        agendaRow(ICONS.horseshoe, 'Rideable Foals', agenda.rideableFoals) +
+        agendaRow(ICONS.homeEco, 'Pasture Returns', agenda.pastureReturns) +
+        agendaRow(ICONS.stethoscope, 'Health Tests Needed', agenda.healthTestsNeeded || 0);
 
+      // Breed Cards (max. 4 sichtbar, mit "Mehr anzeigen" Button)
+      const breedKeys = Object.keys(d.breedStats).filter(b => f === 'all' || b === f);
+      const visibleBreedKeys = breedCardsShowAll ? breedKeys : breedKeys.slice(0, BREED_CARDS_LIMIT);
       let bHtml = '';
-      for (let b in d.breedStats) {
-        if (f !== 'all' && b !== f) continue;
+      visibleBreedKeys.forEach(b => {
         const s = d.breedStats[b];
-        bHtml += `
-          <div class="breed-card">
-            <div class="breed-card-header">
-              <div class="breed-card-name">${b}</div>
-              <div class="breed-card-count">${s.total} horses</div>
-            </div>
-            <div class="breed-card-grid">
-              <span>Stallions:</span><b>${s.stallions}</b>
-              <span>Avg GP:</span><b>${s.avgGP}</b>
-              <span>Mares:</span><b>${s.mares}</b>
-              <span>Avg VG:</span><b>${s.avgVG}</b>
-              <span>Foals:</span><b>${s.foals}</b>
-              <span>Avg Confo:</span><b>${s.avgConfo}</b>
-            </div>
-          </div>`;
-      }
+        bHtml += '<div class="breed-card" style="border-left-color:' + getBreedColor(b) + ';margin-bottom:8px;">' +
+          '<div class="breed-card-header"><span class="breed-card-name">' + b + '</span><span class="breed-card-count">' + s.total + ' horses</span></div>' +
+          '<div class="breed-card-row">Stallions: <b>' + s.stallions + '</b><span class="sep">•</span>Mares: <b>' + s.mares + '</b><span class="sep">•</span>Foals: <b>' + s.foals + '</b></div>' +
+          '<div class="breed-card-avg-row">' +
+            '<div class="avg-item"><div class="avg-value">' + s.avgGP + '</div><div class="avg-label">Avg GP</div></div>' +
+            '<div class="avg-item"><div class="avg-value">' + s.avgVG + '</div><div class="avg-label">Avg VG</div></div>' +
+            '<div class="avg-item"><div class="avg-value">' + s.avgConfo + '</div><div class="avg-label">Avg Confo</div></div>' +
+          '</div>' +
+        '</div>';
+      });
       document.getElementById('breedCards').innerHTML = bHtml;
-      document.getElementById('demographicStats').innerHTML = `
-        <div class="stat-card"><div class="stat-value">${display.f}</div><div class="stat-label">Foals</div></div>
-        <div class="stat-card"><div class="stat-value">${display.total - display.f}</div><div class="stat-label">Adults</div></div>
-        <div class="stat-card"><div class="stat-value">${display.ratio}</div><div class="stat-label">Gender Ratio</div></div>`;
+      const breedMoreBtn = document.getElementById('breedCardsMoreBtn');
+      if (breedMoreBtn) {
+        breedMoreBtn.style.display = breedKeys.length > BREED_CARDS_LIMIT ? 'inline-block' : 'none';
+        breedMoreBtn.textContent = breedCardsShowAll ? 'Show less...' : 'Show more... (' + (breedKeys.length - BREED_CARDS_LIMIT) + ')';
+      }
+
+      drawBreedDistribution(f);
     }
 
-    function renderQuality(f) {
+    function toggleBreedCards() {
+      breedCardsShowAll = !breedCardsShowAll;
+      renderOverview(document.getElementById('breedFilter').value);
+    }
+
+    /* ============================================================
+       TAB 2: BREEDING
+    ============================================================ */
+    function renderBreeding(f) {
+      const d = rawData;
+
+      // Breeding Snapshot
+      const snap = d.breedingSnapshot || { pregnant: 0, covered: 0, availableMares: 0, availableStuds: 0 };
+      document.getElementById('breedingSnapshot').innerHTML =
+        '<div class="breeding-mini-card"><div class="num">' + snap.pregnant + '</div><div class="lbl">Pregnant</div></div>' +
+        '<div class="breeding-mini-card"><div class="num">' + snap.covered + '</div><div class="lbl">Covered</div></div>' +
+        '<div class="breeding-mini-card"><div class="num">' + snap.availableMares + '</div><div class="lbl">Available Mares</div></div>' +
+        '<div class="breeding-mini-card"><div class="num">' + snap.availableStuds + '</div><div class="lbl">Available Studs</div></div>';
+
+      // Foal Gender
+      const fg = d.foalGenders || {};
+      const gTotal = (fg.colt || 0) + (fg.filly || 0) + (fg.unknown || 0) || 1;
+      const pct = n => Math.round((n / gTotal) * 100) + '%';
+      document.getElementById('foalGenderStats').innerHTML =
+        '<div class="stat-card highlight"><div class="stat-value">♂ ' + (fg.colt || 0) + '</div><div class="stat-label">Colts (' + pct(fg.colt || 0) + ')</div></div>' +
+        '<div class="stat-card"><div class="stat-value">♀ ' + (fg.filly || 0) + '</div><div class="stat-label">Fillies (' + pct(fg.filly || 0) + ')</div></div>' +
+        '<div class="stat-card"><div class="stat-value">? ' + (fg.unknown || 0) + '</div><div class="stat-label">Unknown (' + pct(fg.unknown || 0) + ')</div></div>';
+
+      // Upcoming Births & Breeding Checks (kombiniert, aus Kalender-Daten)
+      const birthTb = document.querySelector('#birthTable tbody'); birthTb.innerHTML = '';
+      let bcItems = [];
+      (d.upcomingBirths || []).forEach(b => {
+        if (f !== 'all' && b.breed !== f) return;
+        bcItems.push({ date: b.dueDate, mareName: b.mareName, breed: b.breed, stud: b.stud, foalGender: b.foalGender, phase: 'Birth Due', daysUntil: b.daysUntil });
+      });
+      (d.breedingCheckEvents || []).forEach(c => {
+        if (f !== 'all' && c.breed !== f) return;
+        bcItems.push({ date: c.targetDate, mareName: c.name, breed: c.breed, stud: '—', foalGender: '—', phase: 'Ultrasound Check (' + c.phase + ')', daysUntil: Math.round(parseFloat(c.daysLeft)) });
+      });
+      bcItems.sort((a, b) => a.daysUntil - b.daysUntil);
+      bcItems.forEach(b => {
+        const rowClass = b.daysUntil < 0 ? 'row-urgent' : b.daysUntil === 0 ? 'row-overdue' : '';
+        const countdown = b.daysUntil < 0 ? '<span class="badge badge-danger">' + Math.abs(b.daysUntil) + 'd overdue</span>' :
+                           b.daysUntil === 0 ? '<span class="badge badge-warn">Today</span>' : 'in ' + b.daysUntil + 'd';
+        const phase = String(b.phase).replace('Überfällig', 'Overdue').replace('⚠️ ', '');
+        birthTb.innerHTML += '<tr class="' + rowClass + '"><td><b>' + b.date + '</b></td><td>' + b.mareName + '</td><td>' + b.breed + '</td><td>' + b.stud + '</td><td>' + b.foalGender + '</td><td>' + phase + '</td><td>' + countdown + '</td></tr>';
+      });
+      if (!bcItems.length) birthTb.innerHTML = '<tr><td colspan="7" style="text-align:center;opacity:0.5;">No upcoming events</td></tr>';
+
+      // Success Rate
+      const sr = d.breedingSuccessRate || {};
+      document.getElementById('breedingSuccessStats').innerHTML =
+        '<div class="stat-card highlight"><div class="stat-value">' + (sr.successRate || '—') + '%</div><div class="stat-label">Success Rate</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + (sr.totalBirths || 0) + '</div><div class="stat-label">Births</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + (sr.totalFailures || 0) + '</div><div class="stat-label">Failures</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + (sr.totalAttempts || 0) + '</div><div class="stat-label">Total</div></div>';
+
+      const mareStats = (sr.mareStats || []).slice().sort((a, b) => b.failures - a.failures);
+      const problems = mareStats.filter(m => m.failures > 0);
+      const clean = mareStats.filter(m => m.failures === 0);
+      const rowHtml = m => '<tr' + (m.failures > 0 ? ' style="background:color-mix(in srgb, var(--accent-2) 6%, transparent);"' : '') + '><td><b>' + m.name + '</b></td><td>' + m.births + '</td><td>' + (m.failures > 0 ? '<span class="badge badge-danger">' + m.failures + '</span>' : '0') + '</td><td>' + m.rate + '%</td></tr>';
+      document.getElementById('breedingSuccessProblemBody').innerHTML = problems.map(rowHtml).join('') || '<tr><td colspan="4" style="text-align:center;opacity:0.5;">No issues found</td></tr>';
+      const okWrap = document.getElementById('breedingSuccessOkWrap');
+      if (clean.length) {
+        okWrap.style.display = 'block';
+        okWrap.querySelector('summary').textContent = 'Show 100% Success Mares... (' + clean.length + ')';
+        document.getElementById('breedingSuccessOkBody').innerHTML = clean.map(rowHtml).join('');
+      } else {
+        okWrap.style.display = 'none';
+      }
+
+      // Stud Utilization
+      const su = d.studUtilization || {};
+      document.querySelector('#studUtilTable thead').innerHTML =
+        '<tr><th>Stud <span class="badge badge-gold" style="margin-left:6px;">' + (su.totalIncoming || 0) + ' in</span> <span class="badge" style="background:var(--hr-purple-light);color:var(--neutrals-white);">' + (su.totalOutgoing || 0) + ' out</span></th><th>7d</th><th>30d</th><th>Total</th><th>Earnings</th></tr>';
+      const sutb = document.querySelector('#studUtilTable tbody'); sutb.innerHTML = '';
+      (su.studs || []).forEach(s => {
+        sutb.innerHTML += '<tr><td><b>' + s.name + '</b></td><td>' + s.bookings7d + '</td><td>' + s.bookings30d + '</td><td>' + s.totalBookings + '</td><td class="amount positive">' + fmt(s.totalEarnings) + '</td></tr>';
+      });
+    }
+
+    /* ============================================================
+       TAB 3: GENETICS
+    ============================================================ */
+    function renderGenetics(f) {
+      const d = rawData;
       const breedKey = f === 'all' ? 'all' : f;
-      const allBreedStats = rawData.vgStats;
 
-      const getVGTarget = (breedName) => {
-        if (!breedName || breedName === 'all') return 12;
-        const bn = breedName.toLowerCase();
-        if (bn.includes('icelandic'))  return 14;
-        if (bn.includes('kathiawari')) return 13;
-        return 12;
-      };
+      // Genetic Overview Stats
+      const genStats = d.geneticOverview || {};
+      document.getElementById('geneticStats').innerHTML =
+        '<div class="stat-card highlight"><div class="stat-value">' + (genStats.avgVG || '—') + '</div><div class="stat-label">Avg VG</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + (genStats.avgGP || '—') + '</div><div class="stat-label">Avg GP</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + (genStats.avgConfo || '—') + '</div><div class="stat-label">Avg Confo</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + (genStats.avgComp || '—') + '</div><div class="stat-label">Avg Comp</div></div>';
 
-      document.getElementById('vgTitle').innerText = `VG Status (Target: ${getVGTarget(f)} VG)`;
-
+      // VG Stats
+      const getVGTarget = (bn) => { if (!bn || bn === 'all') return 12; const l = bn.toLowerCase(); if (l.includes('icelandic')) return 14; if (l.includes('kathiawari')) return 13; return 12; };
       let vgHtml = '';
-      for (let breed in allBreedStats) {
+      for (let breed in d.vgStats) {
         if (f !== 'all' && breed !== f) continue;
-        const v = allBreedStats[breed];
-        const t = v.totalWithStats || 1;
-        const target = getVGTarget(breed);
+        const v = d.vgStats[breed]; const t = v.totalWithStats || 1; const target = getVGTarget(breed);
         const p12 = Math.round(v.vg12 / t * 100);
-        vgHtml += `
-          <div style="margin-bottom:14px;">
-            <div style="display:flex;justify-content:space-between;font-size:11px;font-weight:700;margin-bottom:4px;">
-              <span>${breed} (target: ${target} VG)</span><span>${p12}%</span>
-            </div>
-            <div class="progress-bar-bg"><div class="progress-bar-fill" style="width:${p12}%"></div></div>
-            <small style="opacity:0.6;font-size:10px;">${target} VG: ${v.vg12} · ${target-1} VG: ${v.vg11} · ${target-2} VG: ${v.vg10}</small>
-          </div>`;
+        const barColor = p12 >= 100 ? 'background:linear-gradient(90deg,var(--hr-gold),var(--secondary-light));' : '';
+        const checkmark = p12 >= 100 ? ' ✓' : '';
+        vgHtml += '<div style="margin-bottom:14px;"><div style="display:flex;justify-content:space-between;font-size:11px;font-weight:700;margin-bottom:4px;"><span>' + breed + ' (target: ' + target + ' VG)</span><span>' + p12 + '%' + checkmark + '</span></div><div class="progress-bar-bg"><div class="progress-bar-fill" style="width:' + p12 + '%;' + barColor + '"></div></div><small style="opacity:0.6;font-size:10px;">' + target + ' VG: ' + v.vg12 + ' · ' + (target-1) + ' VG: ' + v.vg11 + ' · ' + (target-2) + ' VG: ' + v.vg10 + '</small></div>';
       }
       document.getElementById('vgStats').innerHTML = vgHtml;
 
-      const genData = (f === 'all' || !rawData.generationByBreed[f]) ? rawData.generationComparison : rawData.generationByBreed[f];
-      const better = (foal, adult) => foal >= adult ? `style="color:var(--hr-success);font-weight:700;"` : `style="color:var(--hr-danger);font-weight:700;"`;
-      document.getElementById('genStats').innerHTML = `
-        <table>
-          <tr><th>Metric</th><th>Adult</th><th>Foal</th></tr>
-          <tr><td>Avg GP</td><td>${Math.round(genData.adults.avgGP)}</td><td ${better(genData.foals.avgGP, genData.adults.avgGP)}>${Math.round(genData.foals.avgGP)}</td></tr>
-          <tr><td>Avg Confo</td><td>${genData.adults.avgConfo.toFixed(2)}</td><td ${better(genData.foals.avgConfo, genData.adults.avgConfo)}>${genData.foals.avgConfo.toFixed(2)}</td></tr>
-          <tr><td>Avg VG</td><td>${genData.adults.avgVG.toFixed(1)}</td><td ${better(genData.foals.avgVG, genData.adults.avgVG)}>${genData.foals.avgVG.toFixed(1)}</td></tr>
-        </table>`;
+      // Adult vs Foal
+      const genData = (f === 'all' || !d.generationByBreed[f]) ? d.generationComparison : d.generationByBreed[f];
+      renderGenChart(genData);
 
-      const disciplineData = rawData.disciplineFocus[breedKey] || {};
-      const sorted = Object.keys(disciplineData).sort((a, b) => disciplineData[b].count - disciplineData[a].count);
-      let discHtml = '<table><thead><tr><th>Discipline</th><th>Count</th><th>Avg GP</th><th>Avg Confo</th></tr></thead><tbody>';
-      if (!sorted.length) {
-        discHtml += '<tr><td colspan="4" style="text-align:center;opacity:0.5;">No discipline data available</td></tr>';
-      } else {
-        sorted.forEach(disc => {
-          const dd = disciplineData[disc];
-          discHtml += `<tr><td><b>${disc}</b></td><td>${dd.count}</td><td>${Math.round(dd.avgGP)}</td><td>${dd.avgConfo.toFixed(2)}</td></tr>`;
-        });
-      }
-      document.getElementById('disciplineStats').innerHTML = discHtml + '</tbody></table>';
-
-      const colorData = rawData.colorStats[breedKey] || { solid: [], patterned: [] };
+      // Colour Genetics
+      const colorData = d.colorStats[breedKey] || { solid: [], patterned: [] };
       const renderC = (title, list) => {
         if (!list.length) return '';
-        let h = `<div style="background:var(--hr-white);padding:14px;border-radius:10px;border:1px solid #eee;">
-          <b style="font-size:10px;display:block;margin-bottom:10px;color:var(--hr-purple);text-transform:uppercase;letter-spacing:0.5px;">${title}</b>`;
-        list.forEach(c => h += `
-          <div style="margin-bottom:8px;">
-            <div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;">
-              <span>${c.color}</span><b>${c.count} (${c.percentage}%)</b>
-            </div>
-            <div class="progress-bar-bg" style="height:4px;">
-              <div class="progress-bar-fill" style="width:${c.percentage}%;background:var(--hr-gold);"></div>
-            </div>
-          </div>`);
+        const top5 = list.slice(0, 5);
+        const rest = list.slice(5);
+        let h = '<div style="background:var(--hr-white);padding:14px;border-radius:10px;border:1px solid var(--hr-border);"><b style="font-size:10px;display:block;margin-bottom:10px;color:var(--hr-purple);text-transform:uppercase;letter-spacing:0.5px;">' + title + '</b>';
+        const rowHtml = c => '<div style="margin-bottom:8px;"><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px;"><span>' + c.color + '</span><b>' + c.count + ' (' + c.percentage + '%)</b></div><div class="progress-bar-bg" style="height:4px;"><div class="progress-bar-fill" style="width:' + c.percentage + '%;background:var(--hr-gold);"></div></div></div>';
+        top5.forEach(c => h += rowHtml(c));
+        if (rest.length) {
+          h += '<details ontoggle="this.querySelector(\'.acc-label\').textContent = this.open ? \'Show less...\' : \'Show more...\'">' +
+            '<summary style="font-size:10px;color:var(--hr-text-muted);font-weight:700;"><span class="acc-label">Show more...</span> <span style="opacity:.6;">(' + rest.length + ')</span></summary>' +
+            '<div style="margin-top:8px;">' + rest.map(rowHtml).join('') + '</div></details>';
+        }
         return h + '</div>';
       };
       document.getElementById('colorStatsContainer').innerHTML = renderC('Solid Colours', colorData.solid) + renderC('Patterns', colorData.patterned);
     }
 
-    function renderLineage(f) {
+function dashboardIcon(name) { const paths = {"trophy":"<path d=\"M8 3h8v6a4 4 0 0 1-8 0V3Z\"/><path d=\"M8 5H4v2a4 4 0 0 0 4 4m8-6h4v2a4 4 0 0 1-4 4M12 13v7m-4 1h8\"/>","star":"<path d=\"m12 3 3 6 7 1-5 5 1 7-6-3-6 3 1-7-5-5 7-1Z\"/>","ruler":"<path d=\"m3 17 14-14 4 4L7 21Z M12 8l2 2m-6 2 2 2\"/>","coins":"<ellipse cx=\"12\" cy=\"6\" rx=\"8\" ry=\"3\"/><path d=\"M4 6v6c0 4 16 4 16 0V6M4 12v6c0 4 16 4 16 0v-6\"/>","crown":"<path d=\"m3 5 5 5 4-7 4 7 5-5-2 14H5ZM5 22h14\"/>","mare":"<circle cx=\"12\" cy=\"8\" r=\"5\"/><path d=\"M12 13v9m-4-4h8\"/>","medal":"<circle cx=\"12\" cy=\"16\" r=\"5\"/><path d=\"M8 12 4 3h6l2 6 2-6h6l-4 9\"/>","clock":"<circle cx=\"12\" cy=\"12\" r=\"9\"/><path d=\"M12 6v6l4 2\"/>","dna":"<path d=\"M7 3c0 9 10 9 10 18M17 3c0 9-10 9-10 18M7 4h10M8 8h8M8 16h8M7 20h10\"/>","warning":"<path d=\"m12 3 10 18H2Z M12 9v5m0 3v1\"/>"}; return '<svg class="dashboard-icon" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">' + paths[name] + '</svg>'; }
+    function renderGenChart(genData) {
+      const metrics = [
+        { key: 'avgGP', label: 'GP', adult: genData.adults.avgGP, foal: genData.foals.avgGP, fmt: v => Math.round(v) },
+        { key: 'avgConfo', label: 'Confo', adult: genData.adults.avgConfo, foal: genData.foals.avgConfo, fmt: v => v.toFixed(2) },
+        { key: 'avgVG', label: 'VG', adult: genData.adults.avgVG, foal: genData.foals.avgVG, fmt: v => v.toFixed(1) },
+        { key: 'avgComp', label: 'Comp', adult: genData.adults.avgComp || 0, foal: genData.foals.avgComp || 0, fmt: v => v.toFixed(2) }
+      ];
+
+      document.getElementById('genChart').innerHTML = '<div class="generation-grid">' + metrics.map(m => {
+        const max = Math.max(m.adult, m.foal, 1);
+        const counts = genData.counts;
+        const adultKnown = counts ? counts.adults[m.key] > 0 : m.adult > 0;
+        const foalKnown = counts ? counts.foals[m.key] > 0 : m.foal > 0;
+        const delta = m.foal - m.adult;
+        const bar = (label, value, known, cls) => '<div class="generation-row"><span>' + label + '</span><div class="generation-track"><div class="generation-bar ' + cls + '" style="width:' + (known ? value / max * 100 : 0) + '%"></div></div><b>' + (known ? m.fmt(value) : '—') + '</b></div>';
+        return '<div class="generation-card"><div class="card-header-title">' + ({GP:'Genetic potential',Confo:'Conformation',VG:'Very good traits',Comp:'Competition score'})[m.label] + '</div>' + bar('Adults',m.adult,adultKnown,'adults') + bar('Foals',m.foal,foalKnown,'foals') + '<div class="generation-delta">' + (adultKnown && foalKnown ? 'Foals vs adults: ' + (delta > 0 ? '+' : '') + m.fmt(delta) : 'Not enough data to compare') + '</div></div>';
+      }).join('') + '</div><p class="generation-note">Group averages. Each metric has its own scale; missing measurements are excluded.</p>';
+    }
+
+    /* ============================================================
+       TAB 4: BLOODLINES
+    ============================================================ */
+    function renderBloodlines(f) {
       const breedKey = f === 'all' ? 'all' : f;
       const renderT = (dataMap, containerId, title) => {
         const data = dataMap[breedKey] || [];
-        let h = `<div class="section-title">${title}</div>
-          <table><thead><tr><th>Line / Share</th><th style="text-align:center;">S / M</th><th>Status</th></tr></thead><tbody>`;
-        data.forEach(l => {
-          const warn = l.balanceWarning
-            ? `<svg style="width:13px;height:13px;fill:var(--hr-danger);margin-left:4px;vertical-align:middle;" viewBox="0 0 24 24"><path d="M12 2L1 21h22L12 2zm0 3.45l8.27 14.3H3.73L12 5.45zM11 10v4h2v-4h-2zm0 6v2h2v-2h-2z"/></svg>` : '';
-          h += `<tr>
-            <td>
-              <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
-                <b>${l.name}</b><small>${l.share}%</small>
-              </div>
-              <div class="progress-bar-bg" style="height:4px;">
-                <div class="progress-bar-fill" style="width:${l.share}%;background:${l.domColor}"></div>
-              </div>
-            </td>
-            <td style="text-align:center;"><b>${l.stallions}/${l.mares}</b>${warn}</td>
-            <td style="color:${l.domColor};font-weight:700;font-size:10px;text-transform:uppercase;">${l.domLabel}</td>
-          </tr>`;
+        let h = '<div style="margin-bottom:8px;font-size:10px;font-weight:700;color:var(--hr-purple);text-transform:uppercase;letter-spacing:1px;">' + title + ' <span class="info-tip">?<span class="tip-text">Descendant lines by ' + (title.includes('Sire') ? 'sire' : 'dam') + ', sorted by herd share.</span></span></div><table><thead><tr><th>Line / Share</th><th style="text-align:center;">S / M</th><th>Avg VG</th><th>Avg GP</th><th>Avg Conf</th><th>Avg Comp</th><th>Status</th></tr></thead><tbody>';
+        data.slice(0, 15).forEach(l => {
+          const warn = l.balanceWarning ? '<span title="More than 60% stallions">' + dashboardIcon('warning') + '</span>' : '';
+          const vgNum = parseFloat(l.avgVG), confoNum = parseFloat(l.avgConfo);
+          const isQuality = !isNaN(vgNum) && !isNaN(confoNum) && vgNum >= 12 && confoNum >= 80;
+          const star = isQuality ? ' <span title="Outstanding averages" style="color:var(--hr-gold);">' + dashboardIcon('star') + '</span>' : '';
+          h += '<tr><td><div style="display:flex;justify-content:space-between;margin-bottom:4px;"><b>' + l.name + star + '</b><small>' + l.share + '%</small></div><div class="progress-bar-bg" style="height:4px;"><div class="progress-bar-fill" style="width:' + l.share + '%;background:' + l.domColor + '"></div></div></td><td style="text-align:center;"><b>' + l.stallions + '/' + l.mares + '</b> ' + warn + '</td><td>' + (l.avgVG || '—') + '</td><td>' + (l.avgGP || '—') + '</td><td>' + (l.avgConfo || '—') + '</td><td>' + (l.avgComp || '—') + '</td><td style="color:' + l.domColor + ';font-weight:700;font-size:9px;text-transform:uppercase;">' + l.domLabel + '</td></tr>';
         });
         document.getElementById(containerId).innerHTML = h + '</tbody></table>';
       };
@@ -652,54 +1632,677 @@
       renderT(rawData.damlines, 'damLineStats', 'Dam Lines');
     }
 
-    function renderTimeline(f) {
-      const birthTb  = document.querySelector('#birthTable tbody');
-      const growthTb = document.querySelector('#growthTable tbody');
-      birthTb.innerHTML = ''; growthTb.innerHTML = '';
 
-      if (rawData.upcomingBirths) {
-        rawData.upcomingBirths.forEach(b => {
-          if (f !== 'all' && b.breed !== f) return;
-          const dotColor = b.phase.includes("Check") ? "var(--hr-danger)" : (b.phase.includes("Ultrasound") ? "var(--hr-gold)" : "transparent");
-          birthTb.innerHTML += `<tr><td><b>${b.dueDate}</b></td><td>${b.mareName}</td><td>${b.breed}</td><td><span class="status-dot" style="background:${dotColor}"></span>${b.phase}</td><td>In ${b.daysUntil} days</td></tr>`;
-        });
-      }
-      if (rawData.growthEvents) {
-        rawData.growthEvents.forEach(e => {
-          if (f !== 'all' && e.breed !== f) return;
-          const st = e.isUrgent ? "color:var(--hr-gold);font-weight:bold;background:rgba(255,161,0,0.05);" : "";
-          growthTb.innerHTML += `<tr style="${st}"><td><b>${e.name}</b></td><td>${e.type}</td><td>${e.breed}</td><td>${e.targetDate}</td><td>In <b>${e.daysLeft}</b> days</td></tr>`;
-        });
-      }
+    function setScoreFilter(type) {
+      scoreFilter = type;
+      document.querySelectorAll('#scoreFilterButtons button').forEach(b => b.classList.toggle('active', b.dataset.score === type));
+      renderPerformance(document.getElementById('breedFilter').value);
     }
 
-    function renderElite(f) {
+    function setGpScoreFilter(type) {
+      gpScoreFilter = type;
+      document.querySelectorAll('#gpScoreFilterButtons button').forEach(b => b.classList.toggle('active', b.dataset.score === type));
+      renderPerformance(document.getElementById('breedFilter').value);
+    }
+
+    function renderPerformance(f) {
       const d = rawData;
-      const renderList = (data, containerId, label, mainColor) => {
-        let html = '';
-        data.forEach((x, index) => {
-          if (f !== 'all' && x.breed !== f) return;
-          const rank = index + 1;
-          const rankStyle = rank === 1 ? "background:#D4AF37;color:white;"
-                          : rank === 2 ? "background:#C0C0C0;color:white;"
-                          : rank === 3 ? "background:#CD7F32;color:white;"
-                          : "background:#eee;color:#666;";
-          html += `
-            <div class="stat-card" style="${rank===1?'border:1px solid var(--hr-gold);':''}">
-              <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
-                <span style="font-size:9px;font-weight:700;color:${mainColor};text-transform:uppercase;">${x.breed}</span>
-                <span style="font-size:10px;font-weight:800;padding:2px 7px;border-radius:4px;${rankStyle}">#${rank}</span>
-              </div>
-              <div class="stat-label" style="font-size:13px;text-align:left;margin-bottom:4px;">${x.name}</div>
-              <div class="stat-value" style="font-size:22px;text-align:left;color:${mainColor};">${containerId.includes('GP') ? Math.round(x.gp) : x.confoMax.toFixed(3)}</div>
-              <div style="font-size:8px;opacity:0.5;text-align:left;text-transform:uppercase;margin-top:2px;">${label}</div>
-            </div>`;
+      const breedKey = f === 'all' ? 'all' : f;
+
+      // Discipline Analysis
+      const dd = d.disciplineFocus[breedKey] || {};
+      const sorted = Object.keys(dd).sort((a, b) => dd[b].count - dd[a].count);
+      const bestConfo = sorted.length ? sorted.reduce((a, b) => dd[a].avgConfo >= dd[b].avgConfo ? a : b) : null;
+      const bestGP = sorted.length ? sorted.reduce((a, b) => dd[a].avgGP >= dd[b].avgGP ? a : b) : null;
+      let discHtml = '<table><thead><tr><th>Discipline</th><th>Count</th><th>Avg GP</th><th>Avg Confo</th></tr></thead><tbody>';
+      sorted.forEach(disc => {
+        const d2 = dd[disc];
+        const gpCell = disc === bestGP ? '<span class="badge badge-gold">' + Math.round(d2.avgGP) + '</span>' : Math.round(d2.avgGP);
+        const confoCell = disc === bestConfo ? '<span class="badge badge-gold">' + d2.avgConfo.toFixed(2) + '</span>' : d2.avgConfo.toFixed(2);
+        discHtml += '<tr><td><b>' + disc + '</b></td><td>' + d2.count + '</td><td>' + gpCell + '</td><td>' + confoCell + '</td></tr>';
+      });
+      document.getElementById('disciplineStats').innerHTML = discHtml + '</tbody></table>';
+
+      // Analytics data
+      const a = d.analytics || {};
+      const confoData = a.confo || {};
+      const confoScores = confoData.allScores || [];
+
+      // Confo Overview (immer Confo, unabhängig vom Toggle unten)
+      const vals = confoScores.map(h => h.score);
+      const median = vals.length ? vals[Math.floor(vals.length / 2)] : 0;
+      const best = vals.length ? Math.max(...vals) : 0;
+      const vgPct = a.traits?.traits?.length ? Math.round(a.traits.traits.reduce((s, t) => s + t.vgPercent, 0) / a.traits.traits.length) : 0;
+      const strongest = a.traits?.strongest;
+      const weakest = a.traits?.weakest;
+
+      document.getElementById('confoOverviewStats').innerHTML =
+        '<div class="stat-card"><div class="stat-value">' + confoScores.length + '</div><div class="stat-label">Measured</div></div>' +
+        '<div class="stat-card highlight"><div class="stat-value">' + fmt(median) + '</div><div class="stat-label">Median Score</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + fmt(best) + '</div><div class="stat-label">Herd Best</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + vgPct + '%</div><div class="stat-label">VG Trait Rate</div></div>' +
+        (strongest ? '<div class="stat-card" style="border-left:3px solid var(--tertiary-deep);"><div class="stat-value" style="font-size:18px;">' + strongest.name + '</div><div class="stat-label">Strongest (' + strongest.vgPercent + '% VG)</div></div>' : '') +
+        (weakest ? '<div class="stat-card" style="border-left:3px solid var(--accent-2);"><div class="stat-value" style="font-size:18px;">' + weakest.name + '</div><div class="stat-label">Weakest (' + weakest.vgPercent + '% VG)</div></div>' : '');
+
+      // Score by Category (Beeswarm) — folgt dem Confo/Comp-Toggle
+      const stripData = scoreFilter === 'comp' ? (a.comp || {}) : confoData;
+      const stripScores = stripData.allScores || [];
+      const stripVals = stripScores.map(h => h.score);
+      const stripMedian = stripVals.length ? stripVals[Math.floor(stripVals.length / 2)] : 0;
+      const stripBest = stripVals.length ? Math.max(...stripVals) : 0;
+      renderScoreStrip(stripScores, scoreFilter);
+
+      // Category table (folgt Toggle)
+      const dtb = document.querySelector('#confoDistTable tbody'); dtb.innerHTML = '';
+      const cats = ['Stallion', 'Mare', 'Colt', 'Filly'];
+      cats.forEach(g => { const c = stripData.genderCats && stripData.genderCats[g]; if (c) dtb.innerHTML += '<tr><td><b>' + g + '</b></td><td>' + c.n + '</td><td>' + fmt(c.lowest) + '</td><td>' + fmt(c.median) + '</td><td>' + fmt(c.highest) + '</td></tr>'; });
+      if (stripVals.length) dtb.innerHTML += '<tr style="font-weight:700;background:color-mix(in srgb, var(--secondary-base) 8%, transparent);"><td>All</td><td>' + stripVals.length + '</td><td>' + fmt(Math.min(...stripVals)) + '</td><td>' + fmt(stripMedian) + '</td><td>' + fmt(stripBest) + '</td></tr>';
+
+      // Top/Bottom 10 (folgt Toggle)
+      const top = stripScores.slice(0, 10);
+      const bottom = stripScores.slice(-10).reverse();
+      const ttb = document.querySelector('#confoTopTable tbody'); ttb.innerHTML = '';
+      top.forEach(h => { ttb.innerHTML += '<tr><td><b>' + h.name + '</b></td><td>' + h.breed + '</td><td>' + fmt(h.score) + '</td><td class="amount positive">+' + fmt(h.score - stripMedian) + '</td></tr>'; });
+      const btb = document.querySelector('#confoBottomTable tbody'); btb.innerHTML = '';
+      bottom.forEach(h => { btb.innerHTML += '<tr><td><b>' + h.name + '</b></td><td>' + h.breed + '</td><td>' + fmt(h.score) + '</td><td class="amount negative">' + fmt(h.score - stripMedian) + '</td></tr>'; });
+
+      // GP vs Score
+      drawGpScoreScatter(gpScoreFilter);
+
+      // Trait Bars (Tabelle entfernt — Werte jetzt direkt am Balken bzw. per Hover)
+      const traits = a.traits?.traits || [];
+      let barsHtml = '';
+      traits.forEach(t => {
+        barsHtml += '<div style="margin-bottom:10px;"><div style="display:flex;justify-content:space-between;font-size:11px;font-weight:700;margin-bottom:3px;"><span>' + t.name + '</span><span>' + t.vgPercent + '% VG · n=' + t.total + '</span></div><div style="display:flex;height:16px;border-radius:4px;overflow:hidden;">';
+        ['VG', 'G+', 'G', 'G-', 'A', 'BA', 'P'].forEach(g => {
+          const pct = t.total > 0 ? (t[g] / t.total) * 100 : 0;
+          if (pct > 0) {
+            const showLabel = pct >= 10; // nur bei genug Platz Zahl direkt im Segment
+            barsHtml += '<div style="width:' + pct + '%;background:' + GRADE_COLORS[g] + ';display:flex;align-items:center;justify-content:center;" title="' + g + ': ' + t[g] + ' (' + pct.toFixed(0) + '%)">' + (showLabel ? '<span style="font-size:9px;font-weight:700;color:var(--neutrals-white);">' + t[g] + '</span>' : '') + '</div>';
+          }
         });
-        document.getElementById(containerId).innerHTML = html || '<p style="grid-column:1/-1;text-align:center;opacity:0.5;padding:20px;">No data available.</p>';
-      };
-      renderList(d.topGP, 'eliteGP', 'Genetic Potential', 'var(--hr-purple)');
-      renderList(d.topConfo, 'eliteConfo', 'Max Conformation', 'var(--hr-gold)');
+        barsHtml += '</div></div>';
+      });
+      document.getElementById('traitBars').innerHTML = barsHtml;
+      const gradeLegend = document.getElementById('traitGradeLegend');
+      if (gradeLegend && !gradeLegend.dataset.filled) {
+        gradeLegend.innerHTML = ['VG', 'G+', 'G', 'G-', 'A', 'BA', 'P'].map(g => '<span style="display:inline-flex;align-items:center;gap:4px;margin-right:12px;"><span style="width:9px;height:9px;border-radius:2px;background:' + GRADE_COLORS[g] + ';display:inline-block;"></span>' + g + '</span>').join('');
+        gradeLegend.dataset.filled = '1';
+      }
+
+      // Health Overview
+      const h = a.health || {};
+      document.getElementById('healthOverviewStats').innerHTML =
+        '<div class="stat-card"><div class="stat-value">' + h.fullyTested + ' / ' + h.totalHorses + '</div><div class="stat-label">Fully Tested</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + h.untested + '</div><div class="stat-label">Untested</div></div>' +
+        '<div class="stat-card" style="border-left:3px solid var(--hr-danger);"><div class="stat-value" style="font-size:16px;">' + (h.weakestTest || '—') + '</div><div class="stat-label">Weakest Test</div></div>';
+
+      let covHtml = '';
+      (h.testNames || []).forEach(t => { const c = h.testCoverage[t]; const pct = c.total > 0 ? Math.round(c.tested / c.total * 100) : 0;
+        const barColor = pct >= 80 ? 'var(--tertiary-deep)' : pct >= 50 ? 'var(--hr-gold)' : 'var(--accent-6)';
+        covHtml += '<div style="margin-bottom:6px;"><div style="display:flex;justify-content:space-between;font-size:11px;font-weight:700;margin-bottom:2px;"><span>' + t + '</span><span>' + c.tested + '/' + c.total + ' (' + pct + '%)</span></div><div class="progress-bar-bg" style="height:6px;"><div class="progress-bar-fill" style="width:' + pct + '%;background:' + barColor + ';"></div></div></div>'; });
+      document.getElementById('healthCoverageBars').innerHTML = covHtml;
+
+      const antb = document.querySelector('#actionNeededTable tbody'); antb.innerHTML = '';
+      actionNeededList = (h.actionNeeded || []);
+      if (f !== 'all') actionNeededList = actionNeededList.filter(x => x.breed === f);
+      actionNeededPageNum = 0;
+      renderActionNeededPage();
+    }
+
+    let actionNeededList = [];
+    let actionNeededPageNum = 0;
+    const ACTION_NEEDED_PAGE_SIZE = 8;
+
+    function actionNeededPage(delta) {
+      actionNeededPageNum = Math.max(0, actionNeededPageNum + delta);
+      renderActionNeededPage();
+    }
+
+    function renderActionNeededPage() {
+      const antb = document.querySelector('#actionNeededTable tbody');
+      if (!antb) return;
+      const totalPages = Math.max(1, Math.ceil(actionNeededList.length / ACTION_NEEDED_PAGE_SIZE));
+      actionNeededPageNum = Math.min(actionNeededPageNum, totalPages - 1);
+      const pageItems = actionNeededList.slice(actionNeededPageNum * ACTION_NEEDED_PAGE_SIZE, (actionNeededPageNum + 1) * ACTION_NEEDED_PAGE_SIZE);
+      antb.innerHTML = '';
+      pageItems.forEach(x => { antb.innerHTML += '<tr><td><b>' + x.name + '</b></td><td>' + x.breed + '</td><td style="font-size:11px;">' + x.missing.join(', ') + '</td></tr>'; });
+      if (!actionNeededList.length) antb.innerHTML = '<tr><td colspan="3" style="text-align:center;opacity:0.5;">All adults tested ✓</td></tr>';
+
+      const pageInfo = document.getElementById('actionNeededPageInfo');
+      if (pageInfo) pageInfo.textContent = actionNeededList.length ? 'Page ' + (actionNeededPageNum + 1) + ' / ' + totalPages + ' (' + actionNeededList.length + ' entries)' : '';
+      const prevBtn = document.getElementById('actionNeededPrevBtn');
+      const nextBtn = document.getElementById('actionNeededNextBtn');
+      if (prevBtn) { prevBtn.disabled = actionNeededPageNum === 0; prevBtn.style.opacity = actionNeededPageNum === 0 ? '0.4' : '1'; prevBtn.style.display = actionNeededList.length > ACTION_NEEDED_PAGE_SIZE ? 'inline-block' : 'none'; }
+      if (nextBtn) { nextBtn.disabled = actionNeededPageNum >= totalPages - 1; nextBtn.style.opacity = actionNeededPageNum >= totalPages - 1 ? '0.4' : '1'; nextBtn.style.display = actionNeededList.length > ACTION_NEEDED_PAGE_SIZE ? 'inline-block' : 'none'; }
+    }
+
+    function renderScoreStrip(scores, scoreType) {
+      const el = document.getElementById('scoreStripChart');
+      const cats = ['Stallion', 'Mare', 'Colt', 'Filly'].filter(c => scores.some(h => (h.isFoal ? (h.gender === 'Stallion' ? 'Colt' : 'Filly') : h.gender) === c));
+      if (!cats.length) { el.innerHTML = '<p style="opacity:0.5;font-size:11px;text-align:center;">No data</p>'; return; }
+      const catOf = h => h.isFoal ? (h.gender === 'Stallion' ? 'Colt' : 'Filly') : h.gender;
+      const allVals = scores.map(h => h.score);
+      const med = median_(allVals);
+      const step = niceStep_(Math.max(...allVals) - Math.min(...allVals));
+      const min = Math.floor((Math.min(...allVals) - 1) / step) * step;
+      const max = Math.ceil((Math.max(...allVals) + 1) / step) * step;
+
+      const W = 900, rowH = 56, padL = 90, padR = 20, padT = 14;
+      const H = padT + cats.length * rowH + 26;
+      const x = v => padL + ((v - min) / (max - min)) * (W - padL - padR);
+
+      let svg = '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;height:auto;font-family:Finlandica,sans-serif;">';
+      for (let g = min; g <= max; g += step) {
+        svg += '<line x1="' + x(g) + '" y1="' + padT + '" x2="' + x(g) + '" y2="' + (padT + cats.length * rowH) + '" stroke="var(--hr-border)"/>';
+        svg += '<text x="' + x(g) + '" y="' + (padT + cats.length * rowH + 16) + '" font-size="9" fill="var(--hr-text-muted)" text-anchor="middle">' + g.toFixed(step < 1 ? 1 : 0) + '</text>';
+      }
+      if (med > 0) {
+        svg += '<line x1="' + x(med) + '" y1="' + (padT - 4) + '" x2="' + x(med) + '" y2="' + (padT + cats.length * rowH) + '" stroke="var(--hr-purple)" stroke-width="1.5"/>';
+        svg += '<text x="' + x(med) + '" y="' + (padT - 6) + '" font-size="9" fill="var(--hr-purple)" text-anchor="middle" font-weight="700">median ' + med.toFixed(1) + '</text>';
+      }
+      cats.forEach((cat, i) => {
+        const vals2 = scores.filter(h => catOf(h) === cat).map(h => h.score);
+        const cy = padT + i * rowH + rowH / 2;
+        svg += '<text x="4" y="' + cy + '" font-size="10" font-weight="700" fill="' + CAT_COLORS[cat] + '">' + cat + '</text>';
+        svg += '<text x="4" y="' + (cy + 12) + '" font-size="8" fill="var(--hr-text-muted)">n = ' + vals2.length + '</text>';
+        const seen = {};
+        vals2.forEach(v => {
+          const key = v.toFixed(1);
+          seen[key] = (seen[key] || 0);
+          const jitter = (seen[key] % 5) * 5 - 10;
+          seen[key]++;
+          svg += '<circle cx="' + x(v) + '" cy="' + (cy + jitter) + '" r="3.5" fill="' + CAT_COLORS[cat] + '" fill-opacity="0.75"/>';
+        });
+      });
+      svg += '</svg>';
+      el.innerHTML = svg;
+    }
+
+    const CAT_COLORS = { Stallion: 'var(--primary-dark)', Mare: 'var(--secondary-base)', Colt: 'var(--primary-mid)', Filly: 'var(--secondary-light)' };
+    const GRADE_COLORS = { VG: 'var(--tertiary-light)', 'G+': 'var(--tertiary-mid)', G: 'var(--secondary-base)', 'G-': 'var(--secondary-light)', A: 'var(--accent-6)', BA: 'var(--accent-2)', P: 'var(--primary-deep)' };
+
+    function niceStep_(range) {
+      if (range <= 6) return 1;
+      if (range <= 12) return 2;
+      if (range <= 30) return 5;
+      return 10;
+    }
+
+    /* ============================================================
+       TAB 6: CALENDAR (ex-Dates)
+    ============================================================ */
+    function setDatesQuickFilter(qf) {
+      datesQuickFilter = qf;
+      datesShowCount = DATES_PAGE_SIZE;
+      document.querySelectorAll('#datesQuickFilters button').forEach(b => b.classList.toggle('active', b.dataset.qf === qf));
+      renderDates(document.getElementById('breedFilter').value);
+    }
+
+    function datesShowMore() {
+      datesShowCount += DATES_PAGE_SIZE;
+      renderDates(document.getElementById('breedFilter').value);
+    }
+
+    function renderDates(f) {
+      const search = (document.getElementById('datesSearch')?.value || '').trim().toLowerCase();
+
+      let items = [];
+      (rawData.growthEvents || []).forEach(e => {
+        const isClinic = /klinik|clinic|approv/i.test(e.type);
+        items.push({
+          horse: e.name, breed: e.breed,
+          eventType: isClinic ? 'Clinic/Approval' : 'Growth',
+          details: e.type, targetDate: e.targetDate,
+          sortDays: parseFloat(e.daysLeft), daysLeftLabel: e.daysLeft,
+          isRideable: /reitbar/i.test(e.type)
+        });
+      });
+      (rawData.foalPastureEvents || []).forEach(e => {
+        const hasCountdown = e.daysLeft !== '' && e.daysLeft !== null && e.daysLeft !== undefined;
+        items.push({
+          horse: e.horseName, breed: '',
+          eventType: 'Pasture Return',
+          details: e.status, targetDate: e.date,
+          sortDays: hasCountdown ? parseFloat(e.daysLeft) : Infinity,
+          daysLeftLabel: hasCountdown ? e.daysLeft : null,
+          isRideable: false
+        });
+      });
+      (rawData.breedingCheckEvents || []).forEach(e => {
+        items.push({
+          horse: e.name, breed: e.breed,
+          eventType: 'Breeding Check',
+          details: e.phase, targetDate: e.targetDate,
+          sortDays: parseFloat(e.daysLeft), daysLeftLabel: e.daysLeft,
+          isRideable: false
+        });
+      });
+      // Health Check Events
+      (rawData.healthCheckEvents || []).forEach(e => {
+        items.push({
+          horse: e.name, breed: e.breed,
+          eventType: 'Health Check',
+          details: e.missingTests || 'Missing tests',
+          targetDate: e.dueDate || '—',
+          sortDays: parseFloat(e.daysLeft) || 999,
+          daysLeftLabel: e.daysLeft || '—',
+          isRideable: false
+        });
+      });
+
+      if (f !== 'all') items = items.filter(it => !it.breed || it.breed === f);
+      if (search) items = items.filter(it => it.horse.toLowerCase().includes(search));
+      if (datesQuickFilter === 'pasture') items = items.filter(it => it.eventType === 'Pasture Return');
+      else if (datesQuickFilter === 'rideable') items = items.filter(it => it.isRideable);
+      else if (datesQuickFilter === 'checks') items = items.filter(it => it.eventType === 'Breeding Check');
+      else if (datesQuickFilter === 'health') items = items.filter(it => it.eventType === 'Health Check');
+
+      items.sort((a, b) => a.sortDays - b.sortDays);
+
+      const badgeClass = { 'Growth': 'badge-growth', 'Pasture Return': 'badge-pasture', 'Clinic/Approval': 'badge-clinic', 'Breeding Check': 'badge-check', 'Health Check': 'badge-warn' };
+      const tb = document.querySelector('#timelineTable tbody');
+      const visible = items.slice(0, datesShowCount);
+      tb.innerHTML = visible.map(it => {
+        const dl = it.daysLeftLabel !== null ? parseFloat(it.daysLeftLabel) : null;
+        const urgent = dl !== null && dl >= 0 && dl < 3;
+        let countdown;
+        if (dl === null) countdown = '—';
+        else if (dl < 0) countdown = '<span class="badge badge-danger">' + Math.abs(dl).toFixed(1) + 'd overdue</span>';
+        else if (urgent) countdown = '<span class="badge badge-warn">in ' + it.daysLeftLabel + 'd</span>';
+        else countdown = 'in ' + it.daysLeftLabel + 'd';
+        const detailsCell = it.details === 'Notice' ? '<span class="badge badge-warn">Notice</span>' : it.details;
+        return '<tr><td><b>' + it.horse + '</b></td><td><span class="badge ' + (badgeClass[it.eventType] || '') + '">' + it.eventType + '</span></td><td>' + detailsCell + '</td><td>' + it.targetDate + '</td><td>' + countdown + '</td></tr>';
+      }).join('') || '<tr><td colspan="5" style="text-align:center;opacity:0.5;">No data</td></tr>';
+
+      document.getElementById('datesShowMoreBtn').style.display = items.length > datesShowCount ? 'inline-block' : 'none';
+    }
+
+    /* ============================================================
+       TAB 7: FINANCES
+    ============================================================ */
+    function renderFinances(f) {
+      const d = rawData;
+
+      // Holdings
+      const bal = d.balance || {};
+      const xp = d.xp || {};
+      document.getElementById('balanceStats').innerHTML =
+        '<div class="stat-card highlight"><div class="stat-value">' + fmt(bal.netWorth || 0) + '</div><div class="stat-label">Net Worth</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + fmt(bal.hrc || 0) + '</div><div class="stat-label">HRC (Cash + Savings)</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + fmt(xp.savings || 0) + '</div><div class="stat-label">Savings</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + fmt(bal.dp || 0) + '</div><div class="stat-label">DP</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + fmt(bal.ft || 0) + '</div><div class="stat-label">FT</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + fmt(bal.wt || 0) + '</div><div class="stat-label">WT</div></div>';
+
+      // Daily Passive Income + Savings Interest Breakdown
+      const dpi = d.dailyPassiveIncome || {};
+      const interest = d.interest || {};
+      document.getElementById('passiveIncomeStats').innerHTML =
+        '<div class="stat-card highlight"><div class="stat-value">' + fmt(dpi.totalDaily || 0) + '</div><div class="stat-label">Daily Total</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + fmt(dpi.choresDaily || 0) + '</div><div class="stat-label">Chores / Day</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + fmt(dpi.interestDaily || 0) + '</div><div class="stat-label">Interest / Day</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + fmt(interest.savings || 0) + '</div><div class="stat-label">Savings Capital</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + (interest.rate || 0) + '%</div><div class="stat-label">Effective Rate</div></div>' +
+        (interest.tip ? '<div style="grid-column:1/-1;font-size:10px;color:var(--hr-text-muted);background:var(--hr-bg);border-radius:8px;padding:8px 10px;margin-top:2px;">' + interest.tip + '</div>' : '');
+
+      // Net Worth Trend
+      drawNetWorth();
+
+      const ttb = document.querySelector('#trendTable tbody'); ttb.innerHTML = '';
+      (d.netWorthTrend || []).filter(t => t.netWorth > 0).slice().reverse().forEach(t => {
+        ttb.innerHTML += '<tr><td>' + t.date + '</td><td>' + fmt(t.netWorth) + '</td><td class="amount ' + amtClass(t.changeDay || 0) + '">' + fmt(t.changeDay || 0) + '</td></tr>';
+      });
+
+      // Income/Expenses
+      drawIncomeExpenses();
+
+      const ebt = d.earningsByType || {};
+      const itb = document.querySelector('#incomeTable tbody'); itb.innerHTML = '';
+      (ebt.income || []).forEach(e => {
+        itb.innerHTML += '<tr><td><span class="type-tag" style="background:var(--hr-success);">' + labelCase(e.type) + '</span></td><td>' + e.count + '</td><td class="amount positive">' + fmt(e.total) + '</td></tr>';
+      });
+      itb.innerHTML += '<tr style="font-weight:700;background:var(--hr-success-bg);"><td>TOTAL</td><td></td><td class="amount positive">' + fmt(ebt.totalIncome || 0) + '</td></tr>';
+
+      const etb = document.querySelector('#expenseTable tbody'); etb.innerHTML = '';
+      (ebt.expenses || []).forEach(e => {
+        etb.innerHTML += '<tr><td><span class="type-tag" style="background:var(--hr-danger);">' + labelCase(e.type) + '</span></td><td>' + e.count + '</td><td class="amount negative">' + fmt(e.total) + '</td></tr>';
+      });
+      etb.innerHTML += '<tr style="font-weight:700;background:color-mix(in srgb, var(--accent-2) 8%, transparent);"><td>TOTAL</td><td></td><td class="amount negative">' + fmt(ebt.totalExpenses || 0) + '</td></tr>';
+
+      // Breeding Costs
+      const bc = d.breedingCosts || {};
+      const bd = bc.breakdown || {};
+      document.getElementById('breedingCostStats').innerHTML =
+        '<div class="stat-card" style="border-left:3px solid var(--hr-danger);"><div class="stat-value negative">' + fmt(bc.totalCost || 0) + '</div><div class="stat-label">Total Breeding Costs</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + fmt(bd.ultrasound?.total || 0) + '</div><div class="stat-label">Ultrasound</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + fmt(bd.colour_test?.total || 0) + '</div><div class="stat-label">Colour Tests</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + fmt(bd.stud_out?.total || 0) + '</div><div class="stat-label">Stud Fees</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + fmt(bd.foal_pastures?.total || 0) + '</div><div class="stat-label">Foal Pastures</div></div>';
+
+      // Market & Sales
+      const mv = d.marketValueEstimate || {};
+      document.getElementById('marketValueStats').innerHTML =
+        '<div class="stat-card highlight"><div class="stat-value">' + fmt(mv.avgPrice || 0) + '</div><div class="stat-label">Avg Sale Price</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + (mv.totalSales || 0) + '</div><div class="stat-label">Sold</div></div>' +
+        '<div class="stat-card"><div class="stat-value">' + (mv.totalPurchases || 0) + '</div><div class="stat-label">Purchased</div></div>' +
+        '<div class="stat-card"><div class="stat-value positive">' + fmt(mv.totalRevenue || 0) + '</div><div class="stat-label">Revenue</div></div>' +
+        '<div class="stat-card"><div class="stat-value negative">' + fmt(mv.totalSpent || 0) + '</div><div class="stat-label">Spent</div></div>' +
+        '<div class="stat-card"><div class="stat-value ' + amtClass(mv.netTradeBalance || 0) + '">' + fmt(mv.netTradeBalance || 0) + '</div><div class="stat-label">Net Trade</div></div>';
+
+      const mvtb = document.querySelector('#marketValueTable tbody'); mvtb.innerHTML = '';
+      (mv.byBreed || []).forEach(b => {
+        const maxCell = b.maxPrice === mv.highestSale ? '<span class="badge badge-gold">' + fmt(b.maxPrice) + '</span>' : fmt(b.maxPrice);
+        mvtb.innerHTML += '<tr><td><b>' + b.breed + '</b></td><td>' + b.count + '</td><td>' + fmt(b.avgPrice) + '</td><td>' + fmt(b.minPrice) + '</td><td>' + maxCell + '</td></tr>';
+      });
+
+      const rstb = document.querySelector('#recentSalesTable tbody'); rstb.innerHTML = '';
+      (mv.recentSales || []).forEach(s => {
+        const priceCell = (mv.highestSale && s.price === mv.highestSale) ? '<span class="badge badge-gold">' + fmt(s.price) + '</span>' : fmt(s.price);
+        rstb.innerHTML += '<tr><td>' + s.date + '</td><td><b>' + s.name + '</b></td><td>' + s.breed + '</td><td>' + s.buyer + '</td><td class="amount positive">' + priceCell + '</td></tr>';
+      });
+      if (!(mv.recentSales || []).length) rstb.innerHTML = '<tr><td colspan="5" style="text-align:center;opacity:0.5;">No sales</td></tr>';
+
+      // ROI by Sire Line
+      const roiTb = document.querySelector('#roiTable tbody'); roiTb.innerHTML = '';
+      (d.roiByLine || []).slice(0, 15).forEach(l => {
+        if (l.totalEarnings <= 0) return;
+        roiTb.innerHTML += '<tr><td><b>' + l.line + '</b></td><td>' + l.horseCount + '</td><td class="amount positive">' + fmt(l.totalEarnings) + '</td><td>' + fmt(l.avgEarnings) + '</td></tr>';
+      });
+
+      // Activity Log
+      renderActivity();
+    }
+
+    /* ============================================================
+       TAB 8: RECORDS
+    ============================================================ */
+    function renderRecords(f) {
+      const d = rawData;
+      const records = d.records || {};
+
+      const grid = document.getElementById('recordsGrid');
+      grid.innerHTML = '';
+
+      const recordItems = [
+        { icon: 'trophy', label: 'Highest GP', value: records.highestGP?.value || '—', horse: records.highestGP?.name || '', breed: records.highestGP?.breed || '' },
+        { icon: 'star', label: 'Most VG', value: records.highestVG?.value || '—', horse: records.highestVG?.name || '', breed: records.highestVG?.breed || '' },
+        { icon: 'ruler', label: 'Best Confo', value: records.bestConfo?.value || '—', horse: records.bestConfo?.name || '', breed: records.bestConfo?.breed || '' },
+        { icon: 'coins', label: 'Highest Earnings', value: fmt(records.highestEarnings?.value || 0), horse: records.highestEarnings?.name || '', breed: records.highestEarnings?.breed || '' },
+        { icon: 'crown', label: 'Most Successful Stud', value: records.mostSuccessfulStud?.value || '—', horse: records.mostSuccessfulStud?.name || '', breed: records.mostSuccessfulStud?.breed || '' },
+        { icon: 'mare', label: 'Best Mare', value: records.bestMare?.value || '—', horse: records.bestMare?.name || '', breed: records.bestMare?.breed || '' },
+        { icon: 'medal', label: 'Most Titles', value: records.mostTitles?.value || '—', horse: records.mostTitles?.name || '', breed: records.mostTitles?.breed || '' },
+        { icon: 'clock', label: 'Oldest Horse', value: records.oldestHorse?.value || '—', horse: records.oldestHorse?.name || '', breed: records.oldestHorse?.breed || '' },
+        { icon: 'dna', label: 'Highest Produced GP', value: records.highestProducedGP?.value || '—', horse: records.highestProducedGP?.name || '', breed: '' }
+      ];
+
+      recordItems.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'record-card';
+        card.innerHTML = `
+          <div class="record-label">${dashboardIcon(item.icon)}${item.label}</div>
+          <div class="record-value">${item.value}</div>
+          ${item.horse ? `<div class="record-horse">${item.horse}${item.breed ? '<span class="record-breed">' + item.breed + '</span>' : ''}</div>` : ''}
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    /* ============================================================
+       CHARTS
+    ============================================================ */
+const ICONS = {
+  house: '<div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/><path d="M3 10a2 2 0 0 1 .709-1.528l7-5.999a2 2 0 0 1 2.582 0l7 5.999A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div>',
+  
+  mars: '<div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="m21 3-6.75 6.75"/><circle cx="10" cy="14" r="6"/></svg></div>',
+  
+  venus: '<div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15v7"/><path d="M9 19h6"/><circle cx="12" cy="9" r="6"/></svg></div>',
+  
+  horse: '<div class="stat-icon"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icon-tabler-horse-toy"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M3.5 17.5c5.667 4.667 11.333 4.667 17 0"/><path d="M19 18.5l-2 -8.5l1 -2l2 1l1.5 -1.5l-2.5 -4.5c-5.052 .218 -5.99 3.133 -7 6h-6a3 3 0 0 0 -3 3"/><path d="M5 18.5l2 -9.5"/><path d="M8 20l2 -5h4l2 5"/></svg></div>',
+  
+  scale: '<div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg></div>',
+
+  heartbeat: '<div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19.5 13.572l-7.5 7.428l-2.896 -2.868m-6.117 -8.104a5 5 0 0 1 9.013 -3.022a5 5 0 1 1 7.5 6.572"/><path d="M3 13h2l2 3l2 -6l1 3h3"/></svg></div>',
+
+  hearts: '<div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.017 18l-2.017 2l-7.5 -7.428a5 5 0 1 1 7.5 -6.566a5 5 0 0 1 8.153 5.784"/><path d="M15.99 20l4.197 -4.223a2.81 2.81 0 0 0 0 -3.948a2.747 2.747 0 0 0 -3.91 -.007l-.28 .282l-.279 -.283a2.747 2.747 0 0 0 -3.91 -.007a2.81 2.81 0 0 0 -.007 3.948l4.182 4.238l.007 0"/></svg></div>',
+
+  horseshoe: '<div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 17c.5 -1.242 2 -2 2 -5s-1 -9 -9 -9s-9 6 -9 9s1.495 3.749 2 5l-2 1l2 3l2.406 -1.147c1.25 -.714 1.778 -2.08 1.203 -3.363c-1.078 -2.407 -1.609 -8.49 3.391 -8.49s4.469 6.083 3.39 8.49c-.574 1.284 -.045 2.649 1.204 3.363l2.406 1.147l2 -3l-2 -1"/></svg></div>',
+
+  homeEco: '<div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11l-8 -8l-9 9h2v7a2 2 0 0 0 2 2h5"/><path d="M9 21v-6a2 2 0 0 1 2 -2h2c.325 0 .631 .077 .902 .215"/><path d="M16 22s0 -2 3 -4"/><path d="M19 21a3 3 0 0 1 0 -6h3v3a3 3 0 0 1 -3 3"/></svg></div>',
+
+  stethoscope: '<div class="stat-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4h-1a2 2 0 0 0 -2 2v3.5a5.5 5.5 0 0 0 11 0v-3.5a2 2 0 0 0 -2 -2h-1"/><path d="M8 15a6 6 0 1 0 12 0v-3"/><path d="M11 3v2"/><path d="M6 3v2"/><path d="M18 10a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/></svg></div>'
+};
+
+    // Liest eine Theme-Bridge-CSS-Variable zur Laufzeit aus (Google Charts kann
+    // keine var()-Referenzen verarbeiten, braucht echte Farbwerte).
+    function themeColor_(varName, fallback) {
+      const v = getComputedStyle(document.documentElement).getPropertyValue(varName).trim();
+      return v || getComputedStyle(document.body).color;
+    }
+    const THEME_PALETTE_ = [
+      themeColor_('--primary-dark'),
+      themeColor_('--secondary-base'),
+      themeColor_('--accent-3'),
+      themeColor_('--tertiary-deep'),
+      themeColor_('--primary-mid'),
+      themeColor_('--accent-6'),
+      themeColor_('--accent-1'),
+      themeColor_('--accent-4'),
+      themeColor_('--secondary-base'),
+      themeColor_('--primary-deep')
+    ];
+    const CHART_COLORS = THEME_PALETTE_;
+    const BREED_COLORS = {};
+    function getBreedColor(breed) {
+      if (!BREED_COLORS[breed]) {
+        const palette = THEME_PALETTE_.slice().reverse();
+        BREED_COLORS[breed] = palette[Object.keys(BREED_COLORS).length % palette.length];
+      }
+      return BREED_COLORS[breed];
+    }
+
+    function labelCase(s) { return String(s).split('_').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' '); }
+
+    const CHART_BASE = {
+      backgroundColor: 'transparent', fontName: 'Arial',
+      legend: { textStyle: { color: themeColor_('--primary-dark'), fontSize: 11 } },
+      titleTextStyle: { color: themeColor_('--primary-dark'), fontSize: 13, bold: true },
+      chartArea: { left: 80, right: 30, top: 40, bottom: 40 },
+      tooltip: { textStyle: { fontSize: 12 } }
+    };
+
+    function drawBreedDistribution(f) {
+      if (!chartsReady || typeof google === 'undefined') return;
+      const el = document.getElementById('chartBreedDistribution');
+      if (!el) return;
+      const bs = rawData.breedStats;
+      const dt = new google.visualization.DataTable();
+      dt.addColumn('string', 'Breed');
+      dt.addColumn('number', 'Horses');
+      const colors = [];
+      for (let b in bs) {
+        if (f !== 'all' && b !== f) continue;
+        dt.addRow([b, bs[b].total]);
+        colors.push(getBreedColor(b));
+      }
+      // 1. Summe aller Pferde im Chart berechnen
+      let totalHorses = 0;
+      for (let i = 0; i < dt.getNumberOfRows(); i++) {
+        totalHorses += dt.getValue(i, 1);
+      }
+
+      // 2. Den Wert im HTML-Span aktualisieren
+      const totalElem = document.querySelector('.donut-total-val');
+      if (totalElem) {
+        totalElem.textContent = totalHorses;
+      }
+
+      // 3. Chart zeichnen
+      new google.visualization.PieChart(el).draw(dt, {
+        ...CHART_BASE,
+        pieHole: 0.72,
+        pieSliceText: 'none',
+        pieSliceBorderColor: 'transparent',
+        colors: colors,
+        chartArea: { left: '10%', right: '10%', top: 15, bottom: 45, width: '100%', height: '80%' },
+        legend: {
+          position: 'bottom',
+          alignment: 'center',
+          textStyle: { fontSize: 10, color: themeColor_('--primary-dark'), fontName: 'Arial' }
+        }
+      });
+    }
+
+    function drawIncomeExpenses() {
+      if (!chartsReady || typeof google === 'undefined') return;
+      const el = document.getElementById('chartIncomeExpenses');
+      if (!el) return;
+      const ebt = rawData.earningsByType || {};
+      const dt = new google.visualization.DataTable();
+      dt.addColumn('string', 'Type');
+      dt.addColumn('number', 'HRC');
+      dt.addColumn({ type: 'string', role: 'style' });
+      dt.addColumn({ type: 'string', role: 'tooltip' });
+      (ebt.income || []).forEach(e => dt.addRow([labelCase(e.type), e.total, themeColor_('--tertiary-deep'), labelCase(e.type) + ': ' + fmt(e.total) + ' HRC (' + e.count + 'x)']));
+      (ebt.expenses || []).forEach(e => dt.addRow([labelCase(e.type), Math.abs(e.total), themeColor_('--accent-2'), labelCase(e.type) + ': ' + fmt(Math.abs(e.total)) + ' HRC (' + e.count + 'x)']));
+      new google.visualization.BarChart(el).draw(dt, {
+        ...CHART_BASE, title: 'Income vs Expenses',
+        legend: 'none',
+        hAxis: { textStyle: { fontSize: 11 }, minValue: 0 },
+        vAxis: { textStyle: { fontSize: 11 } },
+        chartArea: { left: 110, right: 30, top: 35, bottom: 30 }
+      });
+    }
+
+    function drawNetWorth() {
+      if (!chartsReady || typeof google === 'undefined') return;
+      const el = document.getElementById('chartNetWorth');
+      if (!el) return;
+      const trend = rawData.netWorthTrend || [];
+      if (!trend.length) { el.innerHTML = '<p style="text-align:center;padding:40px;opacity:0.5;">No data</p>'; return; }
+      const dt = new google.visualization.DataTable();
+      dt.addColumn('string', 'Date');
+      dt.addColumn('number', 'Net Worth');
+      trend.forEach(t => dt.addRow([t.date, t.netWorth]));
+      new google.visualization.AreaChart(el).draw(dt, {
+        ...CHART_BASE, title: 'Net Worth Trend',
+        colors: [themeColor_('--secondary-base')], curveType: 'function', pointSize: 5,
+        areaOpacity: 0.15,
+        vAxis: { textStyle: { fontSize: 10 }, format: '#,###', minValue: 0 },
+        hAxis: { textStyle: { fontSize: 9 }, slantedText: true },
+        chartArea: { left: 80, right: 20, top: 35, bottom: 50 }
+      });
+    }
+
+    function drawGpScoreScatter(scoreType) {
+      if (!chartsReady || typeof google === 'undefined') return;
+      const el = document.getElementById('chartGpScore');
+      if (!el) return;
+      const a = rawData.analytics || {};
+      const breedF = document.getElementById('breedFilter').value;
+      let pts = ((scoreType === 'comp' ? a.comp?.allScores : a.confo?.allScores) || []).slice();
+
+      // Filter by breed
+      if (breedF !== 'all') pts = pts.filter(h => h.breed === breedF);
+
+      if (!pts.length) { el.innerHTML = '<p style="text-align:center;padding:40px;opacity:0.5;">No data</p>'; return; }
+
+      const dt = new google.visualization.DataTable();
+      dt.addColumn('number', 'GP');
+      dt.addColumn('number', 'Score');
+      dt.addColumn({ type: 'string', role: 'tooltip' });
+      pts.forEach(p => dt.addRow([p.gp, p.score, p.name + '\nGP: ' + fmt(p.gp) + '\nScore: ' + p.score.toFixed(3)]));
+
+      const gps = pts.map(p => p.gp), scs = pts.map(p => p.score);
+      const gpStep = niceStep_((Math.max(...gps) - Math.min(...gps)) / 10) * 10 || 10;
+      const gpMin = Math.max(0, Math.floor((Math.min(...gps) - gpStep) / gpStep) * gpStep);
+      const gpMax = Math.ceil((Math.max(...gps) + gpStep) / gpStep) * gpStep;
+      const scStep = niceStep_(Math.max(...scs) - Math.min(...scs));
+      const scMin = Math.max(0, Math.floor((Math.min(...scs) - 1) / scStep) * scStep);
+      const scMax = Math.min(100, Math.ceil((Math.max(...scs) + 1) / scStep) * scStep);
+
+      new google.visualization.ScatterChart(el).draw(dt, {
+        ...CHART_BASE, title: 'GP total vs ' + (scoreType === 'confo' ? 'Confo' : 'Comp') + ' Score',
+        legend: 'none', colors: [themeColor_('--primary-dark')],
+        pointSize: 5,
+        hAxis: { title: 'GP total', viewWindow: { min: gpMin, max: gpMax }, gridlines: { count: 6 }, textStyle: { fontSize: 10 }, titleTextStyle: { fontSize: 11 } },
+        vAxis: { title: 'Highest Score', viewWindow: { min: scMin, max: scMax }, textStyle: { fontSize: 10 }, titleTextStyle: { fontSize: 11 } },
+        chartArea: { left: 60, right: 20, top: 35, bottom: 50 }
+      });
+    }
+
+    /* ============================================================
+       ACTIVITY LOG
+    ============================================================ */
+    function setSort(key) {
+      if (activitySort.key === key) activitySort.dir *= -1;
+      else activitySort = { key: key, dir: -1 };
+      activityPageNum = 0;
+      renderActivity();
+    }
+
+    function activityFilterChanged() {
+      activityPageNum = 0;
+      renderActivity();
+    }
+
+    function activityPage(delta) {
+      activityPageNum = Math.max(0, activityPageNum + delta);
+      renderActivity();
+    }
+
+    function renderActivity() {
+      let items = (rawData.recentActivity || []).slice();
+      const typeFilter = document.getElementById('activityTypeFilter').value;
+      if (typeFilter !== 'all') items = items.filter(a => a.type === typeFilter);
+      const query = document.getElementById('activitySearch').value.trim().toLowerCase();
+      if (query) items = items.filter(a => (a.horse || '').toLowerCase().includes(query) || (a.detail || '').toLowerCase().includes(query) || (a.typeLabel || '').toLowerCase().includes(query));
+
+      items.sort((a, b) => {
+        if (activitySort.key === 'amount') return (a.amount - b.amount) * activitySort.dir;
+        return 0;
+      });
+      if (activitySort.key === 'date' && activitySort.dir === 1) items.reverse();
+
+      document.getElementById('sortIcon-date').innerText = activitySort.key === 'date' ? (activitySort.dir === -1 ? '▼' : '▲') : '';
+      document.getElementById('sortIcon-amount').innerText = activitySort.key === 'amount' ? (activitySort.dir === -1 ? '▼' : '▲') : '';
+
+      const totalPages = Math.max(1, Math.ceil(items.length / ACTIVITY_PAGE_SIZE));
+      activityPageNum = Math.min(activityPageNum, totalPages - 1);
+      const pageItems = items.slice(activityPageNum * ACTIVITY_PAGE_SIZE, (activityPageNum + 1) * ACTIVITY_PAGE_SIZE);
+
+      const tb = document.querySelector('#activityTable tbody');
+      tb.innerHTML = pageItems.map(a => {
+        return '<tr><td>' + a.date + '</td><td><span class="type-tag type-' + a.type + '">' + a.typeLabel + '</span></td><td>' + (a.horse || '-') + '</td><td>' + a.detail + '</td><td class="amount ' + amtClass(a.amount) + '">' + fmt(a.amount) + '</td></tr>';
+      }).join('') || '<tr><td colspan="5" style="text-align:center;opacity:0.5;">No activity</td></tr>';
+
+      document.getElementById('activityPageInfo').textContent = 'Page ' + (activityPageNum + 1) + ' / ' + totalPages + ' (' + items.length + ' entries)';
+      document.getElementById('activityPrevBtn').disabled = activityPageNum === 0;
+      document.getElementById('activityNextBtn').disabled = activityPageNum >= totalPages - 1;
+      document.getElementById('activityPrevBtn').style.opacity = activityPageNum === 0 ? '0.4' : '1';
+      document.getElementById('activityNextBtn').style.opacity = activityPageNum >= totalPages - 1 ? '0.4' : '1';
     }
   </script>
+<div id="dashboardHelpPanel" popover="auto" role="dialog" aria-label="Dashboard help">
+<button type="button" id="dashboardHelpClose" aria-label="Close dashboard help">Close</button>
+<?!= renderModalHelp('dashboard').replace('<details', '<details open'); ?>
+</div>
+<script>
+(() => {
+  const button = document.getElementById('dashboardHelpButton');
+  const panel = document.getElementById('dashboardHelpPanel');
+  let pinned = false, timer;
+  const open = () => { clearTimeout(timer); if (!panel.matches(':popover-open')) panel.showPopover(); };
+  const close = () => { clearTimeout(timer); pinned = false; if (panel.matches(':popover-open')) panel.hidePopover(); };
+  const leave = () => { timer = setTimeout(() => { if (!pinned && !panel.matches(':hover') && !button.matches(':hover') && !panel.contains(document.activeElement)) close(); }, 220); };
+  button.addEventListener('pointerenter', event => { if (event.pointerType === 'mouse') open(); });
+  button.addEventListener('pointerleave', leave);
+  panel.addEventListener('pointerenter', () => clearTimeout(timer));
+  panel.addEventListener('pointerleave', leave);
+  button.addEventListener('click', () => { if (pinned) close(); else { open(); pinned = true; } });
+  document.getElementById('dashboardHelpClose').addEventListener('click', () => { close(); button.focus(); });
+  panel.addEventListener('toggle', () => { const visible = panel.matches(':popover-open'); button.setAttribute('aria-expanded',String(visible)); if (!visible) pinned = false; });
+})();
+</script>
 </body>
 </html>

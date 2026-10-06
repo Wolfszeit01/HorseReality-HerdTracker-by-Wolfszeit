@@ -1,0 +1,46 @@
+<!doctype html><html lang="en"><head><meta name="viewport" content="width=device-width,initial-scale=1">
+<?!= renderThemeVariables(); ?>
+<style>
+*{box-sizing:border-box}body{margin:0;padding:20px;font:14px/1.4 Arial,sans-serif;background:var(--primary-ultramuted);color:var(--primary-deep)}h1{font-size:22px;margin:0 0 5px}p{margin:0 0 14px}label{display:block;font-weight:bold;margin:12px 0 4px}input,select,button{font:inherit;color:inherit}input[type=text],select{width:100%;padding:9px;border:1px solid var(--secondary-base);border-radius:6px;background:var(--neutrals-white)}button{padding:9px 12px;border:1px solid var(--primary-dark);border-radius:6px;background:var(--neutrals-white);cursor:pointer}button.primary{background:var(--primary-dark);color:var(--neutrals-white)}button:disabled{opacity:.5;cursor:wait}.layout{display:grid;grid-template-columns:300px 1fr;gap:18px}.panel{background:var(--neutrals-white);padding:16px;border-radius:12px;min-width:0}.colors label{display:flex;justify-content:space-between;align-items:center;font-weight:normal;margin:8px 0}.colors input{width:64px;height:32px;padding:2px;border:1px solid var(--secondary-base);border-radius:4px;background:transparent}.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}small{font-size:12px;display:block;margin-top:8px}.status{white-space:pre-wrap;min-height:20px;margin-top:10px}#preview{background:var(--primary-ultramuted);color:var(--primary-deep);border:1px solid var(--secondary-light);border-radius:10px;overflow:hidden}#preview .header{background:var(--primary-dark);color:var(--secondary-base);padding:20px;font-size:20px;letter-spacing:1px}#preview .content{padding:15px}#preview .card{padding:14px;background:var(--neutrals-white);border-radius:8px;margin-bottom:12px}#preview .sample-button{display:inline-block;background:var(--primary-dark);color:var(--neutrals-white);padding:8px 15px;border-radius:5px}#preview .badge{display:inline-block;background:var(--tertiary-light);color:var(--primary-deep);padding:4px 8px;border-radius:10px;margin:8px 0}table{border-collapse:collapse;width:100%;font-size:13px}th{background:var(--primary-deep);color:var(--neutrals-white);text-align:left;padding:8px}td{padding:8px}tr:nth-child(even){background:var(--primary-lightmuted)}tr:nth-child(odd){background:var(--primary-ultramuted)}#contrast{padding-left:18px;font-size:12px}#confirmDelete{padding:10px;border:1px solid var(--accent-2);margin-top:10px;border-radius:6px}input:focus-visible,button:focus-visible,select:focus-visible{outline:2px solid var(--secondary-base);outline-offset:2px}@media(max-width:650px){.layout{grid-template-columns:1fr}}
+</style></head><body>
+<h1>Theme Editor</h1><p>Create a theme for this spreadsheet. Lighter surfaces work best with the existing layouts. Standard themes stay unchanged.</p>
+<div class="layout"><section class="panel">
+<label for="source">Template / saved theme</label><select id="source" disabled></select><small id="mode">Loading…</small>
+<label for="name">Theme name</label><input id="name" type="text" maxlength="40" disabled>
+<div class="colors">
+<label>Main colour <input type="color" id="main" disabled></label>
+<label>Accent colour <input type="color" id="accent" disabled></label>
+<label>Surface colour <input type="color" id="background" disabled></label>
+<label>Text / table header <input type="color" id="text" disabled></label>
+<label>Positive / stats colour <input type="color" id="positive" disabled></label>
+</div>
+<small>Light and dark shades are generated automatically. Warning colours remain red and yellow.</small>
+<div class="actions"><button id="save" class="primary" disabled>Save &amp; Apply</button><button id="copy" disabled>New Copy</button><button id="activate" disabled>Activate Saved</button><button id="delete" disabled>Delete</button></div>
+<div id="confirmDelete" hidden>Delete this custom theme? If active, Ocean Blue will be applied.<div class="actions"><button id="yesDelete">Delete Theme</button><button id="noDelete">Cancel</button></div></div>
+</section><section class="panel">
+<h2 style="font-size:16px;margin:0 0 12px">Preview</h2>
+<div id="preview"><div class="header">YOUR STUD</div><div class="content"><div class="card"><strong>Daily Snapshot</strong><p>Account balance and herd overview</p><span class="sample-button">SAVE</span> <span class="badge">Good</span></div><table><thead><tr><th>Horse</th><th>GP</th><th>Role</th></tr></thead><tbody><tr><td>Sample Mare</td><td>720</td><td>Broodmare</td></tr><tr><td>Sample Stallion</td><td>750</td><td>Public Stud</td></tr></tbody></table></div></div>
+<ul id="contrast"></ul><small>Contrast hints use a 4.5:1 threshold for normal text. They cover these sample combinations, not every chart or status colour.</small>
+<small>Save &amp; Apply updates sheet styling and makes this theme active for all users of this spreadsheet. Reopen existing dialogs to see it. Themes can also be activated here later.</small>
+</section></div>
+<div id="status" class="status" role="status" aria-live="polite"></div><div class="actions"><button onclick="google.script.host.close()">Close</button></div>
+<script>
+const el=id=>document.getElementById(id), keys=['main','accent','background','text','positive'];let state=null,editId=null,busyFlag=false,timer,revision=0;
+function colors(){return Object.fromEntries(keys.map(k=>[k,el(k).value]));}
+function controls(){const off=busyFlag||!state;['source','name','save','copy',...keys].forEach(id=>el(id).disabled=off);el('activate').disabled=off||!el('source').value;el('delete').disabled=off||!editId;el('yesDelete').disabled=off;el('noDelete').disabled=off;}
+function busy(value){busyFlag=value;controls();}
+function error(err){busy(false);el('status').textContent=err.message||String(err);}
+function paint(result){Object.entries(result.palette).forEach(([group,values])=>Object.entries(values).forEach(([key,value])=>el('preview').style.setProperty('--'+(group==='accents'?key.replace('accent','accent-'):group+'-'+key),value)));el('contrast').replaceChildren(...result.contrast.map(item=>{const li=document.createElement('li');li.textContent=item.label+': '+item.ratio.toFixed(2)+':1 — '+(item.ratio>=4.5?'good contrast':'low contrast; consider adjusting colours');return li;}));}
+function preview(){const version=++revision;google.script.run.withSuccessHandler(result=>{if(version===revision)paint(result);}).withFailureHandler(err=>{if(version===revision)error(err);}).previewCustomTheme(colors());}
+function select(){const item=state.themes.find(t=>t.id===el('source').value);if(!item)return;clearTimeout(timer);revision++;editId=item.custom?item.id:null;el('name').value=item.custom?item.name:(item.name+' copy').slice(0,40);keys.forEach(k=>el(k).value=item.colors[k]);el('mode').textContent=editId?'Editing a saved custom theme.':'Creating a custom theme from these starting colours.';el('confirmDelete').hidden=true;controls();preview();}
+function load(next,selected){state=next;el('source').replaceChildren(...state.themes.map(item=>{const option=document.createElement('option');option.value=item.id;option.textContent=item.name+(item.id===state.active?' (active)':'')+(item.custom?'':' · standard');return option;}));el('source').value=selected||state.active;busy(false);select();}
+el('source').onchange=select;
+keys.forEach(k=>el(k).oninput=()=>{revision++;clearTimeout(timer);timer=setTimeout(preview,180);});
+el('copy').onclick=()=>{editId=null;el('name').value=(el('name').value+' copy').slice(0,40);el('mode').textContent='Creating a new custom theme.';el('confirmDelete').hidden=true;controls();};
+el('save').onclick=()=>{if(!el('name').value.trim()){el('status').textContent='Enter a theme name.';return;}busy(true);el('status').textContent='Saving and applying theme… This may take a moment.';google.script.run.withSuccessHandler(next=>{load(next);el('status').textContent='Theme saved and activated. Reopen existing dialogs. Any sheet styling errors are reported separately.';}).withFailureHandler(error).saveAndApplyCustomTheme({id:editId,name:el('name').value,colors:colors()});};
+el('activate').onclick=()=>{busy(true);el('status').textContent='Applying saved theme…';google.script.run.withSuccessHandler(next=>{load(next);el('status').textContent='Saved theme activated. Reopen existing dialogs.';}).withFailureHandler(error).activateEditorTheme(el('source').value);};
+el('delete').onclick=()=>el('confirmDelete').hidden=false;
+el('noDelete').onclick=()=>el('confirmDelete').hidden=true;
+el('yesDelete').onclick=()=>{busy(true);el('status').textContent='Deleting theme…';google.script.run.withSuccessHandler(next=>{load(next);el('status').textContent='Custom theme deleted.';}).withFailureHandler(error).deleteCustomTheme(editId);};
+google.script.run.withSuccessHandler(load).withFailureHandler(error).themeEditorState();
+</script></body></html>

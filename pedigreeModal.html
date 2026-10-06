@@ -1,563 +1,1099 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <base target="_top">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;600;700&display=swap" rel="stylesheet">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Pedigree</title>
+
+  <?!= renderThemeVariables(); ?>
+
   <style>
     :root {
-      --hr-purple:       #0b2c41;
-      --hr-purple-mid:   #081b28;
-      --hr-purple-light: #407f9c;
-      --hr-gold:         #ffa100;
-      --hr-bg:           #e4e8ec;
-      --hr-card:         #f5f7f9;
-      --hr-white:        #ffffff;
-      --hr-text:         #0b2c41;
-      --hr-text-muted:   #5a7a8a;
-      --hr-border:       rgba(255, 161, 0, 0.3);
+      --font-brand: 'Sweden Sans', sans-serif;
+      --fw-semibold: 600;
+      --ls-brand: 0.15em;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    /* ══════════════════════════════════════════════════════════════
+       2. BASIS
+       ══════════════════════════════════════════════════════════════ */
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     body {
-      font-family: 'Roboto', sans-serif;
-      background: var(--hr-bg);
-      padding: 10px;
-      color: var(--hr-text);
-      font-size: 12px;
+      font-family: 'Sweden Sans', sans-serif;
+      letter-spacing: normal;
+      line-height: 1.5;
+      background: var(--neutrals-white);
+      padding: 15px;
+      color: var(--primary-deep);
     }
 
-    .card {
-      background: var(--hr-card);
-      border-radius: 14px;
-      padding: 0;
-      box-shadow: 0 10px 32px rgba(8,27,40,0.18);
-      border: 1px solid var(--hr-border);
-      min-height: 800px;
+    ::-webkit-scrollbar {
+      width: 5px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--secondary-base);
+      border-radius: 10px;
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       3. ÄUSSERER RAHMEN
+       ══════════════════════════════════════════════════════════════ */
+    .modal-frame {
+      background-color: var(--primary-ultramuted);
+      border-radius: 12px 12px 0 0;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+      overflow: hidden !important;
+      position: relative;
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       4. HEADER
+       ══════════════════════════════════════════════════════════════ */
+    .modal-header {
+      background: var(--primary-dark);
+      border-radius: 12px 12px 0 0 !important;
+      padding: 16px 0 0 0;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      box-sizing: border-box;
+      min-height: 110px;
+    }
+
+    .header-top-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      padding: 0 20px;
+      margin-bottom: 16px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      text-align: left;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .stuteri-logo-left {
+      height: 42px;
+      width: auto;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
+    }
+
+    .brand-text-stacked {
       display: flex;
       flex-direction: column;
-      overflow: hidden;
+      justify-content: center;
+      line-height: 1;
     }
 
-    .header {
-      background: var(--hr-purple);
-      color: #ffffff;
-      padding: 14px 16px 10px;
-      text-align: center;
-      border-bottom: 2px solid var(--hr-gold);
-      flex-shrink: 0;
-    }
-    .header h1 {
-      font-size: 15px;
-      font-weight: 700;
-      letter-spacing: 1.5px;
-      text-transform: uppercase;
-    }
-    .header p {
-      font-size: 9px;
-      opacity: 0.7;
-      letter-spacing: 2px;
-      text-transform: uppercase;
-      margin-top: 2px;
-    }
-
-    .tabs {
-      display: flex;
-      flex-shrink: 0;
-      background: var(--hr-purple-mid);
-    }
-    .tab {
-      flex: 1;
-      padding: 9px 4px;
-      border: none;
-      background: transparent;
-      color: rgba(255,255,255,0.6);
-      cursor: pointer;
-      font-size: 9px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      font-family: 'Roboto', sans-serif;
+    .header-brand-title {
+      font-family: 'Sweden Sans', sans-serif;
+      font-size: 0.90rem;
       font-weight: 600;
-      transition: all 0.2s;
-      border-bottom: 2px solid transparent;
-    }
-    .tab:hover { color: rgba(255,255,255,0.9); }
-    .tab.active {
-      background: var(--hr-card);
-      color: var(--hr-text);
-      border-bottom: 2px solid var(--hr-gold);
+      color: var(--secondary-base);
+      letter-spacing: 0.15em;
+      line-height: 1.2;
+      text-transform: uppercase;
+      text-align: left;
     }
 
-    .content {
-      background: var(--hr-card);
-      padding: 14px;
-      flex-grow: 1;
-      overflow-y: auto;
-      display: none;
+    .stuteri-text-sub {
+      font-family: 'Elometha', cursive;
+      font-weight: 400;
+      letter-spacing: normal;
+      line-height: 1.2;
+      color: var(--neutrals-white);
+      font-size: 1rem;
+      margin-top: 2px;
+      pointer-events: none;
+      white-space: nowrap;
+      text-align: center;
     }
-    .content.active { display: block; }
-    .content::-webkit-scrollbar { width: 5px; }
-    .content::-webkit-scrollbar-thumb { background: var(--hr-gold); border-radius: 10px; }
+
+    .header-center {
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 40px;
+    }
+
+    .title-container {
+      position: relative;
+      display: inline-block;
+      margin: 0;
+    }
+
+    .title-container h1 {
+      font-family: 'Sweden Sans', sans-serif;
+      font-weight: 600;
+      font-size: 1.40rem;
+      color: var(--secondary-base);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin: 0;
+      line-height: 1;
+    }
+
+    .header-right {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       6. CONTENT-BEREICH & KARTEN
+       ══════════════════════════════════════════════════════════════ */
+    .content-container {
+      padding: 20px;
+    }
+
+    .modal-card {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      margin-bottom: 16px;
+    }
 
     .section-title {
+      font-family: 'Sweden Sans', sans-serif;
       font-size: 10px;
       font-weight: 700;
-      color: var(--hr-text);
-      border-bottom: 1px solid rgba(255,161,0,0.3);
-      padding: 0 0 4px 0;
-      margin: 14px 0 10px 0;
+      color: var(--primary-dark);
       text-transform: uppercase;
-      letter-spacing: 1px;
+      letter-spacing: 2px;
       display: flex;
       align-items: center;
       gap: 6px;
+      margin-bottom: 20px;
     }
+
     .section-title::before {
-      content: '';
+      content: "";
       display: inline-block;
-      width: 3px; height: 12px;
-      background: var(--hr-gold);
+      width: 2px;
+      height: 12px;
+      background-color: var(--secondary-base);
       border-radius: 2px;
+    }
+
+    .helper-text {
+      font-family: 'Sweden Sans', sans-serif;
+      font-size: 11.5px;
+      color: var(--primary-mid);
+      margin-top: -8px;
+      margin-bottom: 20px;
+      line-height: 1.5;
+    }
+
+    /* Icons (Mars & Venus) — wie HerdDashboard: currentColor + inline SVG,
+       Farbe folgt Theme (Sire = primary-dark, Dam = secondary-base). */
+    .field-label-sm svg {
+      width: 13px;
+      height: 13px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
       flex-shrink: 0;
     }
-    .section-title:first-child { margin-top: 0; }
 
-    .subsection-title {
-      font-size: 9px;
-      font-weight: 700;
-      color: var(--hr-purple-light);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      margin: 10px 0 6px 0;
-      padding: 3px 6px;
-      background: rgba(255,161,0,0.08);
-      border-left: 2px solid var(--hr-gold);
-      border-radius: 0 3px 3px 0;
+    .field-label-sm.icon-mars { color: var(--primary-dark); }
+    .field-label-sm.icon-venus { color: var(--secondary-base); }
+
+    /* ══════════════════════════════════════════════════════════════
+       7. FORMULARELEMENTE
+       ══════════════════════════════════════════════════════════════ */
+    .modal-input {
+      width: 100%;
+      background: #FAF8F5;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 6px;
+      padding: 6px 8px;
+      font-size: 11.5px;
+      font-family: inherit;
+      color: #333;
     }
 
-    textarea {
+    .modal-input:focus {
+      outline: none;
+      border-color: var(--secondary-base);
+      background: #fff;
+    }
+
+    .modal-textarea {
       width: 100%;
-      height: 58px;
-      border: 1px solid #ddd;
+      background: #FAF8F5;
+      border: 1px solid rgba(0, 0, 0, 0.08);
       border-radius: 6px;
-      font-family: monospace;
-      font-size: 10px;
-      padding: 6px;
-      margin-bottom: 6px;
-      background: #fefefe;
+      padding: 8px 10px;
+      font-size: 11.5px;
+      color: #333;
       resize: vertical;
-      transition: border-color 0.2s;
+      min-height: 80px;
+      font-family: inherit;
     }
-    textarea:focus {
+
+    .modal-textarea:focus {
       outline: none;
-      border-color: #ffffff;
-      box-shadow: 0 0 0 2px rgba(255,161,0,0.15);
+      border-color: var(--secondary-base);
+      background: #fff;
     }
 
-    .field-label {
-      display: block;
-      font-size: 9px;
-      color: var(--hr-purple-light);
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin-bottom: 3px;
-      font-weight: 700;
-    }
-
-    input[type="text"] {
-      width: 100%;
-      padding: 4px 7px;
-      border: 1px solid #ddd;
-      border-radius: 5px;
-      font-size: 11px;
-      font-family: 'Roboto', sans-serif;
-      height: 25px;
-      background: var(--hr-white);
-      color: var(--hr-text);
-      transition: border-color 0.2s;
-    }
-    input[type="text"]:focus {
-      border-color: #ffffff;
-      outline: none;
-      box-shadow: 0 0 0 2px rgba(255,161,0,0.15);
-    }
-
-    button.main {
-      width: 100%;
-      padding: 10px;
-      background: var(--hr-purple);
-      color: #ffffff;
-      border: 1px solid var(--hr-gold);
-      border-radius: 7px;
-      font-weight: 700;
-      cursor: pointer;
-      margin-top: 10px;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      font-size: 11px;
-      font-family: 'Roboto', sans-serif;
-      transition: all 0.2s;
-    }
-    button.main:hover { background: var(--hr-gold); color: white; }
-    button.main:disabled { opacity: 0.5; cursor: not-allowed; }
-
-    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; align-items: start; }
-
-    .sub-grid {
-      display: grid;
-      grid-template-columns: 1fr 52px;
-      gap: 4px;
-      align-content: start;
-    }
-    .sub-grid label { line-height: 25px; font-size: 11px; }
-
-    .gen-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 4px 10px;
-    }
-    .gen-row { display: flex; align-items: center; gap: 5px; }
-    .gen-row label {
-      min-width: 52px;
-      font-size: 9px;
-      color: var(--hr-text-muted);
-      text-transform: uppercase;
-      flex-shrink: 0;
-    }
-    .gen-row input { flex-grow: 1; min-width: 50px; }
-    .gen-row.kit input { background: #f0f4f7; border-color: #ffffff; }
-
-    .genetic-code-box {
-      background: #f0f4f7;
-      border: 1px solid var(--hr-gold);
-      border-radius: 6px;
-      padding: 10px;
-      font-family: monospace;
+    .btn-primary-action {
+      width: auto;
+      background: var(--primary-dark);
+      color: var(--neutrals-white);
+      border: 1px solid var(--secondary-base);
+      border-radius: 8px;
+      padding: 8px 16px;
       font-size: 12px;
       font-weight: 700;
-      color: var(--hr-purple);
       letter-spacing: 1px;
-      min-height: 36px;
-      word-break: break-all;
-      margin-top: 6px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s ease;
     }
 
-    /* Breed gaits */
-    .breed-gaits {
+    .btn-primary-action:hover {
+      background: #3B1B2A;
+    }
+
+    .modal-btn-secondary {
+      background: transparent;
+      border: 1px solid var(--primary-mid);
+      color: var(--primary-mid);
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+    }
+    .modal-btn-secondary:hover {
+      background: var(--primary-lightmuted);
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       INLINEN STATUS-MELDUNG (NEU!)
+       ══════════════════════════════════════════════════════════════ */
+    .extraction-status {
+      padding: 8px 12px;
+      border-radius: 6px;
+      border-left: 3px solid transparent;
+      margin: 12px 0 0 0;
+      font-size: 11.5px;
+      font-weight: 500;
+      font-family: Arial, Helvetica, sans-serif;
+      text-align: left;
+      background: var(--primary-lightmuted);
       display: none;
-      margin-top: 6px;
-      padding: 8px 10px;
-      background: rgba(255,161,0,0.06);
-      border: 1px dashed rgba(255,161,0,0.4);
+      animation: fadeIn 0.3s ease;
+    }
+    .extraction-status.success {
+      background: color-mix(in srgb, var(--tertiary-light) 14%, white);
+      border-left-color: var(--tertiary-light);
+      color: var(--tertiary-deep);
+      display: block;
+    }
+    .extraction-status.error {
+      background: color-mix(in srgb, var(--accent-2) 12%, white);
+      border-left-color: var(--accent-2);
+      color: var(--accent-2);
+      display: block;
+    }
+    .extraction-status.loading {
+      background: var(--primary-lightmuted);
+      border-left-color: var(--secondary-base);
+      color: var(--primary-dark);
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       OPTIMAL GEFÜLLTER PEDIGREE BAUM (ELTERN + GROSSELTERN GROSS)
+       ══════════════════════════════════════════════════════════════ */
+    .pedigree-tree-container {
+      display: grid;
+      grid-template-columns: 1.2fr 1.1fr 0.9fr;
+      gap: 15px;
+      align-items: stretch;
+      margin-top: 15px;
+      overflow-x: auto;
+      padding-bottom: 10px;
+    }
+
+    .pedigree-column {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .tree-box {
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      background: #ffffff;
+      width: 100%;
+    }
+
+    .tree-box.sire-tone {
+      background: color-mix(in srgb, var(--primary-dark) 4%, white);
+      border: 1px solid color-mix(in srgb, var(--primary-dark) 18%, white);
+      border-left: 3px solid var(--primary-dark);
+    }
+    .tree-box.dam-tone {
+      background: color-mix(in srgb, var(--secondary-base) 8%, white);
+      border: 1px solid color-mix(in srgb, var(--secondary-base) 30%, white);
+      border-left: 3px solid var(--secondary-base);
+    }
+
+    /* Gen I: Große Hauptkarten für Sire & Dam */
+    .tree-box-lg {
+      padding: 14px 12px;
+      justify-content: center;
+      flex: 1;
+    }
+    .tree-box-lg .modal-input {
+      font-size: 12px;
+      padding: 6px 8px;
+    }
+
+    /* Gen II: Großeltern jetzt fast genauso groß (kein Loch mehr in der Mitte) */
+    .tree-box-md {
+      padding: 12px 10px;
+      justify-content: center;
+      flex: 1;
+    }
+    .tree-box-md .modal-input {
+      font-size: 11.5px;
+      padding: 5px 7px;
+    }
+
+    /* Gen III: Kompaktere Karten für Urgroßeltern (da es hier 4 Paare sind) */
+    .tree-box-xs {
+      padding: 9px 8px 6px;
+    }
+    .tree-box-xs .modal-input {
+      font-size: 10px;
+      padding: 3px 5px;
+       line-height: 1.3;
+    }
+
+    .field-label-sm {
+      font-size: 9.5px;
+      font-weight: 600;
+      color: var(--primary-mid);
+      margin-bottom: 4px;
+      line-height: 1.3;
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .bracket-pair {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 8px;
+      position: relative;
+      flex: 1;
+      margin: 4px 0;
+    }
+
+    .bracket-pair::before {
+      content: "";
+      position: absolute;
+      left: -10px;
+      top: 15%;
+      bottom: 15%;
+      width: 10px;
+      border-left: 2px solid var(--secondary-base);
+      border-top: 2px solid var(--secondary-base);
+      border-bottom: 2px solid var(--secondary-base);
+      border-top-left-radius: 4px;
+      border-bottom-left-radius: 4px;
+      pointer-events: none;
+    }
+
+    /* Tooltips */
+    .info-tip {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: transparent;
+      border: 1.3px solid var(--primary-dark);
+      color: var(--primary-dark);
+      font-size: 10px;
+      font-weight: 700;
+      cursor: help;
+      margin-left: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .info-tip:hover {
+      background: var(--primary-dark);
+      color: var(--neutrals-white);
+      border-color: var(--primary-dark);
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       SCHWEBENDER TOOLTIP — identisch zu Import.html
+       ══════════════════════════════════════════════════════════════ */
+    .floating-tooltip {
+      position: fixed;
+      z-index: 9999;
+      background: var(--primary-dark);
+      color: #fff;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 11.5px;
+      font-weight: 500;
+      letter-spacing: normal;
+      text-transform: none;
+      line-height: 1.5;
+      padding: 10px 12px;
+      border-radius: 8px;
+      max-width: 240px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+      pointer-events: none;
+      animation: tooltipFadeIn 0.12s ease;
+    }
+
+    @keyframes tooltipFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .lightbox-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(44, 22, 39, 0.75);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      padding: 30px;
+      box-sizing: border-box;
+      animation: tooltipFadeIn 0.15s ease;
+    }
+
+    .lightbox-box {
+      background: #ffffff;
+      border-radius: 12px;
+      max-width: 90vw;
+      max-height: 90vh;
+      overflow: auto;
+      padding: 20px;
+      position: relative;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: none;
+      background: var(--primary-dark);
+      color: var(--secondary-base);
+      font-size: 15px;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .lightbox-close:hover {
+      background: #3B1B2A;
+    }
+
+    .lightbox-text {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 12.5px;
+      line-height: 1.5;
+      color: var(--primary-deep);
+      margin: 0 28px 14px 0;
+      max-width: 480px;
+    }
+
+    .lightbox-img {
+      display: block;
+      max-width: 100%;
+      max-height: 70vh;
+      border: 1px solid rgba(0, 0, 0, 0.08);
       border-radius: 6px;
     }
-
-    #status {
-      text-align: center;
-      padding: 8px;
-      font-weight: 700;
-      font-size: 11px;
-      border-top: 1px solid var(--hr-border);
-      flex-shrink: 0;
-      min-height: 32px;
+  
+    /* Shared modal typography — Horse Import is the reference. */
+    .stuteri-logo-left { height: 42px; width: auto; }
+    .header-brand-title { font-family: 'Sweden Sans', sans-serif; font-size: .90rem; font-weight: 600; letter-spacing: .15em; line-height: 1.2; }
+    .stuteri-text-sub { font-size: 1rem; line-height: 1.2; }
+    .title-container h1, .modal-header h1, .header-right h2 {
+      font-family: 'Sweden Sans', sans-serif; font-size: 1.40rem; font-weight: 600;
+      letter-spacing: .15em; line-height: 1.2; text-transform: uppercase;
+      color: var(--secondary-base); margin: 0;
+    }
+    .header-center { margin-top: 0; }
+    .header-top-row { margin-bottom: 16px; }
+    .header-subtitle, .modal-header .subtitle {
+      font-family: 'Sweden Sans', sans-serif; font-size: 9px; font-weight: 600;
+      letter-spacing: 2px; line-height: 1.5; text-transform: uppercase;
+      color: color-mix(in srgb, var(--neutrals-white) 65%, transparent); margin: 4px 0 0;
+    }
+    .section-title {
+      font-family: 'Sweden Sans', sans-serif; font-size: 10px; font-weight: 700;
+      letter-spacing: 2px; line-height: 1.5; text-transform: uppercase;
+      color: var(--primary-dark); margin-bottom: 16px; border-bottom: none; padding-bottom: 0;
+    }
+    .section-title::before { width: 2px; height: 12px; background: var(--secondary-base); border-radius: 2px; }
+    .nav-tab, .nav-tab.active, .main-tab, .main-tab.active, .tab, .tab.active {
+      font-family: 'Sweden Sans', sans-serif; font-size: .70rem; font-weight: 600;
+      letter-spacing: 1px; line-height: 1; height: 30px; padding: 0 14px;
+    }
+    .nav-tab.active, .main-tab.active, .tab.active { font-weight: 700; border-radius: 8px 8px 0 0; margin-bottom: 0; }
+  
+    /* Header layout: balanced vertical spacing, responsive title row. */
+.modal-header { min-height: 0; padding-top: 22px; }
+    .header-top-row { align-items: center; column-gap: 24px; margin-bottom: 22px; }
+    .header-center { margin-top: 0; }
+    .header-brand-title { white-space: nowrap; }
+.modal-header { padding: 22px 0; }
+    .header-top-row { margin-bottom: 0; }
+@media (max-width: 820px) {
+      .header-top-row { grid-template-columns: minmax(0, 1fr); row-gap: 18px; }
+      .header-top-row .header-left { justify-content: flex-start; }
+      .header-top-row .header-right, .header-top-row > div:last-child:empty { display: none; }
+      .header-center { width: 100%; text-align: center; }
+    }
+  
+    /* Canonical header geometry, including the import modals' legacy class. */
+    .modal-header, .dashboard-header {
+      display: flex !important; flex-direction: column !important;
+      align-items: stretch; justify-content: flex-start; gap: 0;
+      height: auto; min-height: 0; padding: 0; margin: 0; border-bottom: none;
+    }
+    .modal-header .header-top-row, .dashboard-header .header-top-row {
+      display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      align-items: center; justify-content: normal; gap: 0 24px;
+      width: 100%; height: 90px; min-height: 90px; padding: 0 20px; margin: 0;
+    }
+    .header-top-row .header-left { grid-column: 1; grid-row: 1; justify-content: flex-start; gap: 12px; }
+    .header-top-row .header-center { grid-column: 2; grid-row: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0; padding: 0; width: auto; text-align: center; }
+    .header-top-row .header-right { grid-column: 3; grid-row: 1; }
+    .header-top-row .header-brand-title { white-space: nowrap; }
+    .header-top-row .stuteri-logo-left { height: 42px; flex-shrink: 0; }
+    .header-top-row h1, .header-top-row h2 { font-family: 'Sweden Sans', sans-serif; font-size: 1.40rem; font-weight: 600; letter-spacing: .15em; line-height: 1.2; color: var(--secondary-base); margin: 0; text-transform: uppercase; }
+    .nav-bar, .tabs { height: 30px; min-height: 30px; margin: 0; padding: 0 20px; align-items: flex-end; }
+    .nav-tabs { height: 30px; align-items: flex-end; }
+    @media (max-width: 820px) {
+      .modal-header .header-top-row, .dashboard-header .header-top-row {
+        grid-template-columns: minmax(0, 1fr); grid-template-rows: 42px auto;
+        height: 130px; min-height: 130px; padding: 16px 20px; gap: 14px;
+      }
+      .header-top-row .header-left { grid-column: 1; grid-row: 1; }
+      .header-top-row .header-center { grid-column: 1; grid-row: 2; }
+      .header-top-row .header-right { display: none; }
     }
   </style>
+<style>
+.stuteri-logo-left { max-width:90px; object-fit:contain; }
+.stuteri-logo-center { max-width:130px; object-fit:contain; }
+.sidebar-brand img { max-width:60px; object-fit:contain; }
+.header-brand-title, .brand-name { overflow-wrap:anywhere; }
+</style>
 </head>
 <body>
-  <div class="card">
-    <div class="header">
-      <h1>Outside Stud Import</h1>
-      <p>Paste · Review · Export</p>
-    </div>
-    <div class="tabs">
-      <button class="tab active" onclick="switchTab('paste')" id="btn-paste">1 · Paste Text</button>
-      <button class="tab" onclick="switchTab('preview')" id="btn-preview">2 · Review</button>
-      <button class="tab" onclick="switchTab('export')" id="btn-export">3 · Export</button>
-    </div>
 
-    <!-- TAB 1: PASTE -->
-    <div id="paste" class="content active">
-      <div class="section-title">Source Text</div>
-      <span class="field-label">Info Tab</span>
-      <textarea id="txt_info" placeholder="Paste Info tab content here..."></textarea>
-      <span class="field-label">Colour Tab</span>
-      <textarea id="txt_colour" placeholder="Paste Colour tab content here..."></textarea>
-      <span class="field-label">Stats Tab</span>
-      <textarea id="txt_stats" placeholder="Paste Stats tab content here..."></textarea>
-      <button class="main" onclick="generatePreview()">Generate Preview</button>
-    </div>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Finlandica:wght@400;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/gh/mats-k/sweden-sans@master/sweden-sans.css" rel="stylesheet" />
+  <link href="https://fonts.cdnfonts.com/css/elometha" rel="stylesheet" />
 
-    <!-- TAB 2: REVIEW -->
-    <div id="preview" class="content">
+  <div class="modal-frame">
 
-      <!-- Basic Info -->
-      <div class="section-title">Basic Information</div>
-      <div class="grid-4">
-        <div><span class="field-label">ID</span><input type="text" id="prev_id"></div>
-        <div><span class="field-label">Name</span><input type="text" id="prev_name"></div>
-        <div><span class="field-label">Breed</span><input type="text" id="prev_breed"></div>
-        <div><span class="field-label">Gender</span><input type="text" id="prev_gender" style="background:#f5f5f5;" readonly></div>
-        <div><span class="field-label">Stud Fee</span><input type="text" id="prev_studfee" placeholder="e.g. 5000"></div>
-      </div>
-
-      <!-- Conformation -->
-      <div class="section-title">Conformation</div>
-      <div class="grid-2">
-        <div class="sub-grid">
-          <label>Walk</label><input type="text" data-cat="confo" data-key="Walk">
-          <label>Trot</label><input type="text" data-cat="confo" data-key="Trot">
-          <label>Canter</label><input type="text" data-cat="confo" data-key="Canter">
-          <label>Gallop</label><input type="text" data-cat="confo" data-key="Gallop">
-          <label>Posture</label><input type="text" data-cat="confo" data-key="Posture">
-          <label>Head</label><input type="text" data-cat="confo" data-key="Head">
-        </div>
-        <div class="sub-grid">
-          <label>Neck</label><input type="text" data-cat="confo" data-key="Neck">
-          <label>Back</label><input type="text" data-cat="confo" data-key="Back">
-          <label>Shoulders</label><input type="text" data-cat="confo" data-key="Shoulders">
-          <label>Front Legs</label><input type="text" data-cat="confo" data-key="Frontlegs">
-          <label>Hindquarters</label><input type="text" data-cat="confo" data-key="Hindquarters">
-          <label>Socks</label><input type="text" data-cat="confo" data-key="Socks">
-        </div>
-      </div>
-
-      <!-- Breed-specific gaits -->
-      <div id="breed-gaits" class="breed-gaits">
-        <div class="sub-grid" style="grid-template-columns:auto 52px auto 52px;gap:4px 14px;">
-          <label id="lbl_tolt" style="display:none;">Tölt</label>
-          <input type="text" id="input_tolt" data-cat="confo" data-key="Tolt" style="display:none;">
-          <label id="lbl_flp" style="display:none;">Flying Pace</label>
-          <input type="text" id="input_flp" data-cat="confo" data-key="FlyingPace" style="display:none;">
-        </div>
-      </div>
-
-      <!-- GP Stats -->
-      <div class="section-title">Genetic Potential</div>
-      <div class="grid-2">
-        <div class="sub-grid">
-          <label>Acceleration</label><input type="text" data-cat="gp" data-key="Acceleration">
-          <label>Agility</label><input type="text" data-cat="gp" data-key="Agility">
-          <label>Balance</label><input type="text" data-cat="gp" data-key="Balance">
-          <label>Bascule</label><input type="text" data-cat="gp" data-key="Bascule">
-          <label>Pulling Power</label><input type="text" data-cat="gp" data-key="Pulling power">
-        </div>
-        <div class="sub-grid">
-          <label>Speed</label><input type="text" data-cat="gp" data-key="Speed">
-          <label>Sprint</label><input type="text" data-cat="gp" data-key="Sprint">
-          <label>Stamina</label><input type="text" data-cat="gp" data-key="Stamina">
-          <label>Strength</label><input type="text" data-cat="gp" data-key="Strength">
-          <label>Surefootedness</label><input type="text" data-cat="gp" data-key="Surefootedness">
-        </div>
-      </div>
-
-      <!-- Scores -->
-      <div class="section-title">Scores</div>
-      <div class="grid-2">
-        <div><span class="field-label">Conf. MAX</span><input type="text" id="prev_confmax"></div>
-        <div><span class="field-label">Comp MAX</span><input type="text" id="prev_compmax"></div>
-      </div>
-
-      <!-- Genetics -->
-      <div class="section-title">Genetics</div>
-      <div class="grid-2">
-        <div>
-          <div class="subsection-title">Testable</div>
-          <div class="gen-grid">
-            <div class="gen-row"><label>Ext.</label><input type="text" data-cat="genetics" data-key="Extension"></div>
-            <div class="gen-row"><label>Agouti</label><input type="text" data-cat="genetics" data-key="Agouti"></div>
-            <div class="gen-row"><label>Grey</label><input type="text" data-cat="genetics" data-key="Grey"></div>
-            <div class="gen-row"><label>Dun</label><input type="text" data-cat="genetics" data-key="Dun"></div>
-            <div class="gen-row"><label>Cr/Prl</label><input type="text" data-cat="genetics" data-key="Creampearl"></div>
-            <div class="gen-row"><label>Champ.</label><input type="text" data-cat="genetics" data-key="Champagne"></div>
-            <div class="gen-row"><label>Silver</label><input type="text" data-cat="genetics" data-key="Silver"></div>
-            <div class="gen-row"><label>Mush.</label><input type="text" data-cat="genetics" data-key="Mushroom"></div>
-            <div class="gen-row"><label>Frame</label><input type="text" data-cat="genetics" data-key="Frame"></div>
-            <div class="gen-row"><label>Lp</label><input type="text" data-cat="genetics" data-key="Appaloosa"></div>
-            <div class="gen-row"><label>PATN1</label><input type="text" data-cat="genetics" data-key="PATN1"></div>
-            <div class="gen-row kit"><label>KIT</label><input type="text" data-cat="genetics" data-key="KIT"></div>
-            <div class="gen-row"><label>MITF</label><input type="text" data-cat="genetics" data-key="MITF"></div>
-            <div class="gen-row"><label>SW2</label><input type="text" data-cat="genetics" data-key="SW2"></div>
+    <div class="modal-header">
+      <div class="header-top-row">
+        <div class="header-left">
+          <?!= renderPublicLogo_('stuteri-logo-left'); ?>
+          <div class="brand-text-stacked">
+            <span class="header-brand-title"><?= getBranding_().name ?></span>
+            <span class="script-text stuteri-text-sub"><?= getBranding_().signature ?></span>
           </div>
         </div>
-        <div>
-          <div class="subsection-title">Non-Testable</div>
-          <div class="gen-grid">
-            <div class="gen-row"><label>PATN2</label><input type="text" data-cat="manual-gen" data-key="PATN2" placeholder="n/n"></div>
-            <div class="gen-row"><label>Pangare</label><input type="text" data-cat="manual-gen" data-key="Pangare" placeholder="n/n"></div>
-            <div class="gen-row"><label>Flaxen</label><input type="text" data-cat="manual-gen" data-key="Flaxen" placeholder="n/f"></div>
-            <div class="gen-row"><label>H.Sabino</label><input type="text" data-cat="manual-gen" data-key="HiddenSabino" placeholder="n/n"></div>
-            <div class="gen-row"><label>Sooty</label><input type="text" data-cat="manual-gen" data-key="Sooty" placeholder="Sty/n"></div>
-            <div class="gen-row"><label>Rabicano</label><input type="text" data-cat="manual-gen" data-key="Rabicano" placeholder="Rb/n"></div>
-            <div class="gen-row"><label>Markings</label><input type="text" data-cat="manual-gen" data-key="Markings" placeholder="yes/no"></div>
+        <div class="header-center">
+          <div class="title-container"><h1>Pedigree</h1></div>
+        </div>
+        <div class="header-right"></div>
+      </div>
+    </div>
+
+    <div class="content-container">
+
+      <!-- 1+2. PEDIGREE IMPORT & SOURCE (zusammengefasst) -->
+      <div class="modal-card">
+        <div class="section-title">Pedigree Import &amp; Source</div>
+        <p class="helper-text">Select an existing Horse or add a new one.</p>
+        <input type="text" id="horseSelectInput" placeholder="Type name or ID..." class="modal-input" list="horseNameOptions" autocomplete="off">
+        <datalist id="horseNameOptions"></datalist>
+
+        <div style="margin-top: 18px; padding-top: 16px; border-top: 1px solid rgba(0,0,0,0.06);">
+          <p class="helper-text" style="margin-top: 0;">Note: Parsing can occasionally be inaccurate if horses lack proper taglines. Please check the extracted fields and correct them manually if necessary.</p>
+          <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 6px;">
+            <label for="rawPedigreeText" style="font-size: 11px; font-weight: 600; color: var(--primary-deep);">Raw Pedigree Text</label>
+            <span class="info-tip" data-tip="Paste the raw text block from the Info-tab to automatically extract ancestors. Click to open the screenshot." data-img="https://github.com/Wolfszeit01/HorseReality-HerdTracker-by-Wolfszeit/blob/main/Screenshot%202026-09-04%20121745.png?raw=true">?</span>
           </div>
-          <div class="subsection-title" style="margin-top:12px;">Generated Genetic Code</div>
-          <div class="genetic-code-box" id="geneticCodePreview">—</div>
+          <textarea id="rawPedigreeText" placeholder="Paste Info-tab text here (from 'Pedigree' to 'Pregnancy')..." class="modal-textarea"></textarea>
+
+          <div id="extractionStatus" class="extraction-status"></div>
+
+          <div style="margin-top: 12px;">
+            <button type="button" id="extractBtn" class="btn-primary-action" onclick="extractPedigree()">Extract Pedigree</button>
+          </div>
         </div>
       </div>
 
-    </div><!-- end preview -->
+      <!-- 3. PEDIGREE TREE (Generations I - III) -->
+      <div class="modal-card" style="margin-top: 5px;">
+        <div class="section-title">Pedigree Tree (Generations I - III)</div>
+        <p class="helper-text">Please control and correct pedigree before saving. The golden brackets connect parent lines cleanly.</p>
 
-    <!-- TAB 3: EXPORT -->
-    <div id="export" class="content">
-      <div class="section-title">Ready to Import</div>
-      <p style="font-size:11px;color:var(--hr-text-muted);margin-bottom:16px;line-height:1.6;">
-        Review the data above before confirming. The stud will be added to the <strong>Outside Studs</strong> sheet.
-      </p>
-      <button class="main" onclick="finalizeImport()">Save to Outside Studs</button>
+        <div class="pedigree-tree-container">
+          
+          <!-- SPALTE 1: Generation I (Sire & Dam) -->
+          <div class="pedigree-column" style="gap: 12px;">
+            <div class="tree-box sire-tone tree-box-lg">
+              <div class="field-label-sm icon-mars" style="font-size: 11px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="m21 3-6.75 6.75"/><circle cx="10" cy="14" r="6"/></svg>Sire</div>
+              <input type="text" id="sire" placeholder="Sire Name" class="modal-input" style="margin-bottom: 6px;">
+              <input type="text" id="stallionline" placeholder="Sire Line" class="modal-input" style="font-size: 11px;" list="stallionlineOptions" autocomplete="off">
+              <datalist id="stallionlineOptions"></datalist>
+            </div>
+
+            <div class="tree-box dam-tone tree-box-lg">
+              <div class="field-label-sm icon-venus" style="font-size: 11px;"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15v7"/><path d="M9 19h6"/><circle cx="12" cy="9" r="6"/></svg>Dam</div>
+              <input type="text" id="dam" placeholder="Dam Name" class="modal-input" style="margin-bottom: 6px;">
+              <input type="text" id="damline" placeholder="Dam Line" class="modal-input" style="font-size: 11px;" list="damlineOptions" autocomplete="off">
+              <datalist id="damlineOptions"></datalist>
+            </div>
+          </div>
+
+          <!-- SPALTE 2: Generation II (Grandparents - Jetzt schick ausgefüllt & groß) -->
+          <div class="pedigree-column">
+            <!-- Paternal Paar -->
+            <div class="bracket-pair">
+              <div class="tree-box sire-tone tree-box-md"><div class="field-label-sm icon-mars"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="m21 3-6.75 6.75"/><circle cx="10" cy="14" r="6"/></svg>Grand-Sire (P.)</div><input type="text" id="gs_p" placeholder="GS Paternal" class="modal-input"></div>
+              <div class="tree-box dam-tone tree-box-md"><div class="field-label-sm icon-venus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15v7"/><path d="M9 19h6"/><circle cx="12" cy="9" r="6"/></svg>Grand-Dam (P.)</div><input type="text" id="gd_p" placeholder="GD Paternal" class="modal-input"></div>
+            </div>
+            <!-- Maternal Paar -->
+            <div class="bracket-pair">
+              <div class="tree-box sire-tone tree-box-md"><div class="field-label-sm icon-mars"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="m21 3-6.75 6.75"/><circle cx="10" cy="14" r="6"/></svg>Grand-Sire (M.)</div><input type="text" id="gs_m" placeholder="GS Maternal" class="modal-input"></div>
+              <div class="tree-box dam-tone tree-box-md"><div class="field-label-sm icon-venus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15v7"/><path d="M9 19h6"/><circle cx="12" cy="9" r="6"/></svg>Grand-Dam (M.)</div><input type="text" id="gd_m" placeholder="GD Maternal" class="modal-input"></div>
+            </div>
+          </div>
+
+          <!-- SPALTE 3: Generation III (Great-Grandparents) -->
+          <div class="pedigree-column">
+            <!-- PP Paar -->
+            <div class="bracket-pair">
+              <div class="tree-box sire-tone tree-box-xs"><div class="field-label-sm icon-mars"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="m21 3-6.75 6.75"/><circle cx="10" cy="14" r="6"/></svg>GGS (PP)</div><input type="text" id="ggs_pp" placeholder="Name" class="modal-input"></div>
+              <div class="tree-box dam-tone tree-box-xs"><div class="field-label-sm icon-venus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15v7"/><path d="M9 19h6"/><circle cx="12" cy="9" r="6"/></svg>GGD (PP)</div><input type="text" id="ggd_pp" placeholder="Name" class="modal-input"></div>
+            </div>
+            <!-- PM Paar -->
+            <div class="bracket-pair">
+              <div class="tree-box sire-tone tree-box-xs"><div class="field-label-sm icon-mars"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="m21 3-6.75 6.75"/><circle cx="10" cy="14" r="6"/></svg>GGS (PM)</div><input type="text" id="ggs_pm" placeholder="Name" class="modal-input"></div>
+              <div class="tree-box dam-tone tree-box-xs"><div class="field-label-sm icon-venus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15v7"/><path d="M9 19h6"/><circle cx="12" cy="9" r="6"/></svg>GGD (PM)</div><input type="text" id="ggd_pm" placeholder="Name" class="modal-input"></div>
+            </div>
+            <!-- MP Paar -->
+            <div class="bracket-pair">
+              <div class="tree-box sire-tone tree-box-xs"><div class="field-label-sm icon-mars"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="m21 3-6.75 6.75"/><circle cx="10" cy="14" r="6"/></svg>GGS (MP)</div><input type="text" id="ggs_mp" placeholder="Name" class="modal-input"></div>
+              <div class="tree-box dam-tone tree-box-xs"><div class="field-label-sm icon-venus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15v7"/><path d="M9 19h6"/><circle cx="12" cy="9" r="6"/></svg>GGD (MP)</div><input type="text" id="ggd_mp" placeholder="Name" class="modal-input"></div>
+            </div>
+            <!-- MM Paar -->
+            <div class="bracket-pair">
+              <div class="tree-box sire-tone tree-box-xs"><div class="field-label-sm icon-mars"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="m21 3-6.75 6.75"/><circle cx="10" cy="14" r="6"/></svg>GGS (MM)</div><input type="text" id="ggs_mm" placeholder="Name" class="modal-input"></div>
+              <div class="tree-box dam-tone tree-box-xs"><div class="field-label-sm icon-venus"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15v7"/><path d="M9 19h6"/><circle cx="12" cy="9" r="6"/></svg>GGD (MM)</div><input type="text" id="ggd_mm" placeholder="Name" class="modal-input"></div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Action Footer -->
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 25px;">
+          <div id="saveStatus" class="extraction-status" style="margin-top: 0;"></div>
+          <div style="display: flex; gap: 10px;">
+            <button type="button" class="modal-btn-secondary" onclick="closeModal()">Cancel</button>
+            <button type="button" id="savePedigreeBtn" class="btn-primary-action" onclick="savePedigree()">Save Pedigree</button>
+          </div>
+        </div>
+
+      </div>
+
     </div>
-
-    <div id="status"></div>
   </div>
 
   <script>
-    let currentData = {};
+    // ═══════════════════════════════════════════════════════════════
+    // TEMPLATE PARAMETERS
+    // Werden NICHT mehr serverseitig per Scriptlet eingesetzt, sondern
+    // erst beim Speichern per google.script.run.getPedigreeModalData()
+    // nachgeladen (siehe savePedigree()). Deshalb hier nur Platzhalter,
+    // die von loadPendingDataOnOpen() befüllt werden.
+    // ═══════════════════════════════════════════════════════════════
+    const templateData = {
+      horseId: '',
+      horseName: '',
+      sireName: '',
+      damName: ''
+    };
 
-    function switchTab(id) {
-      document.querySelectorAll('.content').forEach(c => c.classList.remove('active'));
-      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-      document.getElementById(id).classList.add('active');
-      document.getElementById('btn-' + id).classList.add('active');
-    }
-
-    function generatePreview() {
-      const raw = {
-        info:   document.getElementById('txt_info').value,
-        colour: document.getElementById('txt_colour').value,
-        stats:  document.getElementById('txt_stats').value
-      };
-      const btn  = document.querySelector('#paste button.main');
-      const orig = btn.innerText;
-      btn.innerText = 'Loading...'; btn.disabled = true;
-
+    // ═══════════════════════════════════════════════════════════════
+    // INIT ON LOAD — lädt die von openPedigreeModalWithData()
+    // hinterlegten Daten direkt beim Öffnen des Modals nach.
+    // ═══════════════════════════════════════════════════════════════
+    document.addEventListener('DOMContentLoaded', function() {
       google.script.run
-        .withSuccessHandler(data => {
-          currentData = data;
-          render(data);
-          switchTab('preview');
-          btn.innerText = orig; btn.disabled = false;
+        .withSuccessHandler(function(pendingData) {
+          if (!pendingData) return;
+          templateData.horseId = pendingData.id || '';
+          templateData.horseName = pendingData.name || '';
+          templateData.sireName = pendingData.sire || '';
+          templateData.damName = pendingData.dam || '';
+
+          if (templateData.horseId) {
+            document.getElementById('horseSelectInput').value = templateData.horseName || templateData.horseId;
+          }
+          if (templateData.sireName && templateData.sireName !== 'Unknown') {
+            document.getElementById('sire').value = templateData.sireName;
+          }
+          if (templateData.damName && templateData.damName !== 'Unknown') {
+            document.getElementById('dam').value = templateData.damName;
+          }
         })
-        .withFailureHandler(err => {
-          alert('Error: ' + err.message);
-          btn.innerText = orig; btn.disabled = false;
+        .withFailureHandler(function(err) {
+          console.log('No pending pedigree data: ' + err.message);
         })
-        .getOutsideStudPreviewData(raw);
-    }
-
-    function render(d) {
-      const breed  = (d.breed || '').trim();
-      const isIce  = breed.includes('Icelandic Horse');
-
-      // Toggle breed gaits
-      const toggleEl = (id, show) => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = show ? 'block' : 'none';
-      };
-      toggleEl('lbl_tolt',   isIce);
-      toggleEl('input_tolt', isIce);
-      toggleEl('lbl_flp',    isIce);
-      toggleEl('input_flp',  isIce);
-      toggleEl('breed-gaits', isIce);
-
-      // Basic
-      document.getElementById('prev_id').value     = d.id       || '';
-      document.getElementById('prev_name').value   = d.name     || '';
-      document.getElementById('prev_breed').value  = d.breed    || '';
-      document.getElementById('prev_gender').value = d.gender   || '';
-      document.getElementById('prev_confmax').value = d.confoMax || '';
-      document.getElementById('prev_compmax').value = d.compMax  || '';
-
-      // Confo
-      document.querySelectorAll('input[data-cat="confo"]').forEach(i => i.value = d.confo[i.dataset.key] || '');
-
-      // GP
-      document.querySelectorAll('input[data-cat="gp"]').forEach(i => i.value = d.gp[i.dataset.key] || '');
-
-      // Genetics
-      document.querySelectorAll('input[data-cat="genetics"]').forEach(i => {
-        i.value = (d.genetics && d.genetics[i.dataset.key]) ? d.genetics[i.dataset.key] : 'n/n';
-      });
-
-      // Update genetic code preview
-      updateGeneticCodePreview();
-    }
-
-    function updateGeneticCodePreview() {
-      const order = ['Extension','Agouti','Grey','Creampearl','Dun','Champagne',
-                     'Silver','Mushroom','Frame','Appaloosa','PATN1','MITF','SW2','KIT'];
-      const manualOrder = ['PATN2','Pangare','Flaxen','HiddenSabino','Sooty','Rabicano'];
-      const testable = [];
-      document.querySelectorAll('input[data-cat="genetics"]').forEach(i => {
-        if (i.value && i.value !== 'n/n') testable.push(i.value);
-      });
-      const manual = [];
-      document.querySelectorAll('input[data-cat="manual-gen"]').forEach(i => {
-        if (i.value && i.value.trim() !== '' && i.value !== 'n/n' && i.value !== 'n/f' && i.dataset.key !== 'Markings')
-          manual.push(i.value.trim());
-      });
-      document.getElementById('geneticCodePreview').textContent = [...testable, ...manual].join(' ') || '—';
-    }
-
-    // Update genetic code live when user edits any genetics field
-    document.addEventListener('input', function(e) {
-      if (e.target.dataset.cat === 'genetics' || e.target.dataset.cat === 'manual-gen') {
-        updateGeneticCodePreview();
-      }
+        .getPedigreeModalData();
     });
 
-    function finalizeImport() {
-      // Collect all editable fields
-      currentData.id       = document.getElementById('prev_id').value;
-      currentData.name     = document.getElementById('prev_name').value;
-      currentData.breed    = document.getElementById('prev_breed').value;
-      currentData.gender   = document.getElementById('prev_gender').value;
-      currentData.studFee  = document.getElementById('prev_studfee').value;
-      currentData.confoMax = document.getElementById('prev_confmax').value;
-      currentData.compMax  = document.getElementById('prev_compmax').value;
+    // ═══════════════════════════════════════════════════════════════
+    // AUTOCOMPLETE — Horse Names, Sirelines, Damlines aus dem Sheet
+    // ═══════════════════════════════════════════════════════════════
+    document.addEventListener('DOMContentLoaded', function() {
+      google.script.run
+        .withSuccessHandler(function(data) {
+          if (!data || !data.success) return;
+          fillDatalist('horseNameOptions', data.horseNames);
+          fillDatalist('stallionlineOptions', data.stallionlines);
+          fillDatalist('damlineOptions', data.damlines);
+        })
+        .withFailureHandler(function(err) {
+          console.log('Autocomplete data failed to load: ' + err.message);
+        })
+        .getPedigreeAutocompleteData();
+    });
 
-      document.querySelectorAll('input[data-cat="confo"]').forEach(i => {
-        if (!currentData.confo) currentData.confo = {};
-        currentData.confo[i.dataset.key] = i.value;
-      });
-      document.querySelectorAll('input[data-cat="gp"]').forEach(i => {
-        if (!currentData.gp) currentData.gp = {};
-        currentData.gp[i.dataset.key] = i.value;
-      });
-      document.querySelectorAll('input[data-cat="genetics"]').forEach(i => {
-        if (!currentData.genetics) currentData.genetics = {};
-        currentData.genetics[i.dataset.key] = i.value;
-      });
+    function fillDatalist(id, values) {
+      var list = document.getElementById(id);
+      if (!list || !values) return;
+      list.innerHTML = values.map(v => '<option value="' + v.replace(/"/g, '&quot;') + '">').join('');
+    }
 
-      const manualGenes = {};
-      document.querySelectorAll('input[data-cat="manual-gen"]').forEach(i => {
-        manualGenes[i.dataset.key] = i.value.trim();
-      });
-
-      // Build genetic code string (testable + non-testable)
-      const order = ['Extension','Agouti','Grey','Creampearl','Dun','Champagne',
-                     'Silver','Mushroom','Frame','Appaloosa','PATN1','MITF','SW2','KIT'];
-      const manualOrder = ['PATN2','Pangare','Flaxen','HiddenSabino','Sooty','Rabicano'];
-      const gen = currentData.genetics || {};
-      const testable = order.map(k => gen[k]).filter(v => v && v !== 'n/n');
-      const manual   = manualOrder.map(k => manualGenes[k]).filter(v => v && v !== 'n/n' && v !== 'n/f');
-      currentData.geneticCode = [...testable, ...manual].join(' ');
-
-      const status = document.getElementById('status');
-      status.innerText   = 'Saving...';
-      status.style.color = 'orange';
+    // ═══════════════════════════════════════════════════════════════
+    // BEKANNTER SIRE/DAM → Linie + Großeltern automatisch nachladen
+    // ═══════════════════════════════════════════════════════════════
+    function onParentBlur(type) {
+      var input = document.getElementById(type); // 'sire' oder 'dam'
+      var name = input.value.trim();
+      if (!name) return;
 
       google.script.run
-        .withSuccessHandler(res => {
-          status.innerHTML   = '✓ ' + res;
-          status.style.color = 'green';
-          setTimeout(() => { google.script.host.close(); }, 2000);
+        .withSuccessHandler(function(info) {
+          if (!info) return; // unbekanntes Pferd — nichts überschreiben
+
+          if (type === 'sire') {
+            if (info.stallionline) document.getElementById('stallionline').value = info.stallionline;
+            document.getElementById('gs_p').value   = info.sire || '';
+            document.getElementById('gd_p').value   = info.dam  || '';
+            document.getElementById('ggs_pp').value = info.gs_p || '';
+            document.getElementById('ggd_pp').value = info.gd_p || '';
+            document.getElementById('ggs_pm').value = info.gs_m || '';
+            document.getElementById('ggd_pm').value = info.gd_m || '';
+          } else {
+            if (info.damline) document.getElementById('damline').value = info.damline;
+            document.getElementById('gs_m').value   = info.sire || '';
+            document.getElementById('gd_m').value   = info.dam  || '';
+            document.getElementById('ggs_mp').value = info.gs_p || '';
+            document.getElementById('ggd_mp').value = info.gd_p || '';
+            document.getElementById('ggs_mm').value = info.gs_m || '';
+            document.getElementById('ggd_mm').value = info.gd_m || '';
+          }
         })
-        .withFailureHandler(err => {
-          status.innerText   = '✗ Error: ' + err.message;
-          status.style.color = 'red';
+        .withFailureHandler(function(err) {
+          console.log('No existing pedigree info for ' + name + ': ' + err.message);
         })
-        .saveOutsideStud(currentData, manualGenes);
+        .getExistingPedigreeInfo(name);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.getElementById('sire').addEventListener('blur', function() { onParentBlur('sire'); });
+      document.getElementById('dam').addEventListener('blur', function() { onParentBlur('dam'); });
+    });
+
+    // ═══════════════════════════════════════════════════════════════
+    // EXTRACT PEDIGREE — OHNE ALERTS, INLINE FEEDBACK
+    // ═══════════════════════════════════════════════════════════════
+    function extractPedigree() {
+      var rawText = document.getElementById('rawPedigreeText').value;
+      var statusEl = document.getElementById('extractionStatus');
+      var btn = document.getElementById('extractBtn');
+      
+      if (!rawText.trim()) {
+        statusEl.className = 'extraction-status error';
+        statusEl.textContent = 'Please paste pedigree text first.';
+        return;
+      }
+      
+      // Loading-Status anzeigen
+      statusEl.className = 'extraction-status loading';
+      statusEl.textContent = 'Extracting...';
+      statusEl.style.display = 'block';
+      btn.disabled = true;
+      btn.innerText = 'Extracting...';
+      
+      google.script.run
+        .withSuccessHandler(function(result) {
+          btn.disabled = false;
+          btn.innerText = 'Extract Pedigree';
+          
+          if (result && result.success) {
+            document.getElementById('sire').value = result.sire || '';
+            document.getElementById('dam').value = result.dam || '';
+            document.getElementById('gs_p').value = result.gs_p || '';
+            document.getElementById('gd_p').value = result.gd_p || '';
+            document.getElementById('gs_m').value = result.gs_m || '';
+            document.getElementById('gd_m').value = result.gd_m || '';
+            document.getElementById('ggs_pp').value = result.ggs_pp || '';
+            document.getElementById('ggd_pp').value = result.ggd_pp || '';
+            document.getElementById('ggs_pm').value = result.ggs_pm || '';
+            document.getElementById('ggd_pm').value = result.ggd_pm || '';
+            document.getElementById('ggs_mp').value = result.ggs_mp || '';
+            document.getElementById('ggd_mp').value = result.ggd_mp || '';
+            document.getElementById('ggs_mm').value = result.ggs_mm || '';
+            document.getElementById('ggd_mm').value = result.ggd_mm || '';
+            
+            var count = Object.values(result).filter(v => v && typeof v === 'string').length;
+            statusEl.className = 'extraction-status success';
+            statusEl.textContent = '✓ Extracted ' + count + ' pedigree entries';
+            
+            // Nach 3 Sekunden ausblenden
+            setTimeout(() => {
+              statusEl.style.display = 'none';
+            }, 3000);
+            
+            // Optional: Eingabefelder visuell hervorheben
+            highlightFilledFields();
+          } else {
+            statusEl.className = 'extraction-status error';
+            statusEl.textContent = '✗ Extraction failed: ' + (result.error || 'Unknown error');
+          }
+        })
+        .withFailureHandler(function(err) {
+          btn.disabled = false;
+          btn.innerText = 'Extract Pedigree';
+          statusEl.className = 'extraction-status error';
+          statusEl.textContent = '✗ Server error: ' + err.message;
+        })
+        .parsePedigreeString(rawText);
+    }
+
+    function highlightFilledFields() {
+      var inputs = ['sire', 'dam', 'gs_p', 'gd_p', 'gs_m', 'gd_m'];
+      inputs.forEach(id => {
+        var el = document.getElementById(id);
+        if (el.value) {
+          el.style.borderColor = '#98A973';
+          setTimeout(() => {
+            el.style.borderColor = '';
+          }, 2000);
+        }
+      });
+    }
+
+    // ═══════════════════════════════════════════════════════════════
+    // SAVE PEDIGREE - VOLLSTÄNDIGER IMPORT NACH SPEICHERN
+    // ═══════════════════════════════════════════════════════════════
+    function savePedigree() {
+      var btn = document.getElementById('savePedigreeBtn');
+      btn.innerText = 'Saving...';
+      btn.disabled = true;
+
+      var pedigreeData = {
+        id: templateData.horseId || document.getElementById('horseSelectInput').value || '',
+        sire: document.getElementById('sire').value,
+        stallionline: document.getElementById('stallionline').value,
+        dam: document.getElementById('dam').value,
+        damline: document.getElementById('damline').value,
+        gs_p: document.getElementById('gs_p').value,
+        gd_p: document.getElementById('gd_p').value,
+        gs_m: document.getElementById('gs_m').value,
+        gd_m: document.getElementById('gd_m').value,
+        ggs_pp: document.getElementById('ggs_pp').value,
+        ggd_pp: document.getElementById('ggd_pp').value,
+        ggs_pm: document.getElementById('ggs_pm').value,
+        ggd_pm: document.getElementById('ggd_pm').value,
+        ggs_mp: document.getElementById('ggs_mp').value,
+        ggd_mp: document.getElementById('ggd_mp').value,
+        ggs_mm: document.getElementById('ggs_mm').value,
+        ggd_mm: document.getElementById('ggd_mm').value,
+        coi: ''
+      };
+
+   google.script.run
+    .withSuccessHandler(function(pendingData) {
+      pedigreeData.name = pendingData.name || pedigreeData.id;
+      
+      google.script.run
+        .withSuccessHandler(function(importRes) {
+          closeModal();
+          google.script.host.close();
+        })
+        .withFailureHandler(function(err) {
+          var s = document.getElementById('saveStatus');
+          s.className = 'extraction-status error';
+          s.textContent = 'Error during final import: ' + err.message;
+          btn.innerText = 'Save Pedigree';
+          btn.disabled = false;
+        })
+        .savePedigreeOnly({
+          pedigreeData: pedigreeData,
+          opts: {
+            herd: true,
+            stats: true,
+            colour: true,
+            scores: true
+          },
+          manualData: {}
+        });
+    })
+    .withFailureHandler(function(err) {
+      var s = document.getElementById('saveStatus');
+      s.className = 'extraction-status error';
+      s.textContent = 'Error loading pending data: ' + err.message;
+      btn.innerText = 'Save Pedigree';
+      btn.disabled = false;
+    })
+    .getPedigreeModalData();
+}
+
+    function closeModal() {
+      google.script.host.close();
+    }
+
+    // Tooltip Funktionen — identisch zu Import.html, bindet auf [data-tip],
+    // liest den Text bei jedem Hover neu (dynamisch änderbar).
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('[data-tip]').forEach(function(el) {
+        var imgSrc = el.getAttribute('data-img') || '';
+
+        el.addEventListener('mouseenter', function(e) {
+          removeTooltip();
+          var tip = document.createElement('div');
+          tip.className = 'floating-tooltip';
+          tip.textContent = el.getAttribute('data-tip') || 'No info';
+          document.body.appendChild(tip);
+          positionTooltip(e, tip);
+        });
+        el.addEventListener('mousemove', function(e) {
+          var tip = document.querySelector('.floating-tooltip');
+          if (tip) positionTooltip(e, tip);
+        });
+        el.addEventListener('mouseleave', function() {
+          removeTooltip();
+        });
+
+        el.addEventListener('click', function(e) {
+          if (!imgSrc) return;
+          e.stopPropagation();
+          removeTooltip();
+
+          var old = document.querySelector('.lightbox-overlay');
+          if (old) old.remove();
+
+          var overlay = document.createElement('div');
+          overlay.className = 'lightbox-overlay';
+
+          var box = document.createElement('div');
+          box.className = 'lightbox-box';
+
+          var closeBtn = document.createElement('button');
+          closeBtn.className = 'lightbox-close';
+          closeBtn.textContent = '✕';
+          closeBtn.addEventListener('click', function() {
+            overlay.remove();
+          });
+
+          var text = document.createElement('div');
+          text.className = 'lightbox-text';
+          text.textContent = el.getAttribute('data-tip') || '';
+
+          var img = document.createElement('img');
+          img.className = 'lightbox-img';
+          img.src = imgSrc;
+          img.alt = 'Screenshot';
+
+          box.appendChild(closeBtn);
+          box.appendChild(text);
+          box.appendChild(img);
+          overlay.appendChild(box);
+          document.body.appendChild(overlay);
+
+          overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) overlay.remove();
+          });
+        });
+      });
+    });
+
+    function removeTooltip() {
+      var t = document.querySelector('.floating-tooltip');
+      if (t) t.remove();
+    }
+
+    function positionTooltip(e, tip) {
+      var x = e.clientX + 14;
+      var y = e.clientY + 14;
+      var w = tip.offsetWidth || 200;
+      var h = tip.offsetHeight || 80;
+      if (x + w > window.innerWidth - 10) x = e.clientX - w - 14;
+      if (y + h > window.innerHeight - 10) y = e.clientY - h - 14;
+      if (x < 10) x = 10;
+      if (y < 10) y = 10;
+      tip.style.left = x + 'px';
+      tip.style.top = y + 'px';
     }
   </script>
+<?!= renderModalHelp('pedigree'); ?>
 </body>
 </html>

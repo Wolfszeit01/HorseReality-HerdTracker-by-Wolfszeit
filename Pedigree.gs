@@ -1,21 +1,23 @@
-/***********************
- * PEDIGREE MODAL BACKEND — FINAL
- ***********************/
+/* ══════════════════════════════════════════════════════════════
+  Pedidree Import
+   ══════════════════════════════════════════════════════════════ */
 
 function openPedigreeModal() {
-  const html = HtmlService.createHtmlOutputFromFile('pedigreeModal')
-    .setWidth(620)
-    .setHeight(800);
-  SpreadsheetApp.getUi().showModalDialog(html, 'Pedigree Editor');
+  const tpl = HtmlService.createTemplateFromFile('pedigreeModal');
+  const html = tpl.evaluate()
+   .setWidth(1000)
+    .setHeight(1200)
+  SpreadsheetApp.getUi().showModalDialog(html,' ');
 }
 
 function openPedigreeModalWithData(pedigreeData) {
   const props = PropertiesService.getScriptProperties();
   props.setProperty('pendingPedigreeData', JSON.stringify(pedigreeData));
-  const html = HtmlService.createHtmlOutputFromFile('pedigreeModal')
-    .setWidth(620)
-    .setHeight(800);
-  SpreadsheetApp.getUi().showModalDialog(html, 'Complete Pedigree');
+  const tpl = HtmlService.createTemplateFromFile('pedigreeModal');
+  const html = tpl.evaluate()
+    .setWidth(1000)
+    .setHeight(1200);
+  SpreadsheetApp.getUi().showModalDialog(html, ' ');
 }
 
 function getPedigreeModalData() {
@@ -26,35 +28,29 @@ function getPedigreeModalData() {
 
     let data = JSON.parse(pendingData);
 
-    // --- DEEP SEARCH: DAM ---
     if (data.damName && data.damName !== "Unknown") {
       const d = getExistingPedigreeInfo(data.damName);
       if (d) {
         data.damline = data.damline || d.damline;
-        data.gs_m    = d.sire;   // Dam's Sire
-        data.gd_m    = d.dam;    // Dam's Dam
-        // Great-grandparents via Dam's Sire (MP)
-        data.ggs_mp  = d.gs_p;   // Dam's Sire's Sire
-        data.ggd_mp  = d.gd_p;   // Dam's Sire's Dam
-        // Great-grandparents via Dam's Dam (MM)
-        data.ggs_mm  = d.gs_m;   // Dam's Dam's Sire
-        data.ggd_mm  = d.gd_m;   // Dam's Dam's Dam
+        data.gs_m    = d.sire;
+        data.gd_m    = d.dam;
+        data.ggs_mp  = d.gs_p;
+        data.ggd_mp  = d.gd_p;
+        data.ggs_mm  = d.gs_m;
+        data.ggd_mm  = d.gd_m;
       }
     }
 
-    // --- DEEP SEARCH: SIRE ---
     if (data.sireName && data.sireName !== "Unknown") {
       const s = getExistingPedigreeInfo(data.sireName);
       if (s) {
         data.stallionline = data.stallionline || s.stallionline;
-        data.gs_p         = s.sire;   // Sire's Sire
-        data.gd_p         = s.dam;    // Sire's Dam
-        // Great-grandparents via Sire's Sire (PP)
-        data.ggs_pp       = s.gs_p;   // Sire's Sire's Sire
-        data.ggd_pp       = s.gd_p;   // Sire's Sire's Dam
-        // Great-grandparents via Sire's Dam (PM)
-        data.ggs_pm       = s.gs_m;   // Sire's Dam's Sire
-        data.ggd_pm       = s.gd_m;   // Sire's Dam's Dam
+        data.gs_p         = s.sire;
+        data.gd_p         = s.dam;
+        data.ggs_pp       = s.gs_p;
+        data.ggd_pp       = s.gd_p;
+        data.ggs_pm       = s.gs_m;
+        data.ggd_pm       = s.gd_m;
       }
     }
 
@@ -70,7 +66,7 @@ function getKnownHorseNames() {
   const ss    = SpreadsheetApp.getActiveSpreadsheet();
   const names = new Set();
 
-  const herdSheet = ss.getSheetByName('Herd Tracker');
+  const herdSheet = ss.getSheetByName('Herd');
   if (herdSheet && herdSheet.getLastRow() >= 2) {
     herdSheet.getRange('D2:D' + herdSheet.getLastRow()).getValues().forEach(row => {
       if (row[0] && row[0].toString().trim())
@@ -91,27 +87,147 @@ function getKnownHorseNames() {
   return names;
 }
 
+// ─── SHARED HELPERS ───────────────────────────────────────────────────────────
+
+function _isPlaceholder(l) {
+  return /^(Foundation Breeder|Unknown|n\/a)$/i.test(l.trim());
+}
+
+function _isStableName(l) {
+  if (!l) return false;
+  return /(Estate|Stables|Gardens|Meadows|Stuteri|Stable|Farm|Ranch|Stud\b|Park|Acres|Solitude|National|Breeding\s+Stud|hevostalli|hevostila|Academy|Centre|Center|Ridge|Valley|Grove)/i.test(l);
+}
+
+function _isTagline(l) {
+  if (!l) return false;
+  if (/^\d+\s*[\|\/]/.test(l))                                               return true; // 835 | ...
+  if (/\bGP\d{3,}\b/i.test(l))                                               return true; // GP817
+  if (/\{GP\d+\}/i.test(l))                                                  return true; // {GP828}
+  if (/\d+VG\b/i.test(l))                                                    return true; // 12VG
+  if (/\d+:\d+/.test(l))                                                     return true; // 12:0
+  // Score-Zahl nur als Tagline wenn Zeile NICHT mit Buchstabe beginnt
+  if (/\d{2,}\.\d{1,}/.test(l) && !/^[A-Za-zÀ-öø-ÿ\!$]/.test(l.trim()))   return true; // 89.469 solo
+  if (/\[\d+[\.\,]\d+\]/.test(l))                                            return true; // [96.461]
+  if (/\d+,\d+\/\d+/.test(l))                                                return true; // 0,3/6
+  // Reine Zahl: NUR Tagline wenn > 1 Ziffer (einstellige = Pferdename wie "1")
+  if (/^\d{2,}$/.test(l))                                                    return true; // 831
+  if (/\d{3,}\s+\d+\s+\d/.test(l))                                          return true; // 756 12 93.5
+  if (/^[A-Z]{2,3}\d{3,}/.test(l))                                          return true; // EN627
+  if (/\d+[A-Z]{1,3}[I|]\d+[A-Z]{1,3}/i.test(l))                           return true; // 651GPI12VGI
+  if (/︱|︲/.test(l))                                                         return true;
+  if (/FULLYTRAINED|BETA/i.test(l))                                          return true;
+  if (/^(Driving|Endurance|Training|Dressur|Dressage|Jumping|Western|Eventing)\b/i.test(l)) return true;
+  if (/^\s*\|/.test(l))                                                      return true;
+  if (/GP\d+\s*\|/.test(l))                                                  return true; // GP756 | ...
+  // Reine Genetics-Zeile: "11VG 660 A Z SW1"
+  if (/^\d+\s*(VG|G\+?|A|BA|P)\b/i.test(l))                                return true;
+  return false;
+}
+
+function _normalizeDecoName(l) {
+  return l
+    .replace(/[ℬℌℛℐℑℒℓ]/g, m => ({'ℬ':'B','ℌ':'H','ℛ':'R','ℐ':'I','ℑ':'I','ℒ':'L','ℓ':'l'}[m] || m))
+    .replace(/[ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘǫʀꜱᴛᴜᴠᴡxʏᴢᴸᴿ]/g, c => c.normalize('NFKD')[0] || c)
+    .replace(/[σ]/g, 's');
+}
+
+function _cleanName(name) {
+  if (!name) return '';
+  let n = name;
+
+  // "!94.453 ℘ Name" oder "$92.7 Name" → Score-Präfix strippen
+  n = n.replace(/^[!$]?\d+[\.\,]\d+\s*[-–]?\s*\d*[\.\,]?\d*\s*[℘\s]*/,'').trim();
+
+  // "95.029︱Name" → "Name"
+  const scorePrefix = n.match(/^\d+[\.\,]\d+\s*[|︱]\s*(.+)$/);
+  if (scorePrefix) n = scorePrefix[1];
+
+  // Deceased
+  n = n.replace(/Deceased/gi, '');
+
+  // Führende Deko-Zeichen
+  n = n.replace(/^[★☆✶✧˚ꋖꂵꀷ!❦↟ℛᨒ⤈⚜️⭃〔〕♟˚₊✧⋆°·•﹚ℙ♕⭐️♡♥*\-͟͞➳❥༅\s]+/, '').trim();
+
+  // "Name || SU" → "Name"
+  n = n.replace(/\s*\|\|.*$/, '').trim();
+
+  // "Name (3.2)" → "Name"
+  n = n.replace(/\s*\(\d+[\.\,]\d+\)\s*$/, '').trim();
+
+  // "Name 92.365" → "Name"  (trailing score ≥ 3 Dezimalstellen)
+  n = n.replace(/\s+\d+[\.\,]\d{3,}\s*$/, '').trim();
+
+  // "Name | 92.3" oder "Name︱..."
+  n = n.replace(/\s*[|︱︲\/]\s*[\d\s].*$/, '').trim();
+
+  // Tagline-Anhängsel nach Pipe: "Name|12VG"
+  n = n.split(/Tagline/i)[0].trim();
+
+  // Trailing Deko
+  n = n.replace(/[★☆✶✧˚ꋖꂵꀷ!❦↟ℛᨒ⤈⚜️⭃〔〕♟˚₊✧⋆°·•﹚⭐️♡♥\s]+$/, '').trim();
+
+  return n; // "" erlaubt
+}
+
 /**
- * Parses a pedigree string from the game.
+ * Gemeinsame Slot-Extraktion für getPreviewData + parsePedigreeString.
  *
- * Primary:  3-line blocks (Name / Tagline / Stable)
- * Fallback: 2-line blocks (Name / Stable) when no tagline detected
- * Special:  1-line for placeholders (Foundation Breeder / Unknown)
- *
- * Game slot structure (14 slots):
- * 0=Sire, 1=GS(P), 2=GGS(PP), 3=GGD(PP), 4=GD(P), 5=GGS(MP), 6=GGD(MP)
- * 7=Dam,  8=GS(M), 9=GGS(PM), 10=GGD(PM), 11=GD(M), 12=GGS(MM), 13=GGD(MM)
+ * Game slot mapping (14 slots):
+ * 0=Sire, 1=GS(P), 2=GGS(PP), 3=GGD(PP), 4=GD(P), 5=GGS(PM), 6=GGD(PM)
+ * 7=Dam,  8=GS(M), 9=GGS(MP), 10=GGD(MP), 11=GD(M), 12=GGS(MM), 13=GGD(MM)
  */
+function _extractPedigreeSlots(pedLines) {
+  const slots = [];
+  let i = 0;
+
+  while (i < pedLines.length && slots.length < 14) {
+    const line = pedLines[i];
+
+    // Placeholder → leerer Slot, 1 Zeile vorwärts
+    if (_isPlaceholder(line)) {
+      slots.push('');
+      i += 1;
+      continue;
+    }
+
+    // Stable ohne vorangehenden Namen → überspringen
+    if (_isStableName(line)) {
+      i += 1;
+      continue;
+    }
+
+    // Aktuelle Zeile = Name (NIE per _isTagline filtern!)
+    const cleaned = _cleanName(_normalizeDecoName(line));
+    slots.push(cleaned); // auch "" oder "1" erlaubt
+
+    // Nächste Zeile bestimmt Schrittweite
+    const nextLine = pedLines[i + 1] || '';
+    i += _isTagline(nextLine) ? 3 : 2;
+  }
+
+  return slots;
+}
+
+function _slotsToResult(slots) {
+  const g = (idx) => slots[idx] || '';
+  return {
+    sire:   g(0),  dam:    g(7),
+    gs_p:   g(1),  gd_p:   g(4),
+    gs_m:   g(8),  gd_m:   g(11),
+    ggs_pp: g(2),  ggd_pp: g(3),
+    ggs_pm: g(5),  ggd_pm: g(6),
+    ggs_mp: g(9),  ggd_mp: g(10),
+    ggs_mm: g(12), ggd_mm: g(13),
+  };
+}
+
+// ─── parsePedigreeString ──────────────────────────────────────────────────────
+
 function parsePedigreeString(rawText) {
   try {
-    const result = {
-      sire: '', dam: '',
-      gs_p: '', gd_p: '', gs_m: '', gd_m: '',
-      ggs_pp: '', ggd_pp: '', ggs_mp: '', ggd_mp: '',
-      ggs_pm: '', ggd_pm: '', ggs_mm: '', ggd_mm: ''
-    };
-
-    if (!rawText || rawText.trim() === '') return result;
+    if (!rawText || rawText.trim() === '') {
+      return { success: false, error: "No text provided" };
+    }
 
     const pedSplit = rawText.split(/Pedigree/i);
     const pedRaw   = pedSplit.length > 1 ? pedSplit[1] : rawText;
@@ -122,110 +238,20 @@ function parsePedigreeString(rawText) {
       .map(l => l.trim())
       .filter(l => l.length > 0 && !l.match(/^COI:/i));
 
-    const isPlaceholder = (l) =>
-      /^(Foundation Breeder|Unknown|n\/a)$/i.test(l.trim());
-
-    const isTagline = (l) => {
-      if (!l) return false;
-      if (/^\d+\s*[\|\/]/.test(l))                    return true; // "835 | ..."
-      if (/\bGP\d{3,}\b/i.test(l))                    return true; // GP817
-      if (/\{GP\d+\}/i.test(l))                       return true; // {GP828}
-      if (/\d+VG\b/.test(l))                          return true; // "12VG"
-      if (/\d+:\d+/.test(l))                          return true; // "12:0" or "680:11"
-      if (/\d{2,}\.\d{1,}/.test(l))                   return true; // "78.3" or "96.352"
-      if (/\[\d+[\.\,]\d+\]/.test(l))                 return true; // "[96.461]"
-      if (/\d+,\d+\/\d+/.test(l))                     return true; // "0,3/6"
-      if (/^\d+$/.test(l))                             return true; // "831"
-      if (/\d{3,}\s+\d+\s+\d/.test(l))                return true; // "756 12 93.5 G-AGGGA"
-      if (/^[A-Z]{2,3}\d{3,}/.test(l))                return true; // EN627, RA606
-      if (/︱|︲/.test(l))                              return true;
-      if (/FULLYTRAINED|BETA/i.test(l))                return true;
-      if (/^(Driving|Endurance|Training)\b/i.test(l)) return true;
-      if (/^\s*\|/.test(l))                            return true;
-      if (/GP\d+\s*\|/.test(l))                       return true; // "GP756 | 92.383"
-      return false;
-    };
-
-    const normalizeDecoName = (l) => l
-      .replace(/[ℬℌℛℐℑℒℓ]/g, m => ({'ℬ':'B','ℌ':'H','ℛ':'R','ℐ':'I','ℑ':'I','ℒ':'L','ℓ':'l'}[m] || m))
-      .replace(/[ᴀʙᴄᴅᴇꜰɢʜɪᴊᴋʟᴍɴᴏᴘǫʀꜱᴛᴜᴠᴡxʏᴢᴸᴿ]/g, c => c.normalize('NFKD')[0] || c)
-      .replace(/[σ]/g, 's');
-
-    const cleanName = (name) => {
-      if (!name) return '';
-      let n = name;
-      // Score-prefix: "95.029︱Söpö" → "Söpö"
-      const scorePrefix = n.match(/^\d+[\.\,]\d+\s*[|︱]\s*(.+)$/);
-      if (scorePrefix) n = scorePrefix[1];
-      // Strip leading deco chars
-      n = n.replace(/Deceased/gi, '')
-           .replace(/^[★☆✶✧˚ꋖꂵꀷ!❦↟ℛᨒ⤈⚜️⭃〔〕♟˚₊✧⋆°·•﹚ℙ♕⭐️♡♥*\-͟͞➳❥\s]+/, '')
-           .trim();
-      // Strip "|| SU" or "|| XX" suffixes (double-pipe qualifiers)
-      n = n.replace(/\s*\|\|.*$/, '').trim();
-      // Strip trailing score: "KT Sukulaku 92.365" → "KT Sukulaku"
-      n = n.replace(/\s+\d+[\.\,]\d{3,}\s*$/, '').trim();
-      // Strip trailing score after single pipe followed by digits
-      n = n.replace(/\s*[|︱︲\/]\s*[\d\s].*$/, '').trim();
-      // Strip trailing deco chars
-      n = n.replace(/\s*[⪐+⭐️♡♥★☆✶✧˚➳❥\s]+$/, '').trim();
-      n = n.replace(/[★☆✶✧˚ꋖꂵꀷ!❦↟ℛᨒ⤈⚜️⭃〔〕♟˚₊✧⋆°·•﹚⭐️♡♥\s]+$/, '').trim();
-      return n || '';
-    };
-
-    const slots = [];
-    let i = 0;
-
-    while (i < pedLines.length && slots.length < 14) {
-      const line = pedLines[i];
-
-      if (isPlaceholder(line)) {
-        slots.push('');
-        i += 1;
-        continue;
-      }
-
-      const cleaned = cleanName(normalizeDecoName(line));
-      slots.push(cleaned.length > 1 ? cleaned : '');
-
-      const nextLine = pedLines[i + 1] || '';
-      i += isTagline(nextLine) ? 3 : 2;
-    }
-
-    const g = (idx) => slots[idx] || '';
-
-    // Game slot mapping:
-    // 0=Sire, 1=GS(P), 2=GGS(PP), 3=GGD(PP), 4=GD(P), 5=GGS(PM), 6=GGD(PM)
-    // 7=Dam,  8=GS(M), 9=GGS(MP), 10=GGD(MP), 11=GD(M), 12=GGS(MM), 13=GGD(MM)
-    result.sire    = g(0);
-    result.dam     = g(7);
-    result.gs_p    = g(1);   // Sire's Sire
-    result.gd_p    = g(4);   // Sire's Dam
-    result.gs_m    = g(8);   // Dam's Sire
-    result.gd_m    = g(11);  // Dam's Dam
-    result.ggs_pp  = g(2);   // via Sire's Sire (PP)
-    result.ggd_pp  = g(3);
-    result.ggs_pm  = g(5);   // via Sire's Dam (PM)
-    result.ggd_pm  = g(6);
-    result.ggs_mp  = g(9);   // via Dam's Sire (MP)
-    result.ggd_mp  = g(10);
-    result.ggs_mm  = g(12);  // via Dam's Dam (MM)
-    result.ggd_mm  = g(13);
-
+    const result = _slotsToResult(_extractPedigreeSlots(pedLines));
+    result.success = true;
     return result;
   } catch (e) {
-    console.error('Error in parsePedigreeString: ' + e.message);
-    return {
-      sire:'', dam:'', gs_p:'', gd_p:'', gs_m:'', gd_m:'',
-      ggs_pp:'', ggd_pp:'', ggs_mp:'', ggd_mp:'',
-      ggs_pm:'', ggd_pm:'', ggs_mm:'', ggd_mm:''
-    };
+    console.error('parsePedigreeString: ' + e.message);
+    return { success: false, error: e.message };
   }
 }
 
+// ─── getExistingPedigreeInfo ──────────────────────────────────────────────────
+
 function getExistingPedigreeInfo(nameOrId) {
   const ss        = SpreadsheetApp.getActiveSpreadsheet();
-  const herdSheet = ss.getSheetByName('Herd Tracker');
+  const herdSheet = ss.getSheetByName('Herd');
   const pedSheet  = ss.getSheetByName('Pedigree');
 
   if (!nameOrId) return null;
@@ -263,18 +289,17 @@ function getExistingPedigreeInfo(nameOrId) {
       if ((result.id && pId === result.id) || clean(pName) === searchStr) {
         if (!result.id)   result.id   = pId;
         if (!result.name) result.name = pName;
-        // Pedigree sheet columns:
         // B(1)=ID, C(2)=Name, D(3)=Sireline, E(4)=Damline
         // F(5)=Sire, G(6)=Dam
         // H(7)=GS(P), I(8)=GD(P), J(9)=GS(M), K(10)=GD(M)
-        result.stallionline = pedData[i][3]  || '';
-        result.damline      = pedData[i][4]  || '';
-        result.sire         = pedData[i][5]  || '';
-        result.dam          = pedData[i][6]  || '';
-        result.gs_p         = pedData[i][7]  || '';  // GS(P) = Sire's Sire
-        result.gd_p         = pedData[i][8]  || '';  // GD(P) = Sire's Dam
-        result.gs_m         = pedData[i][9]  || '';  // GS(M) = Dam's Sire
-        result.gd_m         = pedData[i][10] || '';  // GD(M) = Dam's Dam
+        result.stallionline = pedData[i][4]  || '';
+        result.damline      = pedData[i][5]  || '';
+        result.sire         = pedData[i][6]  || '';
+        result.dam          = pedData[i][7]  || '';
+        result.gs_p         = pedData[i][8]  || '';
+        result.gd_p         = pedData[i][9]  || '';
+        result.gs_m         = pedData[i][10]  || '';
+        result.gd_m         = pedData[i][12] || '';
         break;
       }
     }
@@ -283,12 +308,16 @@ function getExistingPedigreeInfo(nameOrId) {
   return (result.id || result.name) ? result : null;
 }
 
+// ─── getPedigreeAutocompleteData ──────────────────────────────────────────────
+
 function getPedigreeAutocompleteData() {
   try {
-    const ss         = SpreadsheetApp.getActiveSpreadsheet();
-    let horseNames   = [];
+    const ss       = SpreadsheetApp.getActiveSpreadsheet();
+    let horseNames = [];
+    let stallionlines = [];
+    let damlines   = [];
 
-    const herdSheet = ss.getSheetByName('Herd Tracker');
+    const herdSheet = ss.getSheetByName('Herd');
     if (herdSheet && herdSheet.getLastRow() >= 2) {
       herdSheet.getRange('D2:D' + herdSheet.getLastRow()).getValues().forEach(row => {
         if (row[0] && row[0].toString().trim() !== '')
@@ -298,20 +327,35 @@ function getPedigreeAutocompleteData() {
 
     const pedigreeSheet = ss.getSheetByName('Pedigree');
     if (pedigreeSheet && pedigreeSheet.getLastRow() >= 2) {
-      pedigreeSheet.getRange('C2:C' + pedigreeSheet.getLastRow()).getValues().forEach(row => {
+      pedigreeSheet.getRange('C2:F' + pedigreeSheet.getLastRow()).getValues().forEach(row => {
+        // C = Name, E = Stallionline, F = Damline
         if (row[0] && row[0].toString().trim() !== '') {
           const name = row[0].toString().trim();
           if (!horseNames.includes(name)) horseNames.push(name);
         }
+        if (row[2] && row[2].toString().trim() !== '') {
+          stallionlines.push(row[2].toString().trim());
+        }
+        if (row[3] && row[3].toString().trim() !== '') {
+          damlines.push(row[3].toString().trim());
+        }
       });
     }
 
-    return { success: true, horseNames: [...new Set(horseNames)].sort() };
+    return {
+      success: true,
+      horseNames: [...new Set(horseNames)].sort(),
+      stallionlines: [...new Set(stallionlines)].sort(),
+      damlines: [...new Set(damlines)].sort()
+    };
   } catch (error) {
-    return { success: false, error: error.message, horseNames: [] };
+    return { success: false, error: error.message, horseNames: [], stallionlines: [], damlines: [] };
   }
 }
 
+// ─── saveManualPedigree ───────────────────────────────────────────────────────
+
+// ─── saveManualPedigree ───────────────────────────────────────────────────────
 function saveManualPedigree(pedigreeData) {
   try {
     const ss    = SpreadsheetApp.getActiveSpreadsheet();
@@ -325,8 +369,8 @@ function saveManualPedigree(pedigreeData) {
     const searchName = pedigreeData.name ? pedigreeData.name.toString().toLowerCase().trim() : 'NO_NAME';
 
     for (let i = 1; i < data.length; i++) {
-      const rowId   = data[i][1] ? data[i][1].toString().trim()                : '';
-      const rowName = data[i][2] ? data[i][2].toString().toLowerCase().trim()  : '';
+      const rowId   = data[i][1] ? data[i][1].toString().trim()               : '';
+      const rowName = data[i][2] ? data[i][2].toString().toLowerCase().trim() : '';
       if ((searchId !== 'NO_ID' && rowId === searchId) || rowName === searchName) {
         targetRow = i + 1;
         break;
@@ -334,44 +378,152 @@ function saveManualPedigree(pedigreeData) {
     }
     if (targetRow === -1) targetRow = sheet.getLastRow() + 1;
 
-    // Pedigree sheet column mapping:
-    // B(2)=ID, C(3)=Name, D(4)=Sireline, E(5)=Damline
-    // F(6)=Sire, G(7)=Dam
-    // H(8)=GS(P), I(9)=GD(P), J(10)=GS(M), K(11)=GD(M)
-    // L(12)=GGS(PP), M(13)=GGD(PP), N(14)=GGS(PM), O(15)=GGD(PM)
-    // P(16)=GGS(MP), Q(17)=GGD(MP), R(18)=GGS(MM), S(19)=GGD(MM)
     const rowValues = [
-      pedigreeData.id           || '',  // B
-      pedigreeData.name         || '',  // C
-      pedigreeData.stallionline || '',  // D
-      pedigreeData.damline      || '',  // E
-      pedigreeData.sire         || '',  // F
-      pedigreeData.dam          || '',  // G
-      pedigreeData.gs_p         || '',  // H — GS(P)  = Sire's Sire
-      pedigreeData.gd_p         || '',  // I — GD(P)  = Sire's Dam
-      pedigreeData.gs_m         || '',  // J — GS(M)  = Dam's Sire
-      pedigreeData.gd_m         || '',  // K — GD(M)  = Dam's Dam
-      pedigreeData.ggs_pp       || '',  // L — GGS(PP) = via Sire's Sire
-      pedigreeData.ggd_pp       || '',  // M — GGD(PP)
-      pedigreeData.ggs_pm       || '',  // N — GGS(PM) = via Sire's Dam
-      pedigreeData.ggd_pm       || '',  // O — GGD(PM)
-      pedigreeData.ggs_mp       || '',  // P — GGS(MP) = via Dam's Sire
-      pedigreeData.ggd_mp       || '',  // Q — GGD(MP)
-      pedigreeData.ggs_mm       || '',  // R — GGS(MM) = via Dam's Dam
-      pedigreeData.ggd_mm       || '',  // S — GGD(MM)
+      pedigreeData.id           || '', // B (Spalte 2)
+      pedigreeData.name         || '', // C (Spalte 3)
+      pedigreeData.coi          || '', // D (Spalte 4)
+      pedigreeData.stallionline || '', // E (Spalte 5)
+      pedigreeData.damline      || '', // F (Spalte 6)
+      pedigreeData.sire         || '', // G (Spalte 7)
+      pedigreeData.dam          || '', // H (Spalte 8)
+      pedigreeData.gs_p         || '', // I (Spalte 9)
+      pedigreeData.gd_p         || '', // J (Spalte 10)
+      pedigreeData.gs_m         || '', // K (Spalte 11)
+      pedigreeData.gd_m         || '', // L (Spalte 12)
+      pedigreeData.ggs_pp       || '', // M (Spalte 13)
+      pedigreeData.ggd_pp       || '', // N (Spalte 14)
+      pedigreeData.ggs_pm       || '', // O (Spalte 15)
+      pedigreeData.ggd_pm       || '', // P (Spalte 16)
+      pedigreeData.ggs_mp       || '', // Q (Spalte 17)
+      pedigreeData.predicates   || '', // R (Spalte 18)
+      pedigreeData.ggs_mm       || '', // S (Spalte 19)
+      pedigreeData.ggd_mm       || ''  // T (Spalte 20)
     ];
 
-    sheet.getRange(targetRow, 2, 1, rowValues.length).setValues([rowValues]);
+    sheet.getRange(targetRow, PEDIGREE_COLS.ID).setValue(pedigreeData.id || '');
+    sheet.getRange(targetRow, PEDIGREE_COLS.NAME).setValue(pedigreeData.name || '');
+    // COI NICHT schreiben - behalten
+    sheet.getRange(targetRow, PEDIGREE_COLS.STALLIONLINE).setValue(pedigreeData.stallionline || '');
+    sheet.getRange(targetRow, PEDIGREE_COLS.DAMLINE).setValue(pedigreeData.damline || '');
+    sheet.getRange(targetRow, PEDIGREE_COLS.SIRE).setValue(pedigreeData.sire || '');
+    sheet.getRange(targetRow, PEDIGREE_COLS.DAM).setValue(pedigreeData.dam || '');
+    sheet.getRange(targetRow, PEDIGREE_COLS.GS_P).setValue(pedigreeData.gs_p || '');
+    sheet.getRange(targetRow, PEDIGREE_COLS.GD_P).setValue(pedigreeData.gd_p || '');
+    sheet.getRange(targetRow, PEDIGREE_COLS.GS_M).setValue(pedigreeData.gs_m || '');
+    sheet.getRange(targetRow, PEDIGREE_COLS.GD_M).setValue(pedigreeData.gd_m || '');
+    sheet.getRange(targetRow, PEDIGREE_COLS.GGS_PP).setValue(pedigreeData.ggs_pp || '');
+    sheet.getRange(targetRow, PEDIGREE_COLS.GGD_PP).setValue(pedigreeData.ggd_pp || '');
+    sheet.getRange(targetRow, PEDIGREE_COLS.GGS_PM).setValue(pedigreeData.ggs_pm || '');
+    sheet.getRange(targetRow, PEDIGREE_COLS.GGD_PM).setValue(pedigreeData.ggd_pm || '');
+    sheet.getRange(targetRow, PEDIGREE_COLS.GGS_MP).setValue(pedigreeData.ggs_mp || '');
+    sheet.getRange(targetRow, PEDIGREE_COLS.GGD_MP).setValue(pedigreeData.ggd_mp || '');
+    sheet.getRange(targetRow, PEDIGREE_COLS.GGS_MM).setValue(pedigreeData.ggs_mm || '');
+    sheet.getRange(targetRow, PEDIGREE_COLS.GGD_MM).setValue(pedigreeData.ggd_mm || '');
     PropertiesService.getScriptProperties().deleteProperty('pendingPedigreeData');
-    return '✓ Pedigree saved in row ' + targetRow;
+    return { success: true, row: targetRow };
 
   } catch (error) {
     throw new Error('Error: ' + error.message);
   }
 }
 
-function getPedigreeModalUi(horseId) {
-  const tpl = HtmlService.createTemplateFromFile('pedigreeModal');
-  tpl.preselectedHorseId = horseId || '';
-  return tpl.evaluate().setWidth(620).setHeight(800);
+// ═══════════════════════════════════════════════════════════════
+// NEU: Speichert Pedigree UND führt vollständigen Import durch
+// ═══════════════════════════════════════════════════════════════
+function saveAndImportPedigree(fullData) {
+  try {
+    const ss = SpreadsheetApp.getActiveSpreadsheet();
+    const pedigreeData = fullData.pedigreeData || fullData;
+    const opts = fullData.opts || { herd: true, stats: true, colour: true, scores: true };
+    const manualData = fullData.manualData || {};
+    
+    // 1. Pedigree im Sheet speichern
+    const pedResult = saveManualPedigree(pedigreeData);
+    
+    // 2. Vollständigen Import durchführen mit allen Daten
+    const data = {
+      id: pedigreeData.id,
+      name: pedigreeData.name,
+      breed: pedigreeData.breed,
+      gender: pedigreeData.gender,
+      dob: pedigreeData.dob,
+      predicates: pedigreeData.predicates,
+      agedWithDP: pedigreeData.agedWithDP,
+      sire: pedigreeData.sire,
+      dam: pedigreeData.dam,
+      sireIsInside: true,  // Nach Save sind sie Inside
+      damIsInside: true,
+      gs_p: pedigreeData.gs_p || "",
+      gd_p: pedigreeData.gd_p || "",
+      gs_m: pedigreeData.gs_m || "",
+      gd_m: pedigreeData.gd_m || "",
+      coi: pedigreeData.coi || "",
+      gp: pedigreeData.gp || {},
+      confo: pedigreeData.confo || {},
+      genetics: pedigreeData.genetics || {},
+      health: pedigreeData.health || {},
+      achieve: pedigreeData.achieve || {},
+      showScores: pedigreeData.showScores || [],
+      compScores: pedigreeData.compScores || [],
+      pregnancy: pedigreeData.pregnancy || null
+    };
+    
+    const results = [];
+    const convertedDOB = _convertDOB(data.dob);
+    
+    if (opts.herd) {
+      const r = _writeHerdTracker(data, convertedDOB);
+      if (r) results.push(r);
+    }
+
+    if (opts.stats) {
+      const r = _writeStats(ss, data);
+      if (r) results.push(r);
+    }
+
+    if (opts.colour) {
+      const r = _writeColourGenetics(ss, data, manualData);
+      if (r) results.push(r);
+    }
+
+    if (opts.scores) {
+      results = results.concat(_writeScores(ss, data));
+    }
+
+    // Pedigree ist bereits gespeichert oben, aber hier auch referenzieren
+    const pedRef = "✓ Pedigree saved";
+    results.unshift(pedRef);
+
+    return {
+      success: true,
+      message: "✓ Complete Import!\n" + results.join("\n")
+    };
+    
+  } catch (error) {
+    throw new Error("Import error: " + error.message);
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════
+// Speichert nur Pedigree (Rest ist schon beim Import gespeichert)
+// Wird vom Pedigree-Modal aufgerufen nach outside-Eltern-Input
+// ═══════════════════════════════════════════════════════════════
+function savePedigreeOnly(params) {
+  try {
+    const pedigreeData = params.pedigreeData || params;
+    
+    // Pedigree-Zeile speichern
+    const pedSaveResult = saveManualPedigree(pedigreeData);
+    
+    // Properties clearen
+    const props = PropertiesService.getScriptProperties();
+    props.deleteProperty('pendingPedigreeData');
+    
+    return {
+      success: true,
+      message: "✓ Pedigree saved!"
+    };
+  } catch (error) {
+    throw new Error("Save error: " + error.message);
+  }
 }

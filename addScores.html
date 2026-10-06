@@ -1,0 +1,1071 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Add Scores</title>
+
+  <?!= renderThemeVariables(); ?>
+
+  <style>
+    :root {
+      --font-brand: 'Sweden Sans', sans-serif;
+      --fw-semibold: 600;
+      --ls-brand: 0.15em;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Sweden Sans', sans-serif;
+      letter-spacing: normal;
+      line-height: 1.5;
+      background: var(--neutrals-white);
+      padding: 15px;
+      color: var(--primary-deep);
+    }
+
+    ::-webkit-scrollbar {
+      width: 5px;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: var(--secondary-base);
+      border-radius: 10px;
+    }
+
+    .modal-frame {
+      background-color: var(--primary-ultramuted);
+      border-radius: 12px 12px 0 0;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
+      overflow: hidden !important;
+      position: relative;
+    }
+
+    .modal-header {
+      background: var(--primary-dark);
+      border-radius: 12px 12px 0 0 !important;
+      padding: 16px 0 0 0;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      box-sizing: border-box;
+      min-height: 110px;
+    }
+
+    .header-top-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      padding: 0 20px;
+      margin-bottom: 16px;
+    }
+
+    .header-left {
+      display: flex;
+      align-items: center;
+      text-align: left;
+      gap: 12px;
+      flex: 1;
+    }
+
+    .stuteri-logo-left {
+      height: 42px;
+      width: auto;
+      filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.25));
+    }
+
+    .brand-text-stacked {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      line-height: 1;
+    }
+
+    .header-brand-title {
+      font-family: 'Sweden Sans', sans-serif;
+      font-size: 0.90rem;
+      font-weight: 600;
+      color: var(--secondary-base);
+      letter-spacing: 0.15em;
+      line-height: 1.2;
+      text-transform: uppercase;
+      text-align: left;
+    }
+
+    .stuteri-text-sub {
+      font-family: 'Elometha', cursive;
+      font-weight: 400;
+      letter-spacing: normal;
+      line-height: 1.2;
+      color: var(--neutrals-white);
+      font-size: 1rem;
+      margin-top: 2px;
+      pointer-events: none;
+      white-space: nowrap;
+      text-align: center;
+    }
+
+    .header-center {
+      text-align: center;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-top: 40px;
+    }
+
+    .title-container {
+      position: relative;
+      display: inline-block;
+      margin: 0;
+    }
+
+    .title-container h1 {
+      font-family: 'Sweden Sans', sans-serif;
+      font-weight: 600;
+      font-size: 1.20rem;
+      color: var(--secondary-base);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin: 0;
+      line-height: 1;
+    }
+
+    .header-right {
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .content-container {
+      padding: 20px;
+    }
+
+    .modal-card {
+      background: #ffffff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      margin-bottom: 16px;
+    }
+
+    .section-title {
+      font-family: 'Sweden Sans', sans-serif;
+      font-size: 10px;
+      font-weight: 700;
+      color: var(--primary-dark);
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 16px;
+    }
+
+    .section-title::before {
+      content: "";
+      display: inline-block;
+      width: 2px;
+      height: 12px;
+      background-color: var(--secondary-base);
+      border-radius: 2px;
+    }
+
+    .helper-text {
+      font-family: 'Sweden Sans', sans-serif;
+      font-size: 11px;
+      color: var(--primary-mid);
+      margin-bottom: 16px;
+      line-height: 1.4;
+    }
+
+    /* Feld-Label — identisch zu Import.html/pedigreeModal.html */
+    .field-label {
+      display: block;
+      font-size: 10px;
+      font-weight: 700;
+      font-family: Arial, Helvetica, sans-serif;
+      letter-spacing: 0.5px;
+      color: var(--primary-dark);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .modal-input {
+      width: 100%;
+      background: #FAF8F5;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-family: inherit;
+      color: #333;
+    }
+
+    .modal-input:focus {
+      outline: none;
+      border-color: var(--secondary-base);
+      background: #fff;
+    }
+
+    .modal-textarea {
+      width: 100%;
+      background: #FAF8F5;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 6px;
+      padding: 8px 10px;
+      font-size: 12px;
+      color: #333;
+      resize: vertical;
+      min-height: 100px;
+      font-family: monospace;
+    }
+
+    .modal-textarea:focus {
+      outline: none;
+      border-color: var(--secondary-base);
+      background: #fff;
+    }
+
+    select.modal-input {
+      appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23502843' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 10px center;
+    }
+
+    .btn-primary-action {
+      width: auto;
+      background: var(--primary-dark);
+      color: var(--neutrals-white);
+      border: 1px solid var(--secondary-base);
+      border-radius: 8px;
+      padding: 10px 20px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .btn-primary-action:hover {
+      background: #3B1B2A;
+    }
+
+    .btn-primary-action:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .modal-btn-secondary {
+      background: transparent;
+      border: 1px solid var(--primary-mid);
+      color: var(--primary-mid);
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .modal-btn-secondary:hover {
+      background: var(--primary-lightmuted);
+    }
+
+    .status-message {
+      padding: 8px 12px;
+      border-radius: 6px;
+      border-left: 3px solid transparent;
+      margin: 12px 0;
+      font-size: 11.5px;
+      font-weight: 500;
+      font-family: Arial, Helvetica, sans-serif;
+      text-align: left;
+      background: var(--primary-lightmuted);
+      display: none;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .status-message.success {
+      background: color-mix(in srgb, var(--tertiary-light) 14%, white);
+      border-left-color: var(--tertiary-light);
+      color: var(--tertiary-deep);
+      display: block;
+    }
+
+    .status-message.error {
+      background: color-mix(in srgb, var(--accent-2) 12%, white);
+      border-left-color: var(--accent-2);
+      color: var(--accent-2);
+      display: block;
+    }
+
+    .status-message.loading {
+      background: var(--primary-lightmuted);
+      border-left-color: var(--secondary-base);
+      color: var(--primary-dark);
+      display: block;
+    }
+
+    .status-message.info {
+      background: color-mix(in srgb, var(--accent-3) 12%, white);
+      border-left-color: var(--accent-3);
+      color: var(--accent-3);
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .checkbox-description {
+      font-size: 11px;
+      color: var(--primary-mid);
+      margin-top: 4px;
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .clean-duplicates-link {
+      font-size: 10px;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--primary-mid);
+      text-decoration: underline;
+      text-decoration-color: rgba(115, 57, 96, 0.35);
+      white-space: nowrap;
+      cursor: pointer;
+    }
+    .clean-duplicates-link:hover {
+      color: var(--primary-dark);
+    }
+
+    .stats-split-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .stats-sub-box {
+      padding: 0;
+    }
+
+    .stats-sub-title {
+      font-size: 9.5px;
+      font-weight: 700;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--primary-dark);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+      padding-bottom: 4px;
+    }
+
+    .stats-sub-row {
+      display: grid;
+      grid-template-columns: auto 62px;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 6px;
+    }
+
+    .stats-sub-row:last-child {
+      margin-bottom: 0;
+    }
+
+    .stats-sub-row label {
+      font-size: 10px;
+      font-weight: 600;
+      font-family: Arial, Helvetica, sans-serif;
+      color: var(--primary-mid);
+    }
+
+    .stats-input {
+      padding: 6px 8px;
+      font-size: 11px;
+      font-family: inherit;
+      background: #FAF8F5;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 4px;
+    }
+
+    .autocomplete-dropdown {
+      position: absolute;
+      max-height: 200px;
+      overflow-y: auto;
+      background: white;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      border-radius: 6px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      z-index: 100;
+      display: none;
+    }
+
+    .autocomplete-item {
+      padding: 8px 12px;
+      cursor: pointer;
+      font-size: 12px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .autocomplete-item:hover {
+      background: var(--primary-ultramuted);
+    }
+
+    .autocomplete-item strong {
+      color: var(--primary-deep);
+    }
+
+    .autocomplete-item span {
+      color: var(--primary-mid);
+      font-size: 10px;
+    }
+
+    .cleanup-warning {
+      background: var(--primary-lightmuted);
+      border-left: 3px solid var(--accent-5);
+      padding: 10px 12px;
+      margin: 12px 0;
+      border-radius: 4px;
+    }
+
+    .cleanup-warning strong {
+      color: var(--primary-dark);
+      font-size: 11px;
+    }
+
+    .cleanup-warning p {
+      font-size: 10px;
+      color: var(--primary-mid);
+      margin: 4px 0 0 0;
+    }
+
+    .buttons-row {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      margin-top: 20px;
+    }
+
+    .buttons-row-right {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+
+    .info-tip {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: transparent;
+      border: 1.3px solid var(--primary-dark);
+      color: var(--primary-dark);
+      font-size: 10px;
+      font-weight: 700;
+      cursor: help;
+      margin-left: 6px;
+      transition: all 0.2s ease;
+    }
+
+    .info-tip:hover {
+      background: var(--primary-dark);
+      color: var(--neutrals-white);
+      border-color: var(--primary-dark);
+    }
+
+    .floating-tooltip {
+      position: fixed;
+      z-index: 9999;
+      background: var(--primary-dark);
+      color: #fff;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 11.5px;
+      font-weight: 500;
+      letter-spacing: normal;
+      text-transform: none;
+      line-height: 1.5;
+      padding: 10px 12px;
+      border-radius: 8px;
+      max-width: 240px;
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+      pointer-events: none;
+      animation: tooltipFadeIn 0.12s ease;
+      white-space: pre-line;
+    }
+
+    @keyframes tooltipFadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    .lightbox-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(44, 22, 39, 0.75);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      padding: 30px;
+      box-sizing: border-box;
+      animation: tooltipFadeIn 0.15s ease;
+    }
+
+    .lightbox-box {
+      background: #ffffff;
+      border-radius: 12px;
+      max-width: 90vw;
+      max-height: 90vh;
+      overflow: auto;
+      padding: 20px;
+      position: relative;
+      box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: none;
+      background: var(--primary-dark);
+      color: var(--secondary-base);
+      font-size: 15px;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .lightbox-close:hover {
+      background: #3B1B2A;
+    }
+
+    .lightbox-text {
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: 12.5px;
+      line-height: 1.5;
+      color: var(--primary-deep);
+      margin: 0 28px 14px 0;
+      max-width: 480px;
+      white-space: pre-line;
+    }
+
+    .lightbox-img {
+      display: block;
+      max-width: 100%;
+      max-height: 70vh;
+      border: 1px solid rgba(0, 0, 0, 0.08);
+      border-radius: 6px;
+    }
+  
+    /* Shared modal typography — Horse Import is the reference. */
+    .stuteri-logo-left { height: 42px; width: auto; }
+    .header-brand-title { font-family: 'Sweden Sans', sans-serif; font-size: .90rem; font-weight: 600; letter-spacing: .15em; line-height: 1.2; }
+    .stuteri-text-sub { font-size: 1rem; line-height: 1.2; }
+    .title-container h1, .modal-header h1, .header-right h2 {
+      font-family: 'Sweden Sans', sans-serif; font-size: 1.40rem; font-weight: 600;
+      letter-spacing: .15em; line-height: 1.2; text-transform: uppercase;
+      color: var(--secondary-base); margin: 0;
+    }
+    .header-center { margin-top: 0; }
+    .header-top-row { margin-bottom: 16px; }
+    .header-subtitle, .modal-header .subtitle {
+      font-family: 'Sweden Sans', sans-serif; font-size: 9px; font-weight: 600;
+      letter-spacing: 2px; line-height: 1.5; text-transform: uppercase;
+      color: color-mix(in srgb, var(--neutrals-white) 65%, transparent); margin: 4px 0 0;
+    }
+    .section-title {
+      font-family: 'Sweden Sans', sans-serif; font-size: 10px; font-weight: 700;
+      letter-spacing: 2px; line-height: 1.5; text-transform: uppercase;
+      color: var(--primary-dark); margin-bottom: 16px; border-bottom: none; padding-bottom: 0;
+    }
+    .section-title::before { width: 2px; height: 12px; background: var(--secondary-base); border-radius: 2px; }
+    .nav-tab, .nav-tab.active, .main-tab, .main-tab.active, .tab, .tab.active {
+      font-family: 'Sweden Sans', sans-serif; font-size: .70rem; font-weight: 600;
+      letter-spacing: 1px; line-height: 1; height: 30px; padding: 0 14px;
+    }
+    .nav-tab.active, .main-tab.active, .tab.active { font-weight: 700; border-radius: 8px 8px 0 0; margin-bottom: 0; }
+  
+    /* Header layout: balanced vertical spacing, responsive title row. */
+.modal-header { min-height: 0; padding-top: 22px; }
+    .header-top-row { align-items: center; column-gap: 24px; margin-bottom: 22px; }
+    .header-center { margin-top: 0; }
+    .header-brand-title { white-space: nowrap; }
+.modal-header { padding: 22px 0; }
+    .header-top-row { margin-bottom: 0; }
+@media (max-width: 720px) {
+      .header-top-row { grid-template-columns: minmax(0, 1fr); row-gap: 18px; }
+      .header-top-row .header-left { justify-content: flex-start; }
+      .header-top-row .header-right, .header-top-row > div:last-child:empty { display: none; }
+      .header-center { width: 100%; text-align: center; }
+    }
+  
+    /* Canonical header geometry, including the import modals' legacy class. */
+    .modal-header, .dashboard-header {
+      display: flex !important; flex-direction: column !important;
+      align-items: stretch; justify-content: flex-start; gap: 0;
+      height: auto; min-height: 0; padding: 0; margin: 0; border-bottom: none;
+    }
+    .modal-header .header-top-row, .dashboard-header .header-top-row {
+      display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      align-items: center; justify-content: normal; gap: 0 24px;
+      width: 100%; height: 90px; min-height: 90px; padding: 0 20px; margin: 0;
+    }
+    .header-top-row .header-left { grid-column: 1; grid-row: 1; justify-content: flex-start; gap: 12px; }
+    .header-top-row .header-center { grid-column: 2; grid-row: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0; padding: 0; width: auto; text-align: center; }
+    .header-top-row .header-right { grid-column: 3; grid-row: 1; }
+    .header-top-row .header-brand-title { white-space: nowrap; }
+    .header-top-row .stuteri-logo-left { height: 42px; flex-shrink: 0; }
+    .header-top-row h1, .header-top-row h2 { font-family: 'Sweden Sans', sans-serif; font-size: 1.40rem; font-weight: 600; letter-spacing: .15em; line-height: 1.2; color: var(--secondary-base); margin: 0; text-transform: uppercase; }
+    .nav-bar, .tabs { height: 30px; min-height: 30px; margin: 0; padding: 0 20px; align-items: flex-end; }
+    .nav-tabs { height: 30px; align-items: flex-end; }
+    @media (max-width: 720px) {
+      .modal-header .header-top-row, .dashboard-header .header-top-row {
+        grid-template-columns: minmax(0, 1fr); grid-template-rows: 42px auto;
+        height: 130px; min-height: 130px; padding: 16px 20px; gap: 14px;
+      }
+      .header-top-row .header-left { grid-column: 1; grid-row: 1; }
+      .header-top-row .header-center { grid-column: 1; grid-row: 2; }
+      .header-top-row .header-right { display: none; }
+    }
+  </style>
+<style>
+.stuteri-logo-left { max-width:90px; object-fit:contain; }
+.stuteri-logo-center { max-width:130px; object-fit:contain; }
+.sidebar-brand img { max-width:60px; object-fit:contain; }
+.header-brand-title, .brand-name { overflow-wrap:anywhere; }
+</style>
+</head>
+<body>
+
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Finlandica:wght@400;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/gh/mats-k/sweden-sans@master/sweden-sans.css" rel="stylesheet" />
+  <link href="https://fonts.cdnfonts.com/css/elometha" rel="stylesheet" />
+
+  <div class="modal-frame">
+
+    <div class="modal-header">
+      <div class="header-top-row">
+        <div class="header-left">
+          <?!= renderPublicLogo_('stuteri-logo-left'); ?>
+          <div class="brand-text-stacked">
+            <span class="header-brand-title"><?= getBranding_().name ?></span>
+            <span class="script-text stuteri-text-sub"><?= getBranding_().signature ?></span>
+          </div>
+        </div>
+        <div class="header-center">
+          <div class="title-container"><h1>Add Scores</h1></div>
+        </div>
+        <div class="header-right"></div>
+      </div>
+    </div>
+
+    <div class="content-container">
+
+      <!-- 1. ENTER RESULTS (inkl. Pferde-Auswahl) -->
+      <div class="modal-card">
+        <div class="section-title">Enter Results</div>
+
+        <div class="grid-2" style="margin-bottom: 12px;">
+          <div>
+            <label for="horseSearch" class="field-label">Horse</label>
+            <input type="text" id="horseSearch" placeholder="Type ID or name..." class="modal-input" autocomplete="off">
+            <div id="autocompleteDropdown" class="autocomplete-dropdown"></div>
+            <input type="hidden" id="selectedHorseId" value="">
+            <input type="hidden" id="selectedHorseName" value="">
+          </div>
+          <div>
+            <label for="resultType" class="field-label">Result Type</label>
+            <select id="resultType" class="modal-input">
+              <option value="conf">Conf. Results</option>
+              <option value="comp">Comp. Results</option>
+            </select>
+          </div>
+        </div>
+
+        <div style="margin-bottom: 12px;">
+          <div style="display: flex; align-items: center; gap: 4px; margin-bottom: 6px;">
+          <label for="scoresInput" class="field-label" style="margin-bottom: 0;">Paste raw scores</label>
+          <span class="info-tip" ...>?</span>
+        </div>
+        <p class="checkbox-description" style=" margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+          Existing duplicates for this horse are removed automatically before saving.
+          <a href="#" class="clean-duplicates-link" onclick="cleanAllDuplicates(); return false;">Clean duplicates for all horses now</a>
+        </p>
+          <textarea id="scoresInput" placeholder="e.g.Yesterday REGI - Foals 1st Premium 85.770 #65/89 (161)Yesterday REGI - Foals 1st Premium 85.863 #39/62 (175)" class="modal-textarea"></textarea>
+        </div>
+      </div>
+
+      <!-- 2. MANUAL STATS (OPTIONAL) -->
+      <div class="modal-card">
+        <div class="section-title">Stats (optional)</div>
+        <p class="helper-text">Enter manual placements if needed. Leave blank to keep existing values.</p>
+
+        <div class="stats-split-grid">
+          <div class="stats-sub-box">
+            <div class="stats-sub-title">Conformation Shows</div>
+            <div class="stats-sub-row"><label>Day Champion</label><input type="text" id="man_dc" class="stats-input" placeholder="e.g. 45"></div>
+            <div class="stats-sub-row"><label><span>1</span>st Prem.</label><input type="text" id="man_1st" class="stats-input" placeholder="e.g. 12"></div>
+            <div class="stats-sub-row"><label><span>2</span>nd Prem.</label><input type="text" id="man_2nd" class="stats-input" placeholder="e.g. 8"></div>
+            <div class="stats-sub-row"><label><span>3</span>rd Prem.</label><input type="text" id="man_3rd" class="stats-input" placeholder="e.g. 5"></div>
+          </div>
+          <div class="stats-sub-box">
+            <div class="stats-sub-title">Competitions</div>
+            <div class="stats-sub-row"><label><span>1</span>st Prize</label><input type="text" id="man_first" class="stats-input" placeholder="e.g. 3"></div>
+            <div class="stats-sub-row"><label><span>2</span>nd Prize</label><input type="text" id="man_second" class="stats-input" placeholder="e.g. 7"></div>
+            <div class="stats-sub-row"><label><span>3</span>rd Prize</label><input type="text" id="man_third" class="stats-input" placeholder="e.g. 4"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STATUS MESSAGE -->
+      <div id="statusMessage" class="status-message"></div>
+
+      <!-- BUTTONS -->
+      <div class="buttons-row">
+        <div class="buttons-row-right" style="justify-content: flex-end; width: 100%;">
+          <button type="button" class="modal-btn-secondary" onclick="closeModal()">Cancel</button>
+          <button type="button" id="saveBtn" class="btn-primary-action" onclick="saveScores()">Save</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    let horseList = [];
+    let debounceTimer = null;
+
+    document.addEventListener('DOMContentLoaded', function() {
+      google.script.run
+        .withSuccessHandler(function(list) {
+          horseList = list;
+          console.log('Horse list loaded: ' + horseList.length + ' entries');
+        })
+        .withFailureHandler(function(err) {
+          console.error('Failed to load horse list: ' + err.message);
+        })
+        .getHorseListForSearch();
+
+      setupAutocomplete();
+    });
+
+    function setupAutocomplete() {
+      var input = document.getElementById('horseSearch');
+      var dropdown = document.getElementById('autocompleteDropdown');
+
+      input.addEventListener('input', function() {
+        clearTimeout(debounceTimer);
+        var query = this.value.trim().toLowerCase();
+
+        if (query.length < 1) {
+          dropdown.style.display = 'none';
+          return;
+        }
+
+        debounceTimer = setTimeout(function() {
+          var filtered = horseList.filter(h => 
+            h.name.toLowerCase().includes(query) || 
+            h.id.toLowerCase().includes(query)
+          ).slice(0, 10);
+
+          if (filtered.length === 0) {
+            dropdown.style.display = 'none';
+            return;
+          }
+
+          dropdown.innerHTML = filtered.map(h => 
+            '<div class="autocomplete-item" onclick="selectHorse(\'' + h.id + '\', \'' + h.name.replace(/'/g, "\\'") + '\')">' +
+            '<strong>' + h.name + '</strong> <span>(ID: ' + h.id + ')</span>' +
+            '</div>'
+          ).join('');
+
+          dropdown.style.display = 'block';
+          dropdown.style.position = 'absolute';
+          dropdown.style.width = input.offsetWidth + 'px';
+          dropdown.style.top = (input.offsetTop + input.offsetHeight + 4) + 'px';
+          dropdown.style.left = input.offsetLeft + 'px';
+        }, 150);
+      });
+
+      input.addEventListener('focus', function() {
+        if (this.value.trim().length > 0) {
+          input.dispatchEvent(new Event('input'));
+        }
+      });
+
+      document.addEventListener('click', function(e) {
+        if (!dropdown.contains(e.target) && e.target !== input) {
+          dropdown.style.display = 'none';
+        }
+      });
+    }
+
+    function selectHorse(id, name) {
+      document.getElementById('horseSearch').value = name;
+      document.getElementById('selectedHorseId').value = id;
+      document.getElementById('selectedHorseName').value = name;
+      document.getElementById('autocompleteDropdown').style.display = 'none';
+    }
+
+    function saveScores() {
+      var btn = document.getElementById('saveBtn');
+      var statusEl = document.getElementById('statusMessage');
+      
+      var horseId = document.getElementById('selectedHorseId').value;
+      var horseName = document.getElementById('selectedHorseName').value;
+      var target = document.getElementById('resultType').value;
+      var scoresText = document.getElementById('scoresInput').value;
+
+      if (!horseId) {
+        statusEl.className = 'status-message error';
+        statusEl.textContent = '❌ Please select a horse first!';
+        return;
+      }
+
+      if (!scoresText.trim()) {
+        statusEl.className = 'status-message error';
+        statusEl.textContent = '❌ Please enter at least one score!';
+        return;
+      }
+
+  
+      var scoresArray = [];
+      
+      var regex = /\b\d{2}[,.]\d{3}\b/g;
+      var matches = scoresText.match(regex);
+      
+      if (matches) {
+        scoresArray = matches.map(s => s.replace(',', '.'));
+      } else {
+        var lines = scoresText.split('\n');
+        for (var i = 0; i < lines.length; i++) {
+          var line = lines.trim();
+          if (line && !line.includes('-') && !line.includes('#') && !/[a-zA-Z]/.test(line)) {
+            var cleaned = line.replace(',', '.');
+            if (!isNaN(parseFloat(cleaned))) {
+              scoresArray.push(cleaned);
+            }
+          }
+        }
+      }
+
+      if (scoresArray.length === 0) {
+        statusEl.className = 'status-message error';
+        statusEl.textContent = '❌ No valid scores found in the text!';
+        return;
+      }
+
+      var manStats = {
+        dc: document.getElementById('man_dc').value.trim(),
+        '1st': document.getElementById('man_1st').value.trim(),
+        '2nd': document.getElementById('man_2nd').value.trim(),
+        '3rd': document.getElementById('man_3rd').value.trim(),
+        first: document.getElementById('man_first').value.trim(),
+        second: document.getElementById('man_second').value.trim(),
+        third: document.getElementById('man_third').value.trim()
+      };
+
+      Object.keys(manStats).forEach(key => {
+        if (manStats[key] === '' || manStats[key] === undefined) {
+          delete manStats[key];
+        }
+      });
+
+      btn.disabled = true;
+      btn.innerText = 'Saving...';
+      statusEl.className = 'status-message loading';
+      statusEl.textContent = '💾 Saving data...';
+
+      var data = {
+        id: horseId,
+        name: horseName,
+        target: target,
+        scores: scoresArray,
+        manStats: manStats
+      };
+
+      google.script.run
+        .withSuccessHandler(function(result) {
+          btn.disabled = false;
+          btn.innerText = 'Save';
+          
+          if (result.success) {
+            var msg = '✅ ' + result.message;
+            if (result.duplicatesRemoved > 0) {
+              msg += '\\n🧹 ' + result.duplicatesRemoved + ' duplicates removed';
+            }
+            if (result.statsUpdated) {
+              msg += '\\n📊 Stats updated: ' + result.statsSheets.join(', ');
+            }
+            
+            statusEl.className = 'status-message success';
+            statusEl.textContent = msg;
+            
+            setTimeout(() => {
+              closeModal();
+              google.script.host.close();
+            }, 2000);
+          } else {
+            statusEl.className = 'status-message error';
+            statusEl.textContent = '❌ Error: ' + (result.error || 'Unknown');
+          }
+        })
+        .withFailureHandler(function(err) {
+          btn.disabled = false;
+          btn.innerText = 'Save';
+          statusEl.className = 'status-message error';
+          statusEl.textContent = '❌ Server error: ' + err.message;
+        })
+        .saveBulkScores(data);
+    }
+
+    function cleanAllDuplicates() {
+      if (!confirm('REALLY CLEAN UP ALL DUPLICATES IN BOTH RESULT SHEETS?\\n\\nThis action cannot be undone!')) {
+        return;
+      }
+
+      var link = event.target;
+      var originalText = link.textContent;
+      var statusEl = document.getElementById('statusMessage');
+      link.style.pointerEvents = 'none';
+      link.style.opacity = '0.5';
+      link.textContent = 'Cleaning...';
+      statusEl.className = 'status-message info';
+      statusEl.textContent = 'Cleaning up duplicates...';
+
+      google.script.run
+        .withSuccessHandler(function(result) {
+          link.style.pointerEvents = '';
+          link.style.opacity = '';
+          link.textContent = originalText;
+
+          if (result.success) {
+            statusEl.className = 'status-message success';
+            statusEl.textContent = result.message;
+          } else {
+            statusEl.className = 'status-message error';
+            statusEl.textContent = 'Error: ' + result.error;
+          }
+        })
+        .withFailureHandler(function(err) {
+          link.style.pointerEvents = '';
+          link.style.opacity = '';
+          link.textContent = originalText;
+          statusEl.className = 'status-message error';
+          statusEl.textContent = 'Server error: ' + err.message;
+        })
+        .cleanAllDuplicatesInSheet('all');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      document.querySelectorAll('[data-tip]').forEach(function(el) {
+        var imgSrc = el.getAttribute('data-img') || '';
+
+        el.addEventListener('mouseenter', function(e) {
+          removeTooltip();
+          var tip = document.createElement('div');
+          tip.className = 'floating-tooltip';
+          tip.textContent = el.getAttribute('data-tip') || 'No info';
+          document.body.appendChild(tip);
+          positionTooltip(e, tip);
+        });
+        el.addEventListener('mousemove', function(e) {
+          var tip = document.querySelector('.floating-tooltip');
+          if (tip) positionTooltip(e, tip);
+        });
+        el.addEventListener('mouseleave', function() {
+          removeTooltip();
+        });
+
+        el.addEventListener('click', function(e) {
+          if (!imgSrc) return;
+          e.stopPropagation();
+          removeTooltip();
+
+          var old = document.querySelector('.lightbox-overlay');
+          if (old) old.remove();
+
+          var overlay = document.createElement('div');
+          overlay.className = 'lightbox-overlay';
+
+          var box = document.createElement('div');
+          box.className = 'lightbox-box';
+
+          var closeBtn = document.createElement('button');
+          closeBtn.className = 'lightbox-close';
+          closeBtn.textContent = '✕';
+          closeBtn.addEventListener('click', function() {
+            overlay.remove();
+          });
+
+          var text = document.createElement('div');
+          text.className = 'lightbox-text';
+          text.textContent = el.getAttribute('data-tip') || '';
+
+          var img = document.createElement('img');
+          img.className = 'lightbox-img';
+          img.src = imgSrc;
+          img.alt = 'Screenshot';
+
+          box.appendChild(closeBtn);
+          box.appendChild(text);
+          box.appendChild(img);
+          overlay.appendChild(box);
+          document.body.appendChild(overlay);
+
+          overlay.addEventListener('click', function(e) {
+            if (e.target === overlay) overlay.remove();
+          });
+        });
+      });
+    });
+
+    function removeTooltip() {
+      var t = document.querySelector('.floating-tooltip');
+      if (t) t.remove();
+    }
+
+    function positionTooltip(e, tip) {
+      var x = e.clientX + 14;
+      var y = e.clientY + 14;
+      var w = tip.offsetWidth || 200;
+      var h = tip.offsetHeight || 80;
+      if (x + w > window.innerWidth - 10) x = e.clientX - w - 14;
+      if (y + h > window.innerHeight - 10) y = e.clientY - h - 14;
+      if (x < 10) x = 10;
+      if (y < 10) y = 10;
+      tip.style.left = x + 'px';
+      tip.style.top = y + 'px';
+    }
+
+    function closeModal() {
+      google.script.host.close();
+    }
+  </script>
+<?!= renderModalHelp('scores'); ?>
+</body>
+</html>

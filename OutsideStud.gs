@@ -18,7 +18,12 @@ function getOutsideStudPreviewData(inputs) {
   const d = {
     id: '', name: '', breed: '', gender: '',
     confo: {}, gp: {}, genetics: {},
-    confoMax: '', compMax: ''
+    confoMax: '', compMax: '', 
+    coi: '',
+    hcr: '',  // ✨ NEU: HCR Währung
+    dp: '',   // ✨ NEU: DP Währung
+    ft: '',   // ✨ NEU: FT Währung
+    wt: ''    // ✨ NEU: WT Währung
   };
 
   const info    = inputs.info    || '';
@@ -65,10 +70,16 @@ function getOutsideStudPreviewData(inputs) {
     if (!matched) d.breed = br.replace(/\s*Horse\s*Society\s*/i, '').replace(/\s*Society\s*/i, '').trim();
   }
 
-  // --- GENDER (must be Stallion) ---
+  // --- GENDER ---
   const genderMatch = info.match(/\b(Mare|Stallion|Gelding)\b/i)
                    || statTxt.match(/\b(Mare|Stallion|Gelding)\b/i);
   d.gender = genderMatch ? genderMatch[1] : '';
+
+  // --- COI ---
+  const coiMatch = info.match(/COI[:\s]+(\d+(?:\.\d+)?)%?/i);
+  if (coiMatch) {
+    d.coi = coiMatch[1];
+  }
 
   // --- CONFORMATION ---
   const fullAnalysisText = colTxt + '\n' + statTxt;
@@ -158,14 +169,12 @@ function getOutsideStudPreviewData(inputs) {
   if (mWs) d.genetics['WhiteSpotting'] = cleanG(mWs[1] + '/' + mWs[2]);
 
   // --- CONFO MAX & COMP MAX ---
-  // Confo Max = highest show score
   const showPart = statTxt.split(/show\s+results/i)[1] || '';
   const showScores = (showPart.split(/competition/i)[0].match(/\b\d{1,3}[.,]\d{3}\b/g) || [])
     .map(s => parseFloat(s.replace(',', '.')))
     .filter(v => !isNaN(v));
   if (showScores.length > 0) d.confoMax = Math.max(...showScores).toFixed(3);
 
-  // Comp Max = highest competition score
   const compParts = statTxt.split(/competition\s+results/i);
   if (compParts.length > 1) {
     const compScores = (compParts[1].split(/Health|Genetic/i)[0].match(/\b\d{1,3}[.,]\d{3,4}\b/g) || [])
@@ -230,29 +239,21 @@ function shortenGradeOutside(grade) {
 /**
  * Saves the outside stud to the Outside Studs sheet.
  *
- * Column mapping (verified against sheet):
- * B(2)=ID, C(3)=Name, D(4)=Breed, E(5)=Stud Fee, F(6)=Link (formula, skip)
- * G(7)=WLK, H(8)=TRT, I(9)=CNT, J(10)=GLP, K(11)=Tölt, L(12)=FLP
- * M(13)=Posture, N(14)=HED, O(15)=NECK, P(16)=BCK, Q(17)=SHLD, R(18)=FLgs, S(19)=HD, T(20)=Socks
- * U–AI = skip (hidden columns, formulas)
- * AJ(36)=#VG, AK(37)=#G+, AL(38)=#G, AM(39)=#G-, AN(40)=#A, AO(41)=#BA
- * AP(42)=Acc, AQ(43)=Agi, AR(44)=Bal, AS(45)=Basc, AT(46)=Pull
- * AU(47)=Spd, AV(48)=Spr, AW(49)=Sta, AX(50)=Str, AY(51)=Srft
- * AZ(52)=Total GP
- * BA–BN = Discipline GPs (skip — calculated by formulas)
- * BO(67)=rec. discipline (skip — formula)
- * BP(68)=Pred. Conf. Score (skip — formula)
- * BQ(69)=skip, BR(70)=Conf. MAX, BS(71)=Comp MAX, BT(72)=Genetic Code
+ * Layout after inserting Breed at D: B ID, C Name, D Breed; E HRC, F DP, G FT, H WT, I COI.
+ * K:X conformation, AT:BC GP attributes, BD total GP, BF conformation maximum,
+ * BV competition maximum, BX genetics. Column numbers below are the current, post-insertion positions.
  */
+
 function saveOutsideStud(data, manualGenes) {
   try {
     const ss    = SpreadsheetApp.getActiveSpreadsheet();
     const sheet = ss.getSheetByName('Outside Studs');
     if (!sheet) throw new Error('Sheet "Outside Studs" not found!');
+    if (!/^(breed|rasse)$/i.test(String(sheet.getRange(1,4).getValue()).trim())) throw new Error('Insert column D named Breed before importing.');
 
     const isIce = (data.breed || '').includes('Icelandic Horse');
+    const isKath = (data.breed || '').includes('Kathiawari');
 
-    // Find existing row by ID, or first empty row in column B
     const lastRow = sheet.getLastRow();
     let targetRow = -1;
 
@@ -264,7 +265,6 @@ function saveOutsideStud(data, manualGenes) {
           break;
         }
       }
-      // If not found, find first empty row in column B
       if (targetRow === -1) {
         for (let i = 0; i < ids.length; i++) {
           if (!ids[i][0] || ids[i][0].toString().trim() === '') {
@@ -277,57 +277,59 @@ function saveOutsideStud(data, manualGenes) {
     if (targetRow === -1) targetRow = lastRow + 1;
 
     const set = (col, val) => sheet.getRange(targetRow, col).setValue(val !== undefined && val !== null ? val : '');
+    sheet.getRange(targetRow, 4).setValue(data.breed || '');
 
     // ── Basic info ──────────────────────────────────────────
     set(2, data.id);
     set(3, data.name);
-    set(4, data.breed);
-    set(5, data.studFee);
-    // Col 6 = Link formula — skip
+    set(5, data.hcr || '');
+    set(6, data.dp || '');
+    set(7, data.ft || '');
+    set(8, data.wt || '');
+    set(9, data.coi || '');
+    // J = Link — skip
 
     // ── Conformation ────────────────────────────────────────
     const c = data.confo || {};
-    set(7,  c.Walk          || '');
-    set(8,  c.Trot          || '');
-    set(9,  c.Canter        || '');
-    set(10, c.Gallop        || '');
-   const isKath = (data.breed || '').includes('Kathiawari');
-    set(11, isIce ? (c.Tolt       || '') : ''); // Tölt — Icelandic only
-    set(12, isIce ? (c.FlyingPace || '') : isKath ? (c.Revaal || '') : ''); // FLP / Revaal
-    set(13, c.Posture       || '');
-    set(14, c.Head          || '');
-    set(15, c.Neck          || '');
-    set(16, c.Back          || '');
-    set(17, c.Shoulders     || '');
-    set(18, c.Frontlegs     || '');
-    set(19, c.Hindquarters  || '');
-    set(20, c.Socks         || '');
-    // U(21)–AO(41) = skip (hidden, formula columns)
+    set(11, c.Walk || '');
+    set(12, c.Trot || '');
+    set(13, c.Canter || '');
+    set(14, c.Gallop || '');
+    set(15, isIce ? (c.Tolt || '') : '');
+    set(16, isIce ? (c.FlyingPace || '') : isKath ? (c.Revaal || '') : '');
+    set(17, c.Posture || '');
+    set(18, c.Head || '');
+    set(19, c.Neck || '');
+    set(20, c.Back || '');
+    set(21, c.Shoulders || '');
+    set(22, c.Frontlegs || '');
+    set(23, c.Hindquarters || '');
+    set(24, c.Socks || '');
 
-    // ── GP base stats (AP–AY) ─────────────────────────────
+    // ── GP base stats (AT–BC) ───────────────────────────────
     const gp = data.gp || {};
-    set(42, gp['Acceleration']   || ''); // AP
-    set(43, gp['Agility']        || ''); // AQ
-    set(44, gp['Balance']        || ''); // AR
-    set(45, gp['Bascule']        || ''); // AS
-    set(46, gp['Pulling power']  || ''); // AT
-    set(47, gp['Speed']          || ''); // AU
-    set(48, gp['Sprint']         || ''); // AV
-    set(49, gp['Stamina']        || ''); // AW
-    set(50, gp['Strength']       || ''); // AX
-    set(51, gp['Surefootedness'] || ''); // AY
+    set(46, gp['Acceleration']   || '');
+    set(47, gp['Agility']        || '');
+    set(48, gp['Balance']        || '');
+    set(49, gp['Bascule']        || '');
+    set(50, gp['Pulling power']  || '');
+    set(51, gp['Speed']          || '');
+    set(52, gp['Sprint']         || '');
+    set(53, gp['Stamina']        || '');
+    set(54, gp['Strength']       || '');
+    set(55, gp['Surefootedness'] || '');
 
-    // AZ(52) = Total GP — sum of base stats
+    // BD(56) = Total GP
     const gpVals = Object.values(gp).map(v => parseFloat(v)).filter(v => !isNaN(v));
     const totalGP = gpVals.length > 0 ? Math.round(gpVals.reduce((a, b) => a + b, 0)) : '';
-    set(52, totalGP); // AZ
+    set(56, totalGP);
 
-    // BA(53)–BQ(69) = Discipline GPs + rec. discipline + Pred. Conf. Score — skip (formulas)
+    // ── Results & Genetics (YOUR CORRECTIONS) ───────────────────────
+    set(58, data.confoMax    || '');    
+    set(74, data.compMax     || '');    
+    set(76, data.geneticCode || '');    
 
-    // ── Results & Genetics ───────────────────────────────────
-    set(70, data.confoMax    || ''); // BR = Conf. MAX
-    set(71, data.compMax     || ''); // BS = Comp MAX
-    set(72, data.geneticCode || ''); // BT = Genetic Code
+    updateStallionDropdown();
 
     return '✓ ' + data.name + ' saved to Outside Studs (row ' + targetRow + ')';
 

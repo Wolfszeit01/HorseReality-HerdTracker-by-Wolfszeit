@@ -1,0 +1,1038 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Foal Calculator</title>
+
+  <?!= renderThemeVariables(); ?>
+
+  <style>
+:root {
+      /* Aliase auf Theme-Bridge-Variablen — der Rest der Datei bleibt unangetastet
+         und zieht bei Theme-Wechsel automatisch mit. */
+      --hr-purple:       var(--primary-dark);
+      --hr-purple-mid:   var(--primary-mid);
+      --hr-purple-light: var(--primary-ultra);
+      --hr-gold:         var(--secondary-base);
+      --hr-gold-light:   var(--secondary-light);
+      --hr-bg:           var(--primary-ultramuted);
+      --hr-card:         var(--primary-lightmuted);
+      --hr-white:        var(--neutrals-white);
+      --hr-text:         var(--primary-deep);
+      --hr-text-muted:   var(--primary-mid);
+      --hr-border:       color-mix(in srgb, var(--secondary-base) 25%, transparent);
+      --hr-shadow:       0 8px 24px color-mix(in srgb, var(--primary-dark) 8%, transparent);
+      --hr-success:      var(--tertiary-deep);
+      --hr-success-bg:   var(--primary-lightmuted);
+      --hr-danger:       var(--accent-2);
+      --hr-warn:         var(--accent-5);
+      --hr-coi-low:      var(--tertiary-deep);
+      --hr-coi-medium:   var(--accent-5);
+      --hr-coi-high:     var(--accent-2);
+      --hr-coi-veryhigh: var(--primary-deep);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Sweden Sans', sans-serif;
+      background: var(--hr-bg);
+      color: var(--hr-text);
+      padding: 10px;
+      line-height: 1.4;
+      font-size: 13px;
+      overflow-x: hidden;
+    }
+
+    /* ===== CONTROL PANEL ===== */
+    .control-panel {
+      background: var(--hr-purple);
+      padding: 16px;
+      border-radius: 12px;
+      box-shadow: var(--hr-shadow);
+      margin-bottom: 14px;
+      border-bottom: 3px solid var(--hr-gold);
+    }
+
+    .panel-header {
+      font-family: 'Sweden Sans', sans-serif;
+      font-style: normal;
+      font-size: 1.40rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      line-height: 1.2;
+      text-transform: uppercase;
+      color: var(--hr-gold);
+      text-align: center;
+      margin-bottom: 4px;
+    }
+
+    .panel-subtitle {
+      font-family: 'Sweden Sans', sans-serif;
+      text-align: center;
+      color: color-mix(in srgb, var(--neutrals-white) 65%, transparent);
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .control-panel label {
+      font-size: 9px;
+      font-weight: 700;
+      font-family: 'Sweden Sans', sans-serif;
+      color: var(--hr-gold);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 4px;
+      display: block;
+    }
+
+    .control-panel input,
+    .control-panel select {
+      width: 100%;
+      padding: 8px 10px;
+      margin-bottom: 10px;
+      border: 1px solid color-mix(in srgb, var(--secondary-base) 40%, transparent);
+      border-radius: 6px;
+      background: var(--hr-bg);
+      color: var(--hr-white);
+      font-size: 13px;
+      font-family: 'Sweden Sans', sans-serif;
+      transition: border-color 0.2s;
+    }
+    .control-panel input::placeholder { color: var(--hr-text-muted); }
+    .control-panel input:focus,
+    .control-panel select:focus {
+      outline: none;
+      border-color: var(--hr-gold);
+      background: var(--hr-white);
+    }
+    .control-panel select option { background: var(--hr-purple); color: var(--hr-white); }
+
+    .control-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .control-grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+
+    .control-panel .checkbox-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--hr-text);
+      margin-top: 4px;
+      cursor: pointer;
+    }
+    .control-panel .checkbox-row input[type="checkbox"] {
+      width: auto;
+      margin: 0;
+      accent-color: var(--hr-gold);
+    }
+
+    /* ===== MARE SUMMARY ===== */
+    .mare-summary {
+      background: var(--hr-white);
+      border: 1px solid var(--hr-border);
+      border-left: 4px solid var(--hr-gold);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 14px;
+      display: none;
+    }
+    .mare-summary .stud-title {
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 17px;
+      color: var(--hr-purple);
+      border-bottom: 1px solid var(--hr-border);
+      padding-bottom: 6px;
+      margin-bottom: 8px;
+    }
+    .summary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6px 20px;
+      font-size: 12px;
+    }
+    .summary-grid small { color: var(--hr-text-muted); margin-right: 4px; }
+    .summary-grid b { color: var(--hr-purple); font-family: 'Sweden Sans', sans-serif; }
+
+    /* ===== COI BADGE ===== */
+    .coi-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 4px 10px;
+      border-radius: 50px;
+      font-size: 10px;
+      font-weight: 700;
+      font-family: 'Sweden Sans', sans-serif;
+      height: 22px;
+    }
+    .coi-badge.low {
+      background: color-mix(in srgb, var(--hr-coi-low) 12%, var(--hr-white));
+      color: var(--hr-coi-low);
+      border: 1px solid var(--hr-coi-low);
+    }
+    .coi-badge.medium {
+      background: color-mix(in srgb, var(--hr-coi-medium) 12%, var(--hr-white));
+      color: var(--hr-coi-medium);
+      border: 1px solid var(--hr-coi-medium);
+    }
+    .coi-badge.high {
+      background: color-mix(in srgb, var(--hr-coi-high) 12%, var(--hr-white));
+      color: var(--hr-coi-high);
+      border: 1px solid var(--hr-coi-high);
+    }
+    .coi-badge.very-high {
+      background: color-mix(in srgb, var(--hr-coi-veryhigh) 12%, var(--hr-white));
+      color: var(--hr-coi-veryhigh);
+      border: 1px solid var(--hr-coi-veryhigh);
+    }
+
+    /* ===== RESULT COUNT ===== */
+    #resultsCount {
+      font-size: 10px;
+      text-align: center;
+      margin-bottom: 10px;
+      font-weight: 700;
+      font-family: 'Sweden Sans', sans-serif;
+      color: var(--hr-text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    /* ===== RESULT CARDS ===== */
+    .card {
+      background: var(--hr-white);
+      border-radius: 10px;
+      padding: 14px;
+      margin-bottom: 12px;
+      box-shadow: var(--hr-shadow);
+      border: 1px solid var(--hr-border);
+      border-left: 4px solid var(--hr-gold);
+    }
+    .card.inbreeding-risk {
+      border-left: 4px solid var(--hr-danger);
+    }
+    .card.coi-high {
+      border-left: 4px solid var(--hr-coi-high);
+    }
+    .card.coi-veryhigh {
+      border-left: 4px solid var(--hr-coi-veryhigh);
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--hr-border);
+      margin-bottom: 12px;
+    }
+
+    .stud-title {
+      font-family: 'Playfair Display', serif;
+      font-weight: 700;
+      font-size: 17px;
+      color: var(--hr-purple);
+      line-height: 1.2;
+      max-width: 70%;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .gp-container {
+      display: flex;
+      align-items: baseline;
+      gap: 3px;
+    }
+    .gp-num {
+      font-size: 22px;
+      font-weight: 700;
+      font-family: 'Sweden Sans', sans-serif;
+      color: var(--hr-purple);
+    }
+    .gp-label {
+      font-size: 10px;
+      text-transform: uppercase;
+      color: var(--hr-text-muted);
+      font-weight: 600;
+    }
+
+    /* ===== BADGES ===== */
+    .badge-row {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      white-space: nowrap;
+      padding: 0 10px;
+      border-radius: 50px;
+      font-size: 10px;
+      font-weight: 700;
+      font-family: 'Sweden Sans', sans-serif;
+      height: 22px;
+      border: 1px solid var(--hr-border);
+    }
+    .badge-confo { background: var(--hr-white); color: var(--hr-purple); border-left: 3px solid var(--hr-gold); }
+    .badge-vg    { background: var(--hr-purple); color: var(--hr-white); border: none; }
+    .badge-safe  { background: var(--hr-success-bg); color: var(--hr-success); border-left: 3px solid var(--hr-success); }
+    .badge-warning { background: color-mix(in srgb, var(--hr-warn) 12%, var(--hr-white)); color: var(--hr-warn); border-left: 3px solid var(--hr-warn); }
+    .badge-danger  { background: color-mix(in srgb, var(--hr-danger) 12%, var(--hr-white)); color: var(--hr-danger); border-left: 3px solid var(--hr-danger); }
+
+    /* ===== VG BAR ===== */
+    .vg-bar-bg   { height: 6px; background: var(--hr-border); border-radius: 4px; overflow: hidden; margin: 8px 0; }
+    .vg-bar-fill { height: 100%; background: var(--hr-purple); transition: width 0.5s; }
+
+    /* ===== BASE STATS ===== */
+    .base-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 4px;
+      background: var(--hr-bg);
+      padding: 8px;
+      border-radius: 6px;
+      margin-top: 10px;
+      justify-content: space-between;
+    }
+    .base-stat {
+      text-align: center;
+      flex: 1;
+      min-width: 35px;
+    }
+    .base-stat-label { font-size: 8px; color: var(--hr-text-muted); text-transform: uppercase; }
+    .base-stat-val   { font-size: 11px; font-weight: 700; font-family: 'Sweden Sans', sans-serif; color: var(--hr-text); }
+
+    /* ===== DISCIPLINE STATS ===== */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0 15px;
+      padding: 10px;
+      background: var(--hr-bg);
+      border-radius: 6px;
+      margin-top: 8px;
+    }
+    .stat-row { display: flex; justify-content: space-between; border-bottom: 1px solid var(--hr-border); padding: 4px 0; font-size: 12px; }
+    .stat-label { color: var(--hr-text-muted); }
+    .stat-val   { font-weight: 700; font-family: 'Sweden Sans', sans-serif; color: var(--hr-purple); }
+
+    /* ===== GENETICS BOX ===== */
+    .genetics-box {
+      background: var(--hr-card);
+      padding: 12px;
+      border-radius: 8px;
+      margin: 10px 0;
+      border: 1px solid var(--hr-border);
+    }
+    .genetics-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      border-bottom: 1px solid var(--hr-border);
+      padding: 4px 0;
+      font-size: 12px;
+      margin-bottom: 6px;
+    }
+    .genetics-line:last-of-type { border-bottom: none; }
+    .genetics-line b {
+      font-size: 9px;
+      text-transform: uppercase;
+      color: var(--hr-gold);
+      letter-spacing: 1px;
+      margin-right: 8px;
+      flex-shrink: 0;
+    }
+    .gencode-container {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 3px;
+      justify-content: flex-end;
+      max-width: 70%;
+    }
+    .gene-tag {
+      background: var(--hr-bg);
+      color: var(--hr-purple);
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-family: monospace;
+      border: 1px solid var(--hr-border);
+      white-space: nowrap;
+    }
+
+    .color-result {
+      margin-top: 10px;
+      padding: 10px;
+      background: var(--hr-card);
+      border-radius: 6px;
+      border-left: 3px solid var(--hr-gold);
+      font-size: 12px;
+      display: none;
+      line-height: 1.6;
+    }
+
+    /* ===== DETAILS / CONFO ===== */
+    details {
+      margin-top: 10px;
+      background: var(--hr-bg);
+      border-radius: 6px;
+      border: 1px solid var(--hr-border);
+      overflow: hidden;
+    }
+    summary {
+      font-size: 11px;
+      font-weight: 700;
+      font-family: 'Sweden Sans', sans-serif;
+      color: var(--hr-purple);
+      cursor: pointer;
+      padding: 10px 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    summary:hover { background: var(--hr-card); }
+
+    .confo-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 4px;
+      font-size: 10px;
+      padding: 10px;
+      background: var(--hr-white);
+    }
+    .confo-row {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--hr-bg);
+      padding: 3px 0;
+    }
+    .confo-row span { color: var(--hr-text-muted); }
+
+    /* ===== COI DETAILS ===== */
+    .coi-details {
+      background: var(--hr-bg);
+      border-radius: 6px;
+      padding: 10px;
+      margin-top: 8px;
+      border: 1px solid var(--hr-border);
+    }
+    .coi-details summary {
+      color: var(--hr-coi-medium);
+    }
+    .common-ancestor-list {
+      font-size: 10px;
+      margin-top: 6px;
+      max-height: 100px;
+      overflow-y: auto;
+    }
+    .common-ancestor-item {
+      padding: 3px 0;
+      border-bottom: 1px solid var(--hr-border);
+      color: var(--hr-text-muted);
+    }
+    .common-ancestor-item b {
+      color: var(--hr-purple);
+    }
+
+    /* ===== WARNING BANNER ===== */
+    .warning-banner {
+      background: color-mix(in srgb, var(--hr-warn) 12%, var(--hr-white));
+      border: 1px solid var(--hr-warn);
+      border-radius: 6px;
+      padding: 10px;
+      margin-bottom: 10px;
+      display: none;
+      font-size: 11px;
+      font-family: 'Sweden Sans', sans-serif;
+      color: var(--hr-warn);
+    }
+    .warning-banner.danger {
+      background: color-mix(in srgb, var(--hr-danger) 12%, var(--hr-white));
+      border-color: var(--hr-danger);
+      color: var(--hr-danger);
+    }
+
+    /* ===== BUTTONS ===== */
+    .btn {
+      width: 100%;
+      padding: 10px;
+      border-radius: 7px;
+      font-weight: 700;
+      cursor: pointer;
+      border: none;
+      text-transform: uppercase;
+      margin-top: 8px;
+      font-size: 11px;
+      font-family: 'Sweden Sans', sans-serif;
+      letter-spacing: 1px;
+      transition: all 0.2s;
+    }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .btn-gold {
+      background: var(--hr-gold);
+      color: var(--hr-white);
+      border: 1px solid var(--hr-gold-light);
+    }
+    .btn-gold:hover:not(:disabled) { background: var(--hr-gold-light); }
+
+    .btn-purple {
+      background: var(--hr-purple);
+      color: var(--hr-gold);
+      border: 1px solid var(--hr-gold);
+    }
+    .btn-purple:hover:not(:disabled) { background: var(--hr-gold); color: var(--hr-white); }
+
+    /* ===== LOADER ===== */
+    .loader {
+      text-align: center;
+      padding: 30px;
+      font-weight: 700;
+      font-family: 'Sweden Sans', sans-serif;
+      color: var(--hr-purple);
+      font-size: 12px;
+      letter-spacing: 0.5px;
+    }
+
+    /* ===== SCROLLBAR ===== */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-thumb { background: var(--hr-gold); border-radius: 10px; }
+    /* Shared modal design, scaled to the narrow sidebar. */
+    body { padding: 10px; font-size: 12px; }
+    .sidebar-header { background: var(--hr-purple); border-radius: 12px 12px 0 0; padding: 20px 12px; margin-bottom: 14px; text-align: center; }
+    .sidebar-brand { display: flex; align-items: center; justify-content: center; gap: 10px; }
+    .sidebar-brand img { height: 38px; width: auto; }
+    .brand-name { font-size: 12px; font-weight: 600; letter-spacing: .12em; color: var(--hr-gold); white-space: nowrap; }
+    .brand-signature { color: var(--hr-white); font-family: 'Elometha', cursive; font-size: 16px; }
+    .sidebar-header h1 { font-size: 20px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--hr-gold); margin-top: 18px; }
+    .section-title { font-size: 10px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; border-left: 2px solid var(--hr-gold); padding-left: 7px; margin-bottom: 16px; }
+    .control-panel { background: var(--hr-white); border: none; padding: 16px; box-shadow: var(--hr-shadow); }
+    .control-panel label { font-family: 'Finlandica', Arial, sans-serif; color: var(--hr-text); font-weight: 400; letter-spacing: .5px; line-height: 1.5; }
+    .control-panel input, .control-panel select { color: var(--hr-text); background: var(--hr-bg); min-width: 0; font-size: 12px; }
+    .control-panel select option { background: var(--hr-white); color: var(--hr-text); }
+    .control-grid-3 { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 10px; }
+    .control-grid-3 > div:last-child { grid-column: 1 / -1; }
+    .control-grid { grid-template-columns: 1fr; gap: 6px; margin-bottom: 12px; }
+    .control-panel .checkbox-row { text-transform: none; font-size: 11px; letter-spacing: 0; }
+    .card, .mare-summary { border-radius: 12px; padding: 14px; }
+    .stud-title, .mare-summary .stud-title { font-family: 'Sweden Sans', sans-serif; font-size: 16px; white-space: normal; overflow-wrap: anywhere; }
+    .gp-num { font-family: 'Playfair Display', serif; font-weight: 400; font-size: 25px; }
+    .badge, .coi-badge { font-family: 'Finlandica', Arial, sans-serif; font-variant-numeric: tabular-nums; height: auto; min-height: 22px; padding: 4px 7px; font-weight: 400; white-space: normal; }
+    .badge-vg { background: var(--hr-bg); color: var(--hr-text); }
+    .stats-grid { grid-template-columns: 1fr; }
+    .confo-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 14px; }
+    .btn-gold { background: var(--hr-purple); color: var(--hr-white); border-color: var(--hr-gold); }
+    .btn-purple { background: var(--hr-white); color: var(--hr-purple); border-color: var(--hr-purple); }
+    .btn-gold:hover:not(:disabled) { background: var(--hr-purple-mid); }
+    .btn-purple:hover:not(:disabled) { background: var(--hr-bg); color: var(--hr-purple); }
+    .loader { padding: 20px 12px; font-weight: 400; color: var(--hr-text-muted); }
+    input:focus-visible, select:focus-visible, button:focus-visible, summary:focus-visible { outline: 2px solid var(--hr-gold); outline-offset: 2px; }
+    .selection-count, .forecast-note, .colour-assumption { font-family: Finlandica, sans-serif; font-size: 11px; color: var(--hr-text-muted); margin: 0 0 12px; }
+    .color-result { font-family: Finlandica, sans-serif; }
+    .mare-picker { position: relative; }
+    .mare-options { position: absolute; z-index: 20; top: calc(100% - 10px); left: 0; right: 0; max-height: 240px; overflow-y: auto; background: var(--hr-white); border: 1px solid var(--hr-border); border-radius: 6px; box-shadow: var(--hr-shadow); }
+    .mare-option, .mare-empty { padding: 9px 10px; font-family: Finlandica, sans-serif; font-size: 12px; overflow-wrap: anywhere; }
+    .mare-option { cursor: pointer; }
+    .mare-option:hover, .mare-option[aria-selected="true"] { background: var(--hr-bg); color: var(--hr-purple); }
+    .mare-empty { color: var(--hr-text-muted); }
+    .help-tip { display: inline-flex; align-items: center; justify-content: center; width: 13px; height: 13px; flex-shrink: 0; margin-left: 3px; border: 1px solid currentColor; border-radius: 50%; font-family: Finlandica, sans-serif; font-size: 10px; font-weight: 400; cursor: help; vertical-align: middle; }
+    .help-tip:focus-visible { outline: 2px solid var(--hr-gold); outline-offset: 2px; }
+    .genotype-list { max-height: 220px; overflow-y: auto; padding: 0 10px; }
+    .genotype-entry { padding: 7px 0; border-bottom: 1px solid var(--hr-border); overflow-wrap: anywhere; font-size: 11px; }
+    .colour-genotypes .genotype-more { margin: 8px 0 0; }
+    .ancestor-coi-note { font-family: Finlandica, sans-serif; font-size: 10px; color: var(--hr-text-muted); margin-top: 3px; }
+    .pedigree-estimate { margin-top: 10px; padding: 9px; background: var(--hr-bg); border-radius: 6px; font: 11px Finlandica, sans-serif; }
+    .pedigree-estimate small { display: block; margin-top: 3px; color: var(--hr-text-muted); }
+    .hr-coi-editor form { padding: 10px; font: 11px Finlandica, sans-serif; }
+    .hr-coi-editor input { display: block; width: 100%; padding: 8px; margin: 6px 0; border: 1px solid var(--hr-border); border-radius: 6px; color: var(--hr-text); background: var(--hr-white); font: inherit; }
+    .hr-coi-status { margin-top: 6px; }
+  </style>
+
+  
+<style>
+.stuteri-logo-left { max-width:90px; object-fit:contain; }
+.stuteri-logo-center { max-width:130px; object-fit:contain; }
+.sidebar-brand img { max-width:60px; object-fit:contain; }
+.header-brand-title, .brand-name { overflow-wrap:anywhere; }
+</style>
+</head>
+<body>
+  <base target="_top">
+  
+  <link href="https://fonts.googleapis.com/css2?family=Finlandica:wght@400;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/gh/mats-k/sweden-sans@master/sweden-sans.css" rel="stylesheet" />
+
+  
+
+
+
+  <header class="sidebar-header">
+    <div class="sidebar-brand"><?!= renderPublicLogo_(''); ?><div><div class="brand-name"><?= getBranding_().name ?></div><div class="brand-signature"><?= getBranding_().signature ?></div></div></div>
+    <h1>Foal Calculator</h1>
+  </header>
+  <div class="control-panel">
+    <h2 class="section-title">Find a pairing</h2>
+
+    <label>1. Select mare</label>
+    <div class="mare-picker">
+      <input id="mareSearch" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="mareOptions" aria-label="Select mare by name or ID" autocomplete="off" placeholder="Select or search by name / ID..." onfocus="populateMares(true)" onclick="if(document.getElementById('mareOptions').hidden) populateMares(true)" oninput="onMareSearchInput()" onkeydown="onMareKeydown(event)" onblur="closeMareOptions()" disabled>
+      <div id="mareOptions" class="mare-options" role="listbox" aria-label="Mares" hidden></div>
+    </div>
+    <div id="mareCount" class="selection-count" aria-live="polite"></div>
+
+    <div class="control-grid-3">
+      <div><label>Min. Foal GP</label><input type="number" id="minGP" value="0" onchange="findMatches()"></div>
+      <div><label>Min. Foal Confo Score</label><input type="number" step="0.1" id="minConfo" value="0" onchange="findMatches()"></div>
+      <div><label title="Applies to manually recorded official HR values. Pairs without a recorded HR-COI remain visible.">Max. HR-COI (%)</label><input type="number" step="0.1" id="maxCOI" value="15" onchange="findMatches()"></div>
+    </div>
+
+    <label>Sort By</label>
+    <select id="sortBy" onchange="findMatches()">
+      <option value="gp">Best GP Forecast</option>
+      <option value="confo">Best Confo Score Forecast</option>
+      <option value="vg">Most VGs</option>
+      <option value="coi_low">Lowest HR-COI</option>
+    </select>
+
+    <!-- ✏️ ÄNDERUNG: ALLOW INBREEDING STANDARDMASSIG AUSGEWAHLT (unchecked) -->
+    <div class="control-grid">
+      <label class="checkbox-row">
+        <input type="checkbox" id="allowInbreeding" onchange="findMatches()">
+        Allow direct Inbreeding
+      </label>
+      <label class="checkbox-row">
+        <input type="checkbox" id="showCoiDetails" onchange="findMatches()" checked>
+        Show COI Details
+      </label>
+    </div>
+
+    <label style="margin-top:8px;">Max. Stud Fee <span style="opacity:.6;">(outside studs only)</span></label>
+    <input type="number" id="maxStudFee" placeholder="e.g. 5000" onchange="findMatches()" style="margin-bottom:0;">
+  </div>
+
+  <div id="mareSummary" class="mare-summary">
+    <div class="stud-title" id="msName"></div>
+    <div class="summary-grid">
+      <div><small>Breed:</small> <b id="msBreed"></b></div>
+      <div><small>GP:</small> <b id="msGP"></b></div>
+      <div><small>Confo:</small> <b id="msConfo"></b></div>
+      <div><small>VGs:</small> <b id="msVG"></b></div>
+    </div>
+  </div>
+
+  <div id="dataWarning" class="warning-banner"></div>
+  <div id="globalWarning" class="warning-banner"></div>
+
+  <div id="loader" class="loader">Loading data...</div>
+  <p class="forecast-note">GP and conformation are parent-average estimates, not guaranteed foal results. The COI filter uses recorded HR-COI only. Pairings without an HR value remain visible. Pedigree estimates cover 4 generations from the foal and are not official HR-COI.</p>
+  <div id="resultsCount"></div>
+  <div id="results"></div>
+
+
+  <script>
+    // Icons im HerdDashboard-Stil: inline SVG, stroke="currentColor", 24x24 viewBox.
+    // Farbe wird über die umschließende Textfarbe gesteuert (currentColor).
+    const ICONS = {
+      warning: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;"><path d="M12 9v4"/><path d="M10.363 3.591l-8.106 13.534a1.914 1.914 0 0 0 1.636 2.871h16.214a1.914 1.914 0 0 0 1.636 -2.871l-8.106 -13.534a1.914 1.914 0 0 0 -3.274 0z"/><path d="M12 16h.01"/></svg>',
+      lock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;"><path d="M5 13a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2z"/><path d="M11 16a1 1 0 1 0 2 0a1 1 0 0 0 -2 0"/><path d="M8 11v-4a4 4 0 1 1 8 0v4"/></svg>',
+      scale: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;"><path d="m16 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="m2 16 3-8 3 8c-.87.65-1.92 1-3 1s-2.13-.35-3-1Z"/><path d="M7 21h10"/><path d="M12 3v18"/><path d="M3 7h2c2 0 5-1 7-2 2 1 5 2 7 2h2"/></svg>',
+      coin: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width:1em;height:1em;vertical-align:-0.15em;"><path d="M12 12m-9 0a9 9 0 1 0 18 0a9 9 0 1 0 -18 0"/><path d="M14.8 9a2 2 0 0 0 -1.8 -1h-2a2 2 0 0 0 0 4h2a2 2 0 0 1 0 4h-2a2 2 0 0 1 -1.8 -1"/><path d="M12 6v2m0 8v2"/></svg>'
+    };
+
+    let allData = {};
+    let currentMareId = null;
+    let lastInbreedingResults = {};
+    let matchRequest = 0;
+    const pedigreeRequests = new Map();
+    const colourRequests = new Map();
+    function escapeHtml(value) { return String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+    function resetSelection() {
+      currentMareId=null; matchRequest++;
+      document.getElementById('mareSummary').style.display='none';
+      document.getElementById('results').innerHTML='';
+      document.getElementById('resultsCount').textContent='';
+    }
+
+    const confoLabelsStandard  = ["Walk","Trot","Canter","Gallop","Posture","Head","Neck","Back","Shoulders","Frontlegs","Hindquarters","Socks"];
+    const confoLabelsIcelandic = ['Walk','Trot','Canter','Gallop','Tölt','Pace','Posture','Head','Neck','Back','Shoulders','Frontlegs','Hindquarters','Socks'];
+    const confoLabelsKathiawari = ["Walk","Trot","Canter","Gallop","Revaal","Posture","Head","Neck","Back","Shoulders","Frontlegs","Hindquarters","Socks"];
+
+    const disciplineLabels = { 'dressage':'Dressage','driving':'Driving','endurance':'Endurance','eventing':'Eventing','flat':'Flat Racing','jumping':'Jumping','reining':'Reining' };
+    const baseStatLabels   = { 'acceleration':'Acc','agility':'Agi','balance':'Bal','bascule':'Basc','pulling':'Pull','speed':'Spd','sprint':'Spr','stamina':'Sta','strength':'Str','surefoot':'Srft' };
+
+    window.onload = function() {
+      google.script.run.withSuccessHandler(function(data) {
+        if(data.error){document.getElementById('loader').textContent=data.error;return;}
+        allData=data;
+        document.getElementById('loader').style.display='none';
+        document.getElementById('mareSearch').disabled=false;
+        populateMares(true, false);
+        const warning=document.getElementById('dataWarning');
+        if(data.warnings?.length){warning.textContent=data.warnings.join(' • ');warning.style.display='block';}
+      }).withFailureHandler(function(error){document.getElementById('loader').textContent='Loading failed: '+error.message;}).loadAllDataOptimized();
+    };
+    let visibleMares = [];
+    let activeMareOption = -1;
+    function closeMareOptions() {
+      document.getElementById('mareOptions').hidden=true;
+      const input=document.getElementById('mareSearch');
+      input.setAttribute('aria-expanded','false');
+      input.removeAttribute('aria-activedescendant');
+      activeMareOption=-1;
+    }
+    function populateMares(showAll=false, open=true) {
+      const list=document.getElementById('mareOptions'),input=document.getElementById('mareSearch');
+      const query=showAll?'':input.value.trim().toLocaleLowerCase();
+      const mares=Object.entries(allData.tracker || {}).filter(([id,h])=>h.gender==='Mare').sort((a,b)=>a[1].name.localeCompare(b[1].name));
+      visibleMares=mares.filter(([id,h])=>(h.name+' '+id).toLocaleLowerCase().includes(query));
+      list.replaceChildren();activeMareOption=-1;input.removeAttribute('aria-activedescendant');
+      visibleMares.forEach(([id,h],i)=>{
+        const option=document.createElement('div');option.id='mare-option-'+i;option.className='mare-option';
+        option.setAttribute('role','option');option.setAttribute('aria-selected',String(id===currentMareId));
+        option.textContent=h.name+' · '+id+(!allData.stats[id]?' — stats missing':'');
+        option.onmousedown=event=>event.preventDefault();
+        option.onclick=()=>selectMare(id);
+        list.appendChild(option);
+      });
+      if(!visibleMares.length){const empty=document.createElement('div');empty.className='mare-empty';empty.textContent='No matching mares';list.appendChild(empty);}
+      list.hidden=!open;input.setAttribute('aria-expanded',String(open));
+      document.getElementById('mareCount').textContent=visibleMares.length+' of '+mares.length+' mares';
+    }
+    function onMareSearchInput() { resetSelection();populateMares(); }
+    function selectMare(id) {
+      if(allData.tracker[id]?.gender!=='Mare')return;
+      resetSelection();currentMareId=id;
+      document.getElementById('mareSearch').value=allData.tracker[id].name+' · '+id;
+      closeMareOptions();updateMareSummary(id);findMatches();
+    }
+    function onMareKeydown(event) {
+      const list=document.getElementById('mareOptions'),input=document.getElementById('mareSearch');
+      if(event.key==='Escape'){event.preventDefault();closeMareOptions();return;}
+      if(event.key==='Enter'&&!list.hidden&&activeMareOption>=0){event.preventDefault();selectMare(visibleMares[activeMareOption][0]);return;}
+      if(event.key!=='ArrowDown'&&event.key!=='ArrowUp')return;
+      event.preventDefault();if(list.hidden)populateMares(true);
+      if(!visibleMares.length)return;
+      activeMareOption=activeMareOption<0?(event.key==='ArrowDown'?0:visibleMares.length-1):Math.max(0,Math.min(visibleMares.length-1,activeMareOption+(event.key==='ArrowDown'?1:-1)));
+      Array.from(list.children).forEach((option,i)=>option.setAttribute('aria-selected',String(i===activeMareOption)));
+      const active=list.children[activeMareOption];input.setAttribute('aria-activedescendant',active.id);active.scrollIntoView({block:'nearest'});
+    }
+
+    function updateMareSummary(id) {
+      const mare  = allData.tracker[id];
+      const stats = allData.stats[id];
+      
+      if (!stats) {
+        console.warn("⚠️ No stats for mare:", id);
+        return;
+      }
+      
+      const confoCount = stats.confoCount || 12;
+      const vgCount    = stats.confoRaw ? stats.confoRaw.filter(v => v >= 92.5).length : 0;
+
+      document.getElementById('msName').innerText  = mare.name;
+      document.getElementById('msBreed').innerText = mare.breed;
+      document.getElementById('msGP').innerText    = Math.round(stats.gpTotal);
+      document.getElementById('msConfo').innerText = (stats.confoScoreMax || 0).toFixed(2);
+      document.getElementById('msVG').innerText    = vgCount + ' / ' + confoCount;
+      document.getElementById('mareSummary').style.display = 'block';
+      
+      console.log("📊 Mare Summary displayed:", mare.name);
+    }
+
+    function calculateFoal(m, s) {
+      const len = m.confoCount || m.confoRaw.length;
+      const foalRaw = [];
+      for (let i = 0; i < len; i++) {
+        const mVal = m.confoRaw[i] || 0;
+        const sVal = s.confoRaw[i] || 0;
+        foalRaw.push((mVal + sVal) / 2);
+      }
+
+      const disciplines = {};
+      for (let key in m.gpDisciplines) disciplines[key] = (m.gpDisciplines[key] + s.gpDisciplines[key]) / 2;
+      const baseStats = {};
+      if (m.gpStats && s.gpStats) for (let key in m.gpStats) baseStats[key] = (m.gpStats[key] + s.gpStats[key]) / 2;
+
+      return {
+        gpTotal:    (m.gpTotal + s.gpTotal) / 2,
+        confoMin:   (m.confoScoreMin + s.confoScoreMin) / 2,
+        confoMax:   (m.confoScoreMax + s.confoScoreMax) / 2,
+        vgCount:    foalRaw.filter(v => v >= 92.5).length,
+        raw:        foalRaw,
+        disciplines, baseStats,
+        confoCount: len
+      };
+    }
+
+    async function findMatches() {
+      const request=++matchRequest, mareId=currentMareId;
+      if(!mareId)return;
+      const mare=allData.tracker[mareId], stats=allData.stats[mareId];
+      const container=document.getElementById('results');
+      document.getElementById('resultsCount').textContent='';
+      if(!stats){container.textContent='No complete stats for this mare. Please import the stats first.';return;}
+      const number=(id,fallback)=>{const v=document.getElementById(id).value;const n=Number(v);return v!==''&&Number.isFinite(n)?Math.max(0,n):fallback;};
+      const minGP=number('minGP',0),minConfo=number('minConfo',0),maxCOI=number('maxCOI',15),maxFee=number('maxStudFee',Infinity);
+      const allow=document.getElementById('allowInbreeding').checked,sort=document.getElementById('sortBy').value;
+      let candidates=Object.entries(allData.tracker).filter(([id,h])=>h.gender==='Stallion'&&h.breed.trim().toLowerCase()===mare.breed.trim().toLowerCase()&&h.age>=3&&allData.stats[id]).map(([id,h])=>({id,name:h.name,foal:calculateFoal(stats,allData.stats[id]),studStats:allData.stats[id],isPublic:h.type==='public',studFee:h.studFee}));
+      candidates=candidates.filter(c=>c.foal.gpTotal>=minGP&&c.foal.confoMin>=minConfo&&(!c.isPublic||maxFee===Infinity||(Number.isFinite(c.studFee)&&c.studFee<=maxFee)));
+      if(!candidates.length){container.textContent='No candidates match these filters.';return;}
+      const ids=candidates.map(c=>c.id).sort(),key=JSON.stringify([mareId,ids]);
+      container.innerHTML='<div class="loader">Checking pedigrees...</div>';
+      try {
+        if(!pedigreeRequests.has(key))pedigreeRequests.set(key,new Promise((resolve,reject)=>google.script.run.withSuccessHandler(resolve).withFailureHandler(reject).batchCheckInbreeding(mareId,ids)));
+        const results=await pedigreeRequests.get(key);
+        if(request!==matchRequest||mareId!==currentMareId)return;
+        if(Object.values(results).some(r=>r.coiRisk==='error'))pedigreeRequests.delete(key);
+        lastInbreedingResults=results;
+        candidates.forEach(c=>{const r=results[c.id]||{};Object.assign(c,{isRelated:!!r.isRelated,inbreedingReason:r.reason||'',hrCoi:allData.hrCoi?.[mareId+'|'+c.id]??null,coi:r.coi??null,coiRisk:r.coiRisk||'unknown',commonAncestors:r.commonAncestors||[]});});
+        candidates=candidates.filter(c=>(c.hrCoi===null||c.hrCoi<=maxCOI)&&(allow||!c.isRelated));
+        if(sort==='gp')candidates.sort((a,b)=>b.foal.gpTotal-a.foal.gpTotal);
+        else if(sort==='confo')candidates.sort((a,b)=>b.foal.confoMin-a.foal.confoMin);
+        else if(sort==='vg')candidates.sort((a,b)=>b.foal.vgCount-a.foal.vgCount);
+        else candidates.sort((a,b)=>(a.hrCoi??Infinity)-(b.hrCoi??Infinity));
+        renderResults(candidates,15);
+      }catch(error){pedigreeRequests.delete(key);if(request===matchRequest)container.textContent='Pedigree check failed: '+error.message;}
+    }
+
+    function renderResults(list, limit = 15) {
+      const container  = document.getElementById('results');
+      const mareStats  = allData.stats[currentMareId];
+      const mareBreed  = allData.tracker[currentMareId].breed.toLowerCase();
+      const confoLabels = mareBreed.includes('icelandic') ? confoLabelsIcelandic
+                        : mareBreed.includes('kathiawari') ? confoLabelsKathiawari
+                        : confoLabelsStandard;
+      const confoCount = mareStats.confoCount || 12;
+
+      container.innerHTML = '';
+      const totalCount = list.length;
+      const visible    = list.slice(0, limit);
+      const showCoiDetails = document.getElementById('showCoiDetails').checked;
+
+      const highCoiCount = list.filter(c => c.hrCoi !== null && c.hrCoi >= 6.25).length;
+      const warningBanner = document.getElementById('globalWarning');
+      if (highCoiCount > 0) {
+        warningBanner.style.display = 'block';
+        warningBanner.className = 'warning-banner danger';
+        warningBanner.innerHTML = `${ICONS.warning} ${highCoiCount} match(es) have a recorded HR-COI of 6.25% or higher.`;
+      } else {
+        warningBanner.style.display = 'none';
+      }
+
+      if (totalCount === 0) {
+        container.innerHTML = '<div style="text-align:center;padding:20px;color:var(--hr-text-muted);font-weight:700;">No matching stallions found. Adjust filters or increase COI threshold.</div>';
+        document.getElementById('resultsCount').innerText = '';
+        return;
+      }
+
+      document.getElementById('resultsCount').innerText =
+        totalCount + ' stallion' + (totalCount !== 1 ? 's' : '') + ' found' +
+        (totalCount > limit ? ' · showing top ' + limit : '');
+
+      console.log("📊 Rendering", totalCount, "stallions");
+
+      const formatGenetics = (code) => {
+        if (!code || code === 'N/A') return '<span style="color:var(--hr-text-muted);">N/A</span>';
+        return `<div class="gencode-container">${code.split(/\s+/).map(g => `<span class="gene-tag">${escapeHtml(g)}</span>`).join('')}</div>`;
+      };
+
+      const checkBetter = (foalVal, mareVal) =>
+        foalVal > mareVal ? 'style="color:var(--hr-success);font-weight:700;"' : '';
+
+      const getCoiBadge = (coi) => {
+        const label=coi===null?'Pedigree estimate unavailable':coi===0?'No overlap found in recorded generations':'Pedigree estimate: '+coi.toFixed(2)+'%';
+        return '<div class="pedigree-estimate">'+label+'<small>4 generations · Not official HR-COI</small><span class="help-tip" tabindex="0" title="Only four recorded generations from the foal are compared. Stored common-ancestor COI is included; missing values are assumed zero. No overlap does not mean HR-COI is zero. This estimate is not used by the HR-COI filter.">?</span></div>';
+      };
+
+      const getCoIDetails = (item) => {
+        if (!showCoiDetails) return '';
+        if (!item.commonAncestors || item.commonAncestors.length === 0) return '';
+        
+        return `
+        <details class="coi-details">
+          <summary>View Common Ancestors (${item.commonAncestors.length}) <span class="help-tip" tabindex="0" title="These horses appear in both parents’ recorded family trees. Each line shows the distance from mare and stallion and the estimated contribution to foal COI. Parents are 1 generation away, grandparents 2. Several independent paths to one ancestor can contribute. Each contribution is multiplied by 1 plus that ancestor’s stored COI; unknown COI is assumed zero." aria-label="Common ancestors occur in both pedigrees. Generation distances and estimated COI contributions are shown below.">?</span></summary>
+          <div class="common-ancestor-list">
+            ${item.commonAncestors.map(anc => `
+              <div class="common-ancestor-item">
+                <b>${escapeHtml(anc.name || anc.id)}</b>: 
+                ${anc.generationsFromMare} gen (mare) × ${anc.generationsFromStallion} gen (stallion)
+                → ${anc.contribution.toFixed(2)}% contribution
+                <div class="ancestor-coi-note">${anc.ancestorCoiPercent == null ? "Ancestor COI unknown · 0% assumed" : "Ancestor COI: "+anc.ancestorCoiPercent.toFixed(2)+"% · "+escapeHtml(anc.ancestorCoiSource)}</div>
+              </div>
+            `).join('')}
+          </div>
+        </details>
+        `;
+      };
+
+      visible.forEach(item => {
+        const usageCount = allData.stallionUsage[item.name] || 0;
+        const vgPct      = Math.round((item.foal.vgCount / confoCount) * 100);
+
+        let usageBadge = '';
+        if (usageCount >= 3) {
+          const c = usageCount >= 5 ? 'var(--hr-danger)' : 'var(--hr-warn)';
+          usageBadge = `<div class="badge" style="border:1px solid ${c};color:${c};background:var(--hr-white);">${ICONS.warning} ${usageCount} mares <span class="help-tip" tabindex="0" title="Number of entries in Broodmares that name this stallion. This highlights frequent use in your herd; it is not a count of shared ancestors or a COI value." aria-label="Stallion use: number of Broodmares entries naming this stallion, not a COI value.">?</span></div>`;
+        }
+
+        let feeBadge = '';
+        if (item.isPublic && item.studFee) {
+          feeBadge = `<div class="badge" style="background:var(--hr-card);color:var(--hr-text);border:1px solid var(--hr-gold);">${ICONS.coin} ${Number(item.studFee).toLocaleString()} Equus</div>`;
+        }
+
+        let cardClass = 'card';
+        if (item.isRelated) cardClass += ' inbreeding-risk';
+        else if (item.hrCoi !== null && item.hrCoi >= 12.5) cardClass += ' coi-veryhigh';
+        else if (item.hrCoi !== null && item.hrCoi >= 6.25) cardClass += ' coi-high';
+
+        const card = `
+<div class="${cardClass}">
+  <div class="card-header">
+    <div class="stud-title">${escapeHtml(item.name)}</div>
+    <div class="gp-container" ${checkBetter(item.foal.gpTotal, mareStats.gpTotal)}>
+      <span class="gp-num">${Math.round(item.foal.gpTotal)}</span>
+      <span class="gp-label">GP</span>
+    </div>
+  </div>
+
+  <div class="badge-row">
+    <div class="badge badge-confo">Confo: ${item.foal.confoMin.toFixed(2)}–${item.foal.confoMax.toFixed(2)}</div>
+    <div class="badge badge-vg">${item.foal.vgCount} / ${confoCount} VG</div>
+    <div class="coi-badge">${item.hrCoi === null ? "HR-COI not recorded" : "HR-COI: "+item.hrCoi.toFixed(2)+"% · entered"}</div>
+    ${item.isRelated
+      ? `<div class="badge badge-danger">${ICONS.warning} Direct Inbreeding</div>`
+      : (item.coi === null ? '<div class="badge">Pedigree incomplete</div>' : '<div class="badge badge-safe">No direct relation found in recorded pedigree</div>')}
+    ${usageBadge}
+    ${feeBadge}
+  </div>
+
+  <details class="hr-coi-editor"><summary>Record HR-COI</summary>
+    <form data-mare="${escapeHtml(currentMareId)}" data-stud="${escapeHtml(item.id)}" onsubmit="event.preventDefault();saveHrCoi(this)">
+      <label>Official HR value for this pairing (%)<input name="hrCoi" type="text" inputmode="decimal" aria-label="Official HR COI in percent" placeholder="e.g. 4.83" value="${item.hrCoi === null ? '' : item.hrCoi}"></label>
+      <small>Copy the foal COI shown by HR for these two horses. Leave empty and save to remove it.</small>
+      <button class="btn btn-purple" type="submit">Save HR-COI</button><div class="hr-coi-status" role="status"></div>
+    </form></details>
+  ${getCoiBadge(item.coi)}
+  ${getCoIDetails(item)}
+
+  <div class="vg-bar-bg"><div class="vg-bar-fill" style="width:${vgPct}%"></div></div>
+
+  <div class="base-stats">
+    ${Object.keys(baseStatLabels).map(key => `
+      <div class="base-stat">
+        <div class="base-stat-label">${baseStatLabels[key]}</div>
+        <div class="base-stat-val" ${checkBetter(item.foal.baseStats[key], mareStats.gpStats[key])}>
+          ${Math.round(item.foal.baseStats[key] || 0)}
+        </div>
+      </div>`).join('')}
+  </div>
+
+  <div class="stats-grid">
+    ${Object.keys(disciplineLabels).map(key => `
+      <div class="stat-row">
+        <span class="stat-label">${disciplineLabels[key]}</span>
+        <span class="stat-val" ${checkBetter(item.foal.disciplines[key], mareStats.gpDisciplines[key])}>
+          ${Math.round(item.foal.disciplines[key])}
+        </span>
+      </div>`).join('')}
+  </div>
+
+  <div class="genetics-box">
+    <div class="genetics-line">
+      <b>Mare</b>${formatGenetics(allData.genetics[currentMareId])}
+    </div>
+    <div class="genetics-line">
+      <b>Stallion</b>${formatGenetics(allData.genetics[item.id])}
+    </div>
+    <button class="btn btn-gold" onclick="calculateColors('${currentMareId}','${item.id}',this)">Calculate Foal Colours</button>
+    <div id="colors_${item.id}" class="color-result"></div>
+  </div>
+
+  <details>
+    <summary>Conformation Forecast</summary>
+    <div class="confo-grid">
+      ${item.foal.raw.map((v, i) => `
+        <div class="confo-row">
+          <span>${(confoLabels[i] || 'Unk').substring(0,6)}</span>
+          <b style="color:${v>=92.5?'var(--hr-success)':v>=75?'var(--hr-purple)':'var(--hr-text-muted)'}">${v>=92.5?'VG':(v>=75?'G':'A')}</b>
+        </div>`).join('')}
+    </div>
+  </details>
+
+  <button class="btn btn-purple" onclick="bookPregnancy('${currentMareId}','${item.id}',this)">Book Breeding</button>
+</div>`;
+        container.insertAdjacentHTML('beforeend', card);
+      });
+      if(totalCount>limit){const more=document.createElement('button');more.className='btn btn-purple';more.textContent='Show next '+Math.min(15,totalCount-limit);more.onclick=()=>renderResults(list,limit+15);container.appendChild(more);}
+    }
+
+    function bookPregnancy(mId, sId, btn) {
+      const orig = btn.textContent;
+      btn.textContent = 'Saving...';
+      btn.disabled = true;
+      google.script.run
+        .withSuccessHandler(response => {
+          btn.textContent  = '✓ ' + response;
+          btn.style.background = 'var(--hr-success)';
+          btn.style.color  = 'var(--hr-white)';
+          const studName   = btn.closest('.card').querySelector('.stud-title').innerText;
+          allData.stallionUsage[studName] = (allData.stallionUsage[studName] || 0) + 1;
+          // Keep the completed booking disabled to avoid accidental repeats.
+        })
+        .withFailureHandler(err => {
+          alert('Error saving: ' + err);
+          btn.textContent = orig;
+          btn.disabled = false;
+        })
+        .savePregnancy(mId, sId);
+    }
+
+    async function saveHrCoi(form) {
+      const button=form.querySelector('button'),status=form.querySelector('.hr-coi-status');
+      button.disabled=true;status.textContent='Saving...';
+      try {
+        const response=await new Promise((resolve,reject)=>google.script.run.withSuccessHandler(resolve).withFailureHandler(reject).saveFoalHrCoi(form.dataset.mare,form.dataset.stud,form.querySelector('input').value));
+        if(!allData.hrCoi)allData.hrCoi={};
+        if(response.value===null)delete allData.hrCoi[response.pair];else allData.hrCoi[response.pair]=response.value;
+        status.textContent='Saved';if(currentMareId===form.dataset.mare)findMatches();
+      }catch(error){status.textContent=error.message;}finally{button.disabled=false;}
+    }
+
+    async function loadColourGenotypes(details) {
+      if(details.dataset.loading==='true')return;
+      const button=details.querySelector('.genotype-more'),list=details.querySelector('.genotype-list');
+      details.dataset.loading='true';details.dataset.loaded='true';button.disabled=true;button.textContent='Loading...';
+      try {
+        const response=await new Promise((resolve,reject)=>google.script.run.withSuccessHandler(resolve).withFailureHandler(reject).getFoalColourGenotypes(details.dataset.mare,details.dataset.stud,details.dataset.phenotype,Number(details.dataset.offset)));
+        response.genotypes.forEach(code=>{const item=document.createElement('div');item.className='genotype-entry';item.textContent=code;list.appendChild(item);});
+        details.dataset.offset=String(response.nextOffset);
+        button.hidden=response.nextOffset>=response.total;
+        button.textContent='Show next '+Math.min(50,response.total-response.nextOffset)+' ('+response.nextOffset+' / '+response.total+')';
+      }catch(error){button.textContent='Retry loading genotypes';button.title=error.message;}
+      finally{details.dataset.loading='false';button.disabled=false;}
+    }
+
+    async function calculateColors(mareId,studId,btn) {
+      const box=document.getElementById('colors_'+studId),key=JSON.stringify([mareId,studId]);
+      btn.disabled=true;btn.textContent='Calculating...';box.style.display='block';box.textContent='Analysing genetics...';
+      try {
+        if(!colourRequests.has(key))colourRequests.set(key,new Promise((resolve,reject)=>google.script.run.withSuccessHandler(resolve).withFailureHandler(reject).calculateFoalColors(mareId,studId)));
+        const response=await colourRequests.get(key);
+        if(response?.error){colourRequests.delete(key);throw new Error(response.error);}
+        if(currentMareId===mareId && box.isConnected)box.innerHTML=response;
+      }catch(error){colourRequests.delete(key);if(box.isConnected)box.textContent='Colour calculation: '+error.message;}
+      finally{btn.disabled=false;btn.textContent='Calculate Foal Colours';}
+    }
+  </script>
+<?!= renderModalHelp('calculator'); ?>
+</body>
+</html>

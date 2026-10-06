@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Daily Snapshot</title>
+
+  <?!= renderThemeVariables(); ?>
+
+  <style>
+    :root {
+      --font-brand: 'Sweden Sans', sans-serif;
+      --fw-semibold: 600;
+      --ls-brand: 0.15em;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Sweden Sans', sans-serif;
+      background: var(--primary-ultramuted);
+      color: var(--primary-deep);
+      padding: 0 0 20px 0;
+    }
+
+    b { font-family: Arial, Helvetica, sans-serif; }
+
+    /* ══════════════════════════════════════════════════════════════
+       HEADER
+       ══════════════════════════════════════════════════════════════ */
+    .modal-header {
+      background: var(--primary-dark);
+      padding: 16px 20px 14px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 3px solid var(--secondary-base);
+      margin-bottom: 18px;
+    }
+    .header-left { display: flex; align-items: center; gap: 10px; }
+    .stuteri-logo-left { height: 34px; width: auto; filter: drop-shadow(0 2px 4px color-mix(in srgb, var(--primary-deep) 25%, transparent)); }
+    .brand-text-stacked { display: flex; flex-direction: column; justify-content: center; line-height: 1; }
+    .header-brand-title {
+      font-family: 'Sweden Sans', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--secondary-base);
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+    }
+    .stuteri-text-sub { font-family: 'Elometha', cursive; color: var(--neutrals-white); font-size: 0.8rem; }
+    .header-right { text-align: right; }
+    .header-right h2 {
+      font-family: 'Sweden Sans', sans-serif;
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--secondary-base);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .header-right .subtitle {
+      font-size: 9px;
+      color: color-mix(in srgb, var(--neutrals-white) 65%, transparent);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-family: Arial, Helvetica, sans-serif;
+      margin-top: 2px;
+    }
+
+    .content-container { padding: 0 20px; }
+
+    .subtitle { font-size: 10px; color: var(--primary-mid); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+    .section { background: var(--neutrals-white); border-radius: 10px; padding: 16px; margin-bottom: 14px; border: 1px solid var(--primary-ultramuted); }
+    .section-title { font-size: 10px; font-weight: 700; color: var(--primary-dark); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; border-bottom: 1px solid var(--secondary-base); padding-bottom: 4px; }
+    .row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+    .row.three { grid-template-columns: 1fr 1fr 1fr; }
+    .row.five { grid-template-columns: 1fr 1fr 1fr 1fr 1fr; }
+    label { font-size: 10px; font-weight: 700; font-family: Arial, Helvetica, sans-serif; color: var(--primary-mid); text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 3px; }
+    input { width: 100%; padding: 8px 10px; border-radius: 6px; border: 1px solid color-mix(in srgb, var(--secondary-base) 40%, var(--neutrals-white)); font-family: 'Sweden Sans', sans-serif; font-size: 13px; color: var(--primary-dark); background: var(--neutrals-white); }
+    input:focus { outline: none; border-color: var(--secondary-base); box-shadow: 0 0 0 2px color-mix(in srgb, var(--secondary-base) 15%, transparent); }
+    input.computed { background: var(--primary-lightmuted); color: var(--primary-mid); }
+    .calc-row { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin-top: 8px; }
+    .calc-box { background: var(--primary-lightmuted); border-radius: 6px; padding: 8px; text-align: center; }
+    .calc-value { font-size: 16px; font-weight: 700; font-family: Arial, Helvetica, sans-serif; color: var(--primary-dark); }
+    .calc-label { font-size: 8px; color: var(--primary-mid); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+    .progress-wrap { margin-top: 10px; }
+    .progress-bg { height: 8px; background: var(--primary-ultramuted); border-radius: 4px; overflow: hidden; }
+    .progress-fill { height: 100%; background: var(--secondary-base); transition: width 0.5s; }
+    .progress-text { display: flex; justify-content: space-between; font-size: 10px; font-weight: 700; font-family: Arial, Helvetica, sans-serif; margin-top: 3px; color: var(--primary-mid); }
+    .btn-row { display: flex; gap: 10px; margin-top: 16px; }
+    .btn { padding: 10px 20px; border-radius: 8px; border: none; font-family: 'Sweden Sans', sans-serif; font-weight: 700; font-size: 12px; cursor: pointer; text-transform: uppercase; letter-spacing: 0.5px; }
+    .btn-primary { background: var(--primary-dark); color: var(--secondary-base); flex-grow: 1; }
+    .btn-primary:hover { background: var(--primary-deep); }
+    .btn-secondary { background: var(--neutrals-white); color: var(--primary-dark); border: 1px solid color-mix(in srgb, var(--secondary-base) 40%, var(--neutrals-white)); }
+    .status { font-size: 11px; margin-top: 10px; padding: 8px; border-radius: 6px; display: none; font-family: Arial, Helvetica, sans-serif; }
+    .status.success { display: block; background: var(--tertiary-light); color: var(--neutrals-white); }
+    .status.error { display: block; background: var(--accent-2); color: var(--neutrals-white); }
+    .last-entry { font-size: 10px; color: var(--primary-mid); margin-bottom: 12px; padding: 8px; background: color-mix(in srgb, var(--secondary-base) 12%, var(--neutrals-white)); border-radius: 6px; font-family: Arial, Helvetica, sans-serif; }
+  
+    /* Shared visual language of the completed modals. */
+    body { background: var(--neutrals-white); padding: 15px; line-height: 1.5; }
+    .modal-frame { background: var(--primary-ultramuted); border-radius: 12px 12px 0 0; overflow: hidden; box-shadow: 0 6px 20px color-mix(in srgb, var(--primary-deep) 10%, transparent); }
+    .modal-header { flex-direction: column; align-items: stretch; gap: 18px; padding: 16px 20px 20px; border-bottom: none; margin-bottom: 0; }
+    .header-left { gap: 12px; }
+    .stuteri-logo-left { height: 42px; }
+    .header-brand-title { font-size: .90rem; letter-spacing: .15em; }
+    .stuteri-text-sub { font-size: 1rem; text-align: center; margin-top: 2px; }
+    .header-right { text-align: center; }
+    .header-right h2 { font-size: 1.20rem; letter-spacing: .15em; }
+    .header-right .subtitle { margin: 4px 0 0; letter-spacing: 2px; }
+    .content-container { padding: 20px; }
+    .section { border: none; border-radius: 12px; padding: 20px; margin-bottom: 16px; box-shadow: 0 2px 8px color-mix(in srgb, var(--primary-deep) 4%, transparent); }
+    .section-title { display: flex; align-items: center; gap: 6px; border-bottom: none; padding-bottom: 0; letter-spacing: 2px; margin-bottom: 16px; }
+    .section-title::before { content: ''; width: 2px; height: 12px; background: var(--secondary-base); border-radius: 2px; flex-shrink: 0; }
+    label { font-family: var(--font-brand); font-weight: 600; }
+    input { min-width: 0; border-radius: 8px; font-family: Arial, Helvetica, sans-serif; font-weight: 400; }
+    input[type="text"] { font-family: var(--font-brand); }
+    .row > div { min-width: 0; }
+    .calc-box { padding: 12px 8px; border-radius: 8px; }
+    .btn-primary { color: var(--neutrals-white); border: 1px solid var(--secondary-base); }
+    .btn-secondary { background: transparent; color: var(--primary-mid); border-color: var(--primary-mid); }
+    .btn-secondary:hover { background: var(--primary-lightmuted); }
+    .btn:focus-visible { outline: 2px solid var(--secondary-base); outline-offset: 2px; }
+    .status { font-family: var(--font-brand); padding: 12px; border-radius: 8px; }
+    .status.success { background: color-mix(in srgb, var(--tertiary-light) 20%, var(--neutrals-white)); color: var(--tertiary-deep); }
+    .status.error { background: color-mix(in srgb, var(--accent-2) 12%, var(--neutrals-white)); color: var(--accent-2); }
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-thumb { background: var(--secondary-base); border-radius: 10px; }
+    @media (max-width: 620px) { .row.five { grid-template-columns: repeat(6, minmax(0, 1fr)); } .row.five > div { grid-column: span 2; } .row.five > div:nth-child(-n+2) { grid-column: span 3; } }
+    @media (max-width: 420px) { .content-container { padding: 12px; } .section { padding: 16px; } .row.three { grid-template-columns: 1fr; } .calc-row { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+    .snapshot-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; align-items: start; }
+    .snapshot-grid > .section { min-width: 0; margin-bottom: 0; }
+    .snapshot-grid > .section:last-child { grid-column: 1 / -1; }
+    .row.five { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+    .row.five > div { grid-column: span 2; }
+    .row.five > div:nth-child(-n+2) { grid-column: span 3; }
+    @media (max-width: 720px) { .snapshot-grid { grid-template-columns: minmax(0, 1fr); } }
+  
+    /* Shared modal typography — Horse Import is the reference. */
+    .stuteri-logo-left { height: 42px; width: auto; }
+    .header-brand-title { font-family: 'Sweden Sans', sans-serif; font-size: .90rem; font-weight: 600; letter-spacing: .15em; line-height: 1.2; }
+    .stuteri-text-sub { font-size: 1rem; line-height: 1.2; }
+    .title-container h1, .modal-header h1, .header-right h2 {
+      font-family: 'Sweden Sans', sans-serif; font-size: 1.40rem; font-weight: 600;
+      letter-spacing: .15em; line-height: 1.2; text-transform: uppercase;
+      color: var(--secondary-base); margin: 0;
+    }
+    .header-center { margin-top: 0; }
+    .header-top-row { margin-bottom: 16px; }
+    .header-subtitle, .modal-header .subtitle {
+      font-family: 'Sweden Sans', sans-serif; font-size: 9px; font-weight: 600;
+      letter-spacing: 2px; line-height: 1.5; text-transform: uppercase;
+      color: color-mix(in srgb, var(--neutrals-white) 65%, transparent); margin: 4px 0 0;
+    }
+    .section-title {
+      font-family: 'Sweden Sans', sans-serif; font-size: 10px; font-weight: 700;
+      letter-spacing: 2px; line-height: 1.5; text-transform: uppercase;
+      color: var(--primary-dark); margin-bottom: 16px; border-bottom: none; padding-bottom: 0;
+    }
+    .section-title::before { width: 2px; height: 12px; background: var(--secondary-base); border-radius: 2px; }
+    .nav-tab, .nav-tab.active, .main-tab, .main-tab.active, .tab, .tab.active {
+      font-family: 'Sweden Sans', sans-serif; font-size: .70rem; font-weight: 600;
+      letter-spacing: 1px; line-height: 1; height: 30px; padding: 0 14px;
+    }
+    .nav-tab.active, .main-tab.active, .tab.active { font-weight: 700; border-radius: 8px 8px 0 0; margin-bottom: 0; }
+  
+    /* Header layout: balanced vertical spacing, responsive title row. */
+.modal-header { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 20px; padding: 22px 20px; min-height: 0; }
+    .modal-header .header-right { grid-column: 2; }
+    @media (max-width: 820px) { .modal-header { grid-template-columns: minmax(0, 1fr); gap: 18px; } .modal-header .header-right { grid-column: 1; } }
+  
+    /* Canonical header geometry, including the import modals' legacy class. */
+    .modal-header, .dashboard-header {
+      display: flex !important; flex-direction: column !important;
+      align-items: stretch; justify-content: flex-start; gap: 0;
+      height: auto; min-height: 0; padding: 0; margin: 0; border-bottom: none;
+    }
+    .modal-header .header-top-row, .dashboard-header .header-top-row {
+      display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      align-items: center; justify-content: normal; gap: 0 24px;
+      width: 100%; height: 90px; min-height: 90px; padding: 0 20px; margin: 0;
+    }
+    .header-top-row .header-left { grid-column: 1; grid-row: 1; justify-content: flex-start; gap: 12px; }
+    .header-top-row .header-center { grid-column: 2; grid-row: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0; padding: 0; width: auto; text-align: center; }
+    .header-top-row .header-right { grid-column: 3; grid-row: 1; }
+    .header-top-row .header-brand-title { white-space: nowrap; }
+    .header-top-row .stuteri-logo-left { height: 42px; flex-shrink: 0; }
+    .header-top-row h1, .header-top-row h2 { font-family: 'Sweden Sans', sans-serif; font-size: 1.40rem; font-weight: 600; letter-spacing: .15em; line-height: 1.2; color: var(--secondary-base); margin: 0; text-transform: uppercase; }
+    .nav-bar, .tabs { height: 30px; min-height: 30px; margin: 0; padding: 0 20px; align-items: flex-end; }
+    .nav-tabs { height: 30px; align-items: flex-end; }
+    @media (max-width: 820px) {
+      .modal-header .header-top-row, .dashboard-header .header-top-row {
+        grid-template-columns: minmax(0, 1fr); grid-template-rows: 42px auto;
+        height: 130px; min-height: 130px; padding: 16px 20px; gap: 14px;
+      }
+      .header-top-row .header-left { grid-column: 1; grid-row: 1; }
+      .header-top-row .header-center { grid-column: 1; grid-row: 2; }
+      .header-top-row .header-right { display: none; }
+    }
+  </style>
+<style>
+.stuteri-logo-left { max-width:90px; object-fit:contain; }
+.stuteri-logo-center { max-width:130px; object-fit:contain; }
+.sidebar-brand img { max-width:60px; object-fit:contain; }
+.header-brand-title, .brand-name { overflow-wrap:anywhere; }
+</style>
+</head>
+<body>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Finlandica:wght@400;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/gh/mats-k/sweden-sans@master/sweden-sans.css" rel="stylesheet" />
+  <link href="https://fonts.cdnfonts.com/css/elometha" rel="stylesheet" />
+
+  <div class="modal-frame">
+  <div class="modal-header">
+    <div class="header-top-row">
+    <div class="header-left">
+      <?!= renderPublicLogo_('stuteri-logo-left'); ?>
+      <div class="brand-text-stacked">
+        <span class="header-brand-title"><?= getBranding_().name ?></span>
+        <span class="stuteri-text-sub"><?= getBranding_().signature ?></span>
+      </div>
+    </div>
+    <div class="header-center">
+      <h2>Daily Snapshot</h2>
+
+    </div>
+  </div>
+  </div>
+
+  <div class="content-container">
+  <div id="lastEntry" class="last-entry" style="display:none;"></div>
+
+  <div class="snapshot-grid">
+  <div class="section">
+    <div class="section-title">XP Progress</div>
+    <div class="row three">
+      <div><label>Level</label><input type="number" id="level" min="1" max="100" oninput="recalcXP()"></div>
+      <div><label>XP in Current Level</label><input type="number" id="xp" min="0" oninput="recalcXP()"></div>
+      <div><label>Rank</label><input type="text" id="rank" placeholder="e.g. Expert"></div>
+    </div>
+    <div class="calc-row" id="xpCalcRow">
+      <div class="calc-box"><div class="calc-value" id="calcSinceLast">—</div><div class="calc-label">Since Last</div></div>
+      <div class="calc-box"><div class="calc-value" id="calcTilNext">—</div><div class="calc-label">Til Next Level</div></div>
+      <div class="calc-box"><div class="calc-value" id="calcPercent">—</div><div class="calc-label">% Progress</div></div>
+      <div class="calc-box"><div class="calc-value" id="calcDayTotal">—</div><div class="calc-label">Day Total</div></div>
+    </div>
+    <div class="progress-wrap" id="progressWrap" style="display:none;">
+      <div class="progress-bg"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+      <div class="progress-text"><span id="progressLeft">0 XP</span><span id="progressRight">0 XP</span></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Account Balance</div>
+    <div class="row five">
+      <div><label>HRC (Cash)</label><input type="number" id="hrc" min="0"></div>
+      <div><label>HRC (Savings)</label><input type="number" id="savings" min="0" value="0" oninput="recalcInterest()"></div>
+      <div><label>DP</label><input type="number" id="dp" min="0" value="0"></div>
+      <div><label>FT</label><input type="number" id="ft" min="0" value="0"></div>
+      <div><label>WT</label><input type="number" id="wt" min="0" value="0"></div>
+    </div>
+    <div id="interestInfo" style="display:none;margin-top:8px;">
+      <div class="calc-row" style="grid-template-columns:1fr 1fr 1fr;">
+        <div class="calc-box"><div class="calc-value" id="calcRate">—</div><div class="calc-label">Interest Rate</div></div>
+        <div class="calc-box"><div class="calc-value" id="calcDaily" style="color:var(--tertiary-deep);">—</div><div class="calc-label">Daily Interest</div></div>
+        <div class="calc-box"><div class="calc-value" id="calcMonthly" style="color:var(--tertiary-deep);">—</div><div class="calc-label">Monthly (~30d)</div></div>
+      </div>
+      <div id="savingsTip" style="font-size:10px;color:var(--primary-mid);margin-top:8px;padding:6px 8px;background:color-mix(in srgb, var(--secondary-base) 12%, var(--neutrals-white));border-radius:6px;"></div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-title">Herd Occupancy</div>
+    <div class="row">
+      <div><label>Stalls Owned</label><input type="number" id="totalStalls" min="0" value="0"></div>
+      <div><label>Horses on Pasture</label><input type="number" id="horsesOnPasture" min="0" value="0"></div>
+    </div>
+  </div>
+
+  </div>
+  <div class="btn-row">
+    <button class="btn btn-primary" onclick="save()">Save</button>
+    <button class="btn btn-secondary" onclick="google.script.host.close()">Cancel</button>
+  </div>
+  <div id="status" class="status"></div>
+  </div>
+
+  </div>
+
+  <script>
+    // XP Thresholds: Max XP needed to reach level N+1 (index 0 = level 1)
+    const XP_TABLE = [
+      75,225,400,595,825,1085,1385,1735,2130,2590,
+      3115,3720,4415,5215,6130,7190,8405,9800,11405,13250,
+      15375,17815,20620,23850,27555,31820,36725,42365,48845,56300,
+      64870,74755,86050,99075,114055,131270,151070,173830,200000,230090,
+      264685,304465,350195,402780,463235,532745,612670,704555,810210,931680,
+      1071345,1231925,1416550,1628830,1872895,2153510,2476155,2847115,3273625,3764015,
+      4327840,4876100,5721445,6578410,7563710,8696565,9999075,11496645,13218490,15198190,
+      17474360,20091405,23100375,26559955,30537630,35110995,40363250,46414965,53366070,61358150,
+      70547100,81112160,93259410,107225800,123283750,141746495,162974160,187380820,215442545,247706715,
+      284802665,327453995,376492660,432875205,497701435,572235845,657932300,756462405,869748080,1000000000
+    ];
+
+    let prevXP = 0;
+
+    function recalcXP() {
+      const level = parseInt(document.getElementById('level').value) || 0;
+      const xp = parseInt(document.getElementById('xp').value) || 0;
+
+      if (level < 1 || level > 100) return;
+
+      // XP_TABLE[level-1] = XP needed FOR this level (not cumulative)
+      // User's "Total XP" = XP earned within current level
+      const levelMax = XP_TABLE[level - 1];
+      const tilNext = Math.max(0, levelMax - xp);
+      const pct = levelMax > 0 ? Math.min(100, (xp / levelMax) * 100) : 0;
+      const sinceLast = prevXP > 0 ? Math.max(0, xp - prevXP) : 0;
+
+      document.getElementById('calcTilNext').textContent = tilNext.toLocaleString('en-US');
+      document.getElementById('calcPercent').textContent = pct.toFixed(1) + '%';
+      document.getElementById('calcSinceLast').textContent = prevXP > 0 ? '+' + sinceLast.toLocaleString('en-US') : '—';
+      document.getElementById('calcDayTotal').textContent = prevXP > 0 ? '+' + sinceLast.toLocaleString('en-US') : '—';
+
+      document.getElementById('progressWrap').style.display = 'block';
+      document.getElementById('progressFill').style.width = pct + '%';
+      document.getElementById('progressLeft').textContent = xp.toLocaleString('en-US') + ' XP';
+      document.getElementById('progressRight').textContent = levelMax.toLocaleString('en-US') + ' XP';
+    }
+
+    // Interest Rate Tiers
+    const INTEREST_TIERS = [
+      { max: 100000, rate: 1.50 },
+      { max: 250000, rate: 1.00 },
+      { max: 500000, rate: 0.80 },
+      { max: 1000000, rate: 0.50 },
+      { max: 2000000, rate: 0.30 },
+      { max: 5000000, rate: 0.15 },
+      { max: 10000000, rate: 0.10 },
+      { max: 25000000, rate: 0.03 },
+      { max: Infinity, rate: 0 }
+    ];
+    // Profitable breakpoints where moving to next tier costs more than you gain
+    const PROFITABLE_CAPS = [100000, 250000, 500000, 1000000, 2000000, 5000000, 10000000, 25000000];
+
+    function getInterestRate(amount) {
+      for (const tier of INTEREST_TIERS) {
+        if (amount <= tier.max) return tier.rate;
+      }
+      return 0;
+    }
+
+    function recalcInterest() {
+      const savings = parseInt(document.getElementById('savings').value) || 0;
+      const hrc = parseInt(document.getElementById('hrc').value) || 0;
+      const total = savings + hrc;
+
+      document.getElementById('interestInfo').style.display = savings > 0 ? 'block' : 'none';
+      if (savings <= 0) return;
+
+      const rate = getInterestRate(savings);
+      const daily = Math.floor(savings * (rate / 100));
+      const monthly = daily * 30;
+
+      document.getElementById('calcRate').textContent = rate + '%';
+      document.getElementById('calcDaily').textContent = '+' + daily.toLocaleString('en-US');
+      document.getElementById('calcMonthly').textContent = '+' + monthly.toLocaleString('en-US');
+
+      // Optimal tip: check if moving some to cash would yield better rate
+      let tip = '';
+      if (rate === 0) {
+        tip = '⚠️ 0% interest! Anything over 25M earns nothing. Keep the surplus as cash.';
+      } else {
+        // Find optimal cap for current tier
+        const currentTier = INTEREST_TIERS.find(t => savings <= t.max);
+        const tierIndex = INTEREST_TIERS.indexOf(currentTier);
+        if (tierIndex > 0) {
+          const prevCap = PROFITABLE_CAPS[tierIndex - 1];
+          const prevRate = INTEREST_TIERS[tierIndex - 1].rate;
+          const dailyAtPrevCap = Math.floor(prevCap * (prevRate / 100));
+          if (dailyAtPrevCap > daily) {
+            tip = '💡 Tip: ' + prevCap.toLocaleString('en-US') + ' HRC in Savings (' + prevRate + '%) = ' + dailyAtPrevCap.toLocaleString('en-US') + '/day. Keep the rest as cash → more yield!';
+          } else {
+            tip = '✓ Current savings amount is efficient for ' + rate + '% interest.';
+          }
+        } else {
+          tip = '✓ Optimal interest bracket (1.50%). Max. ' + PROFITABLE_CAPS[0].toLocaleString('en-US') + ' HRC recommended.';
+        }
+      }
+      document.getElementById('savingsTip').innerHTML = tip;
+    }
+
+    window.onload = function() {
+      google.script.run
+        .withSuccessHandler(function(data) {
+          if (data && data.lastDate) {
+            document.getElementById('lastEntry').style.display = 'block';
+            document.getElementById('lastEntry').innerHTML = 'Last entry: <b>' + data.lastDate + '</b> — Level ' + data.level + ', ' + data.xp.toLocaleString('en-US') + ' XP';
+            prevXP = data.xp || 0;
+            document.getElementById('level').value = data.level || '';
+            document.getElementById('rank').value = data.rank || '';
+            document.getElementById('hrc').value = data.hrc || 0;
+            document.getElementById('savings').value = data.savings || 0;
+            document.getElementById('dp').value = data.dp || 0;
+            document.getElementById('ft').value = data.ft || 0;
+            document.getElementById('wt').value = data.wt || 0;
+            document.getElementById('totalStalls').value = data.totalStalls || 0;
+            document.getElementById('horsesOnPasture').value = data.horsesOnPasture || 0;
+          }
+        })
+        .getLastXpEntry();
+    };
+
+    function save() {
+      const level = parseInt(document.getElementById('level').value) || 0;
+      const xp = parseInt(document.getElementById('xp').value) || 0;
+      const levelMax = XP_TABLE[level - 1] || 0;
+      const tilNext = Math.max(0, levelMax - xp);
+      const pct = levelMax > 0 ? (xp / levelMax) * 100 : 0;
+
+      const data = {
+        level: level,
+        rank: document.getElementById('rank').value.trim(),
+        xp: xp,
+        sinceLast: prevXP > 0 ? Math.max(0, xp - prevXP) : 0,
+        dayTotal: prevXP > 0 ? Math.max(0, xp - prevXP) : 0,
+        tilNext: tilNext,
+        percent: pct,
+        hrc: Number(document.getElementById('hrc').value) || 0,
+        savings: Number(document.getElementById('savings').value) || 0,
+        dp: Number(document.getElementById('dp').value) || 0,
+        ft: Number(document.getElementById('ft').value) || 0,
+        wt: Number(document.getElementById('wt').value) || 0,
+        totalStalls: Number(document.getElementById('totalStalls').value) || 0,
+        horsesOnPasture: Number(document.getElementById('horsesOnPasture').value) || 0
+      };
+
+      const st = document.getElementById('status');
+      st.className = 'status'; st.style.display = 'none';
+
+      google.script.run
+        .withSuccessHandler(function(res) {
+          if (res.success) {
+            st.className = 'status success';
+            st.innerHTML = '✓ Saved! Net Worth: <b>' + res.netWorth.toLocaleString('en-US') + '</b> HRC';
+            setTimeout(function() { google.script.host.close(); }, 1500);
+          } else { st.className = 'status error'; st.innerHTML = res.error; }
+          st.style.display = 'block';
+        })
+        .withFailureHandler(function(err) { document.getElementById('status').className = 'status error'; document.getElementById('status').innerHTML = err.message; document.getElementById('status').style.display = 'block'; })
+        .saveXpSnapshot(data);
+    }
+  </script>
+<?!= renderModalHelp('snapshot'); ?>
+</body>
+</html>

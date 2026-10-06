@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Activity Import</title>
+
+  <?!= renderThemeVariables(); ?>
+
+  <style>
+    :root {
+      --font-brand: 'Sweden Sans', sans-serif;
+      --fw-semibold: 600;
+      --ls-brand: 0.15em;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Sweden Sans', sans-serif;
+      letter-spacing: normal;
+      line-height: 1.5;
+      background: var(--neutrals-white);
+      padding: 15px;
+      color: var(--primary-deep);
+    }
+
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-thumb { background: var(--secondary-base); border-radius: 10px; }
+
+    /* ══════════════════════════════════════════════════════════════
+       RAHMEN & HEADER
+       ══════════════════════════════════════════════════════════════ */
+    .modal-frame {
+      background-color: var(--primary-ultramuted);
+      border-radius: 12px 12px 0 0;
+      box-shadow: 0 6px 20px color-mix(in srgb, var(--primary-deep) 10%, transparent);
+      overflow: hidden !important;
+      position: relative;
+    }
+
+    .modal-header {
+      background: var(--primary-dark);
+      border-radius: 12px 12px 0 0 !important;
+      padding: 16px 0 0 0;
+      display: flex !important;
+      flex-direction: column !important;
+      justify-content: space-between;
+      align-items: center;
+      position: relative;
+      box-sizing: border-box;
+      min-height: 110px;
+    }
+
+    .header-top-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      padding: 0 20px;
+      margin-bottom: 16px;
+    }
+
+    .header-left { display: flex; align-items: center; text-align: left; gap: 12px; flex: 1; }
+
+    .stuteri-logo-left {
+      height: 42px;
+      width: auto;
+      filter: drop-shadow(0 2px 4px color-mix(in srgb, var(--primary-deep) 25%, transparent));
+    }
+
+    .brand-text-stacked { display: flex; flex-direction: column; justify-content: center; line-height: 1; }
+
+    .header-brand-title {
+      font-family: 'Sweden Sans', sans-serif;
+      font-size: 0.90rem;
+      font-weight: 600;
+      color: var(--secondary-base);
+      letter-spacing: 0.15em;
+      line-height: 1.2;
+      text-transform: uppercase;
+      text-align: left;
+    }
+
+    .stuteri-text-sub {
+      font-family: 'Elometha', cursive;
+      font-weight: 400;
+      letter-spacing: normal;
+      line-height: 1.2;
+      color: var(--neutrals-white);
+      font-size: 1rem;
+      margin-top: 2px;
+      pointer-events: none;
+      white-space: nowrap;
+      text-align: center;
+    }
+
+    .header-center {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      margin-top: 30px;
+    }
+
+    .title-container { position: relative; display: inline-block; margin: 0; }
+
+    .title-container h1 {
+      font-family: 'Sweden Sans', sans-serif;
+      font-weight: 600;
+      font-size: 1.20rem;
+      color: var(--secondary-base);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin: 0;
+      line-height: 1;
+    }
+
+    .header-subtitle {
+      color: color-mix(in srgb, var(--neutrals-white) 60%, transparent);
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      font-weight: 700;
+      font-family: Arial, Helvetica, sans-serif;
+      margin-top: 4px;
+    }
+
+    .header-right { display: flex; justify-content: flex-end; }
+
+    /* ══════════════════════════════════════════════════════════════
+       TABS
+       ══════════════════════════════════════════════════════════════ */
+    .nav-bar {
+      width: 100%;
+      display: flex;
+      justify-content: flex-start;
+      padding: 0 20px;
+      background: transparent !important;
+      box-sizing: border-box;
+    }
+
+    .nav-tabs { display: flex; gap: 4px; padding: 0; }
+
+    .nav-tab {
+      font-family: 'Sweden Sans', sans-serif;
+      background: transparent;
+      border: none;
+      color: var(--neutrals-white);
+      height: 30px;
+      padding: 0 14px;
+      font-size: 0.70rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border-radius: 6px 6px 0 0;
+      opacity: 0.85;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      outline: none;
+    }
+
+    .nav-tab svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      flex-shrink: 0;
+    }
+
+    .nav-tab:hover { opacity: 1; background-color: var(--primary-ultramuted); }
+
+    .nav-tab.active {
+      background: var(--primary-ultramuted) !important;
+      color: var(--primary-mid) !important;
+      border-radius: 8px 8px 0 0;
+      font-weight: 700;
+      opacity: 1;
+      height: 30px;
+    }
+
+    /* ══════════════════════════════════════════════════════════════
+       CONTENT
+       ══════════════════════════════════════════════════════════════ */
+    .content-container { padding: 20px; }
+
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+
+    .import-card {
+      background: var(--neutrals-white);
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 2px 8px color-mix(in srgb, var(--primary-deep) 4%, transparent);
+      margin-bottom: 16px;
+    }
+
+    .import-helper-text {
+      font-family: 'Sweden Sans', sans-serif;
+      font-size: 11.5px;
+      color: var(--primary-mid);
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+
+    .import-helper-text b { color: var(--primary-dark); }
+
+    .type-list { margin-bottom: 10px; font-size: 10px; color: var(--primary-mid); line-height: 1.9; }
+
+    .type-tag {
+      display: inline-block;
+      --tag-tone: var(--primary-light);
+      padding: 2px 7px;
+      border-radius: 6px;
+      font-size: 10px;
+      font-weight: 400;
+      font-family: var(--font-brand);
+      color: var(--primary-deep);
+      background: color-mix(in srgb, var(--tag-tone) 16%, var(--neutrals-white));
+      border: 1px solid color-mix(in srgb, var(--tag-tone) 40%, var(--neutrals-white));
+      margin: 2px;
+    }
+    .t-comp, .t-conf { --tag-tone: var(--tertiary-light); }
+    .t-stud, .t-sale { --tag-tone: var(--secondary-base); }
+    .t-birth, .t-cover { --tag-tone: var(--primary-light); }
+    .t-foal, .t-fee { --tag-tone: var(--accent-4); }
+    .t-money, .t-other { --tag-tone: var(--primary-light); }
+
+    /* Bank categories share a theme-derived tint and readable text color. */
+    .bank-fee { --tag-tone: var(--accent-4); }
+    .bank-trade { --tag-tone: var(--secondary-base); }
+    .bank-income { --tag-tone: var(--tertiary-light); }
+    .bank-transfer { --tag-tone: var(--primary-light); }
+
+    #notifBox, #bankBox {
+      min-height: 180px;
+      max-height: 260px;
+      overflow-y: auto;
+      border: 1px solid color-mix(in srgb, var(--secondary-base) 55%, var(--neutrals-white));
+      border-radius: 8px;
+      padding: 12px;
+      background: var(--primary-lightmuted);
+      font-size: 12px;
+      line-height: 1.5;
+      width: 100%;
+      font-family: 'Sweden Sans', sans-serif;
+    }
+
+    #notifBox:empty::before, #bankBox:empty::before {
+      content: attr(data-placeholder);
+      color: var(--neutrals-grey);
+      white-space: pre-line;
+      pointer-events: none;
+    }
+    #notifBox:focus, #bankBox:focus { outline: 2px solid var(--secondary-base); outline-offset: 2px; }
+
+    #notifBox a { color: var(--primary-mid); }
+
+    .actions { display: flex; gap: 10px; margin-top: 10px; align-items: center; }
+
+    .btn-primary-action {
+      background: var(--primary-dark);
+      color: var(--neutrals-white);
+      border: 1px solid var(--secondary-base);
+      border-radius: 8px;
+      padding: 9px 18px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .btn-primary-action:hover { background: var(--primary-deep); }
+    .btn-primary-action:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .modal-btn-secondary {
+      background: transparent;
+      border: 1px solid var(--primary-mid);
+      color: var(--primary-mid);
+      padding: 9px 18px;
+      border-radius: 8px;
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .modal-btn-secondary:hover { background: var(--primary-lightmuted); }
+
+    .spinner { font-size: 11px; color: var(--primary-mid); }
+
+    /* ══════════════════════════════════════════════════════════════
+       ERGEBNISSE
+       ══════════════════════════════════════════════════════════════ */
+    .summary-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 16px; }
+
+    .summary-card { border-radius: 6px; padding: 10px; text-align: center; }
+    .summary-card .num {
+      font-size: 20px;
+      font-weight: 700;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+    .summary-card .label {
+      font-size: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-top: 2px;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .summary-card.parsed  { background: var(--primary-lightmuted); color: var(--tertiary-deep); }
+    .summary-card.review  { background: color-mix(in srgb, var(--secondary-base) 20%, var(--neutrals-white)); color: var(--secondary-deep); }
+    .summary-card.skipped { background: var(--primary-lightmuted); color: var(--neutrals-grey); }
+    .summary-card.errored { background: color-mix(in srgb, var(--accent-2) 12%, var(--neutrals-white)); color: var(--accent-2); }
+
+    .dest-line {
+      font-size: 10px;
+      color: var(--primary-mid);
+      margin-top: 8px;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    .review-list { margin-top: 12px; max-height: 140px; overflow-y: auto; }
+    .review-item { background: color-mix(in srgb, var(--secondary-base) 20%, var(--neutrals-white)); border-radius: 6px; padding: 8px 10px; margin-bottom: 4px; font-size: 11px; }
+    .review-item .reason { font-weight: 700; font-family: Arial, Helvetica, sans-serif; color: var(--secondary-deep); }
+    .review-item .text { color: var(--primary-mid); margin-top: 2px; font-size: 10px; word-break: break-all; }
+
+    .error-box {
+      background: color-mix(in srgb, var(--accent-2) 12%, var(--neutrals-white));
+      color: var(--accent-2);
+      padding: 10px;
+      border-radius: 6px;
+      font-weight: 700;
+      font-family: Arial, Helvetica, sans-serif;
+      margin-top: 12px;
+      font-size: 12px;
+    }
+
+    .review-more {
+      font-size: 10px;
+      color: var(--primary-mid);
+      padding: 4px;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+  .spinner { align-items: center; gap: 8px; font-family: var(--font-brand); }
+    .spinner::before { content: ''; width: 12px; height: 12px; border: 2px solid var(--primary-ultramuted); border-top-color: var(--primary-mid); border-radius: 50%; animation: parser-spin .9s linear infinite; }
+    @keyframes parser-spin { to { transform: rotate(360deg); } }
+    @media (prefers-reduced-motion: reduce) { .spinner::before { animation: none; } }
+    .nav-tab:hover { color: var(--primary-mid); }
+    button { font-family: var(--font-brand); }
+  
+    /* Shared modal typography — Horse Import is the reference. */
+    .stuteri-logo-left { height: 42px; width: auto; }
+    .header-brand-title { font-family: 'Sweden Sans', sans-serif; font-size: .90rem; font-weight: 600; letter-spacing: .15em; line-height: 1.2; }
+    .stuteri-text-sub { font-size: 1rem; line-height: 1.2; }
+    .title-container h1, .modal-header h1, .header-right h2 {
+      font-family: 'Sweden Sans', sans-serif; font-size: 1.40rem; font-weight: 600;
+      letter-spacing: .15em; line-height: 1.2; text-transform: uppercase;
+      color: var(--secondary-base); margin: 0;
+    }
+    .header-center { margin-top: 0; }
+    .header-top-row { margin-bottom: 16px; }
+    .header-subtitle, .modal-header .subtitle {
+      font-family: 'Sweden Sans', sans-serif; font-size: 9px; font-weight: 600;
+      letter-spacing: 2px; line-height: 1.5; text-transform: uppercase;
+      color: color-mix(in srgb, var(--neutrals-white) 65%, transparent); margin: 4px 0 0;
+    }
+    .section-title {
+      font-family: 'Sweden Sans', sans-serif; font-size: 10px; font-weight: 700;
+      letter-spacing: 2px; line-height: 1.5; text-transform: uppercase;
+      color: var(--primary-dark); margin-bottom: 16px; border-bottom: none; padding-bottom: 0;
+    }
+    .section-title::before { width: 2px; height: 12px; background: var(--secondary-base); border-radius: 2px; }
+    .nav-tab, .nav-tab.active, .main-tab, .main-tab.active, .tab, .tab.active {
+      font-family: 'Sweden Sans', sans-serif; font-size: .70rem; font-weight: 600;
+      letter-spacing: 1px; line-height: 1; height: 30px; padding: 0 14px;
+    }
+    .nav-tab.active, .main-tab.active, .tab.active { font-weight: 700; border-radius: 8px 8px 0 0; margin-bottom: 0; }
+  
+    /* Header layout: balanced vertical spacing, responsive title row. */
+.modal-header { min-height: 0; padding-top: 22px; }
+    .header-top-row { align-items: center; column-gap: 24px; margin-bottom: 22px; }
+    .header-center { margin-top: 0; }
+    .header-brand-title { white-space: nowrap; }
+@media (max-width: 820px) {
+      .header-top-row { grid-template-columns: minmax(0, 1fr); row-gap: 18px; }
+      .header-top-row .header-left { justify-content: flex-start; }
+      .header-top-row .header-right, .header-top-row > div:last-child:empty { display: none; }
+      .header-center { width: 100%; text-align: center; }
+    }
+  
+    /* Canonical header geometry, including the import modals' legacy class. */
+    .modal-header, .dashboard-header {
+      display: flex !important; flex-direction: column !important;
+      align-items: stretch; justify-content: flex-start; gap: 0;
+      height: auto; min-height: 0; padding: 0; margin: 0; border-bottom: none;
+    }
+    .modal-header .header-top-row, .dashboard-header .header-top-row {
+      display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      align-items: center; justify-content: normal; gap: 0 24px;
+      width: 100%; height: 90px; min-height: 90px; padding: 0 20px; margin: 0;
+    }
+    .header-top-row .header-left { grid-column: 1; grid-row: 1; justify-content: flex-start; gap: 12px; }
+    .header-top-row .header-center { grid-column: 2; grid-row: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0; padding: 0; width: auto; text-align: center; transform: translateY(9px); }
+    .header-top-row .header-right { grid-column: 3; grid-row: 1; }
+    .header-top-row .header-brand-title { white-space: nowrap; }
+    .header-top-row .stuteri-logo-left { height: 42px; flex-shrink: 0; }
+    .header-top-row h1, .header-top-row h2 { font-family: 'Sweden Sans', sans-serif; font-size: 1.40rem; font-weight: 600; letter-spacing: .15em; line-height: 1.2; color: var(--secondary-base); margin: 0; text-transform: uppercase; }
+    .nav-bar, .tabs { height: 30px; min-height: 30px; margin: 0; padding: 0 20px; align-items: flex-end; }
+    .nav-tabs { height: 30px; align-items: flex-end; }
+    @media (max-width: 820px) {
+      .modal-header .header-top-row, .dashboard-header .header-top-row {
+        grid-template-columns: minmax(0, 1fr); grid-template-rows: 42px auto;
+        height: 130px; min-height: 130px; padding: 16px 20px; gap: 14px;
+      }
+      .header-top-row .header-left { grid-column: 1; grid-row: 1; }
+      .header-top-row .header-center { grid-column: 1; grid-row: 2; }
+      .header-top-row .header-right { display: none; }
+    }
+  </style>
+<style>
+.stuteri-logo-left { max-width:90px; object-fit:contain; }
+.stuteri-logo-center { max-width:130px; object-fit:contain; }
+.sidebar-brand img { max-width:60px; object-fit:contain; }
+.header-brand-title, .brand-name { overflow-wrap:anywhere; }
+</style>
+</head>
+<body>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Finlandica:wght@400;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet" />
+  <link href="https://cdn.jsdelivr.net/gh/mats-k/sweden-sans@master/sweden-sans.css" rel="stylesheet" />
+  <link href="https://fonts.cdnfonts.com/css/elometha" rel="stylesheet" />
+
+  <div class="modal-frame">
+
+    <div class="modal-header">
+      <div class="header-top-row">
+        <div class="header-left">
+          <?!= renderPublicLogo_('stuteri-logo-left'); ?>
+          <div class="brand-text-stacked">
+            <span class="header-brand-title"><?= getBranding_().name ?></span>
+            <span class="script-text stuteri-text-sub"><?= getBranding_().signature ?></span>
+          </div>
+        </div>
+        <div class="header-center">
+          <div class="title-container"><h1>Activity Import</h1></div>
+        </div>
+        <div class="header-right"></div>
+      </div>
+
+      <div class="nav-bar">
+        <div class="nav-tabs">
+          <button class="nav-tab active" id="btn-notif" onclick="switchTab('notif', this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 5a2 2 0 0 1 4 0a7 7 0 0 1 4 6v3a4 4 0 0 0 2 3h-16a4 4 0 0 0 2 -3v-3a7 7 0 0 1 4 -6"/><path d="M9 17v1a3 3 0 0 0 6 0v-1"/></svg>
+            Notifications
+          </button>
+          <button class="nav-tab" id="btn-bank" onclick="switchTab('bank', this)">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 9m0 2a2 2 0 0 1 2 -2h10a2 2 0 0 1 2 2v6a2 2 0 0 1 -2 2h-10a2 2 0 0 1 -2 -2z"/><path d="M14 14m-2 0a2 2 0 1 0 4 0a2 2 0 1 0 -4 0"/><path d="M17 9v-2a2 2 0 0 0 -2 -2h-10a2 2 0 0 0 -2 2v6a2 2 0 0 0 2 2h2"/></svg>
+            Bank Log
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="content-container">
+
+      <!-- TAB 1: NOTIFICATIONS -->
+      <div id="panel-notif" class="tab-panel active">
+        <div class="import-card">
+          <p class="import-helper-text">
+            Paste directly from <b>Horse Reality Notifications</b> (Ctrl+V). Links to horse names are kept → ID resolution.
+          </p>
+          <div class="type-list">
+            Detects:
+            <span class="type-tag t-comp">Comp</span>
+            <span class="type-tag t-conf">Conf</span>
+            <span class="type-tag t-stud">Stud</span>
+            <span class="type-tag t-sale">Sale</span>
+            <span class="type-tag t-birth">Birth</span>
+            <span class="type-tag t-cover">Covering</span>
+            <span class="type-tag t-foal">Foal Pastures</span>
+            <span class="type-tag t-money">Exchange</span>
+          </div>
+          <div id="notifBox" contenteditable="true" role="textbox" aria-label="Horse Reality notifications" aria-multiline="true" data-placeholder="Paste notifications here…&#10;&#10;Example:&#10;Horse Reality: Your horse Example Horse became 1st in the Finnhorse Society (category: Stallions). You received 300!&#10;Today at 10:46" style="margin-top:8px;"></div>
+          <div class="actions">
+            <button class="btn-primary-action" id="parseNotifBtn" onclick="parseNotif()">Parse</button>
+            <button class="modal-btn-secondary" onclick="clearNotif()">Clear</button>
+            <span class="spinner" id="notifSpinner" style="display:none;">Processing...</span>
+          </div>
+          <p class="hm-help-note">Parse saves recognized entries. Review items go to Needs Review; Clear does not undo saved entries.</p><div id="notifResults"></div>
+        </div>
+      </div>
+
+      <!-- TAB 2: BANK LOG -->
+      <div id="panel-bank" class="tab-panel">
+        <div class="import-card">
+          <p class="import-helper-text">
+            Paste the <b>Bank Log</b> from Horse Reality (Ctrl+V). Tab-separated: Type | Amount | Description | Date.
+            Entries already covered by Notifications (Comp/Conf/Stud/Sale) are skipped automatically.
+          </p>
+          <div class="type-list">
+            Detects:
+            <span class="type-tag bank-fee" title="Fees &amp; services">Show Fee</span>
+            <span class="type-tag bank-fee" title="Fees &amp; services">Comp Fee</span>
+            <span class="type-tag bank-fee" title="Fees &amp; services">Colour Test</span>
+            <span class="type-tag bank-fee" title="Fees &amp; services">Ultrasound</span>
+            <span class="type-tag bank-fee" title="Fees &amp; services">Foal Pastures</span>
+            <span class="type-tag bank-trade" title="Horse trading">Purchase</span>
+            <span class="type-tag bank-income" title="Income &amp; refunds">Chores</span>
+            <span class="type-tag bank-income" title="Income &amp; refunds">Refund</span>
+            <span class="type-tag bank-transfer" title="Money transfers">Exchange</span>
+            <span class="type-tag bank-transfer" title="Money transfers">Savings</span>
+          </div>
+          <div id="bankBox" contenteditable="true" data-placeholder="Paste Bank Log here..." style="margin-top:8px;"></div>
+          <div class="actions">
+            <button class="btn-primary-action" id="parseBankBtn" onclick="parseBank()">Parse</button>
+            <button class="modal-btn-secondary" onclick="clearBank()">Clear</button>
+            <span class="spinner" id="bankSpinner" style="display:none;">Processing...</span>
+          </div>
+          <p class="hm-help-note">Parse saves transactions. Check Needs Review for uncertain entries; Clear only clears this form.</p><div id="bankResults"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    function escapeText(value) {
+      const el = document.createElement('span');
+      el.textContent = String(value == null ? '' : value);
+      return el.innerHTML;
+    }
+    function switchTab(id, el) {
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      el.classList.add('active');
+      document.getElementById('panel-' + id).classList.add('active');
+    }
+
+    /* ---- NOTIFICATIONS ---- */
+    function clearNotif() {
+      document.getElementById('notifBox').innerHTML = '';
+      document.getElementById('notifResults').innerHTML = '';
+    }
+
+    function parseNotif() {
+      const html = document.getElementById('notifBox').innerHTML;
+      if (!html || !html.trim()) return;
+      document.getElementById('parseNotifBtn').disabled = true;
+      document.getElementById('notifSpinner').style.display = 'inline-flex';
+      document.getElementById('notifResults').innerHTML = '';
+      google.script.run
+        .withSuccessHandler(r => showResults('notif', r))
+        .withFailureHandler(e => showError('notif', e))
+        .el_processNotificationHtml(html);
+    }
+
+    /* ---- BANK LOG ---- */
+    function clearBank() {
+      document.getElementById('bankBox').innerHTML = '';
+      document.getElementById('bankResults').innerHTML = '';
+    }
+
+    function parseBank() {
+      const text = document.getElementById('bankBox').innerText;
+      if (!text || !text.trim()) return;
+      document.getElementById('parseBankBtn').disabled = true;
+      document.getElementById('bankSpinner').style.display = 'inline-flex';
+      document.getElementById('bankResults').innerHTML = '';
+      google.script.run
+        .withSuccessHandler(r => showResults('bank', r))
+        .withFailureHandler(e => showError('bank', e))
+        .el_processBankLogText(text);
+    }
+
+    /* ---- RESULTS ---- */
+    function showError(tab, err) {
+      document.getElementById(tab === 'notif' ? 'parseNotifBtn' : 'parseBankBtn').disabled = false;
+      document.getElementById(tab === 'notif' ? 'notifSpinner' : 'bankSpinner').style.display = 'none';
+      document.getElementById(tab + 'Results').innerHTML =
+        '<div class="error-box">Error: ' + escapeText(err.message) + '</div>';
+    }
+
+    function showResults(tab, res) {
+      document.getElementById(tab === 'notif' ? 'parseNotifBtn' : 'parseBankBtn').disabled = false;
+      document.getElementById(tab === 'notif' ? 'notifSpinner' : 'bankSpinner').style.display = 'none';
+
+      if (res.empty) {
+        document.getElementById(tab + 'Results').innerHTML =
+          '<div class="error-box">No recognizable lines found.</div>';
+        return;
+      }
+
+      let html = `
+        <div class="summary-grid">
+          <div class="summary-card parsed"><div class="num">${res.parsed}</div><div class="label">Parsed</div></div>
+          <div class="summary-card review"><div class="num">${res.review}</div><div class="label">Review</div></div>
+          <div class="summary-card skipped"><div class="num">${res.skipped}</div><div class="label">Skipped</div></div>
+          <div class="summary-card errored"><div class="num">${res.errored}</div><div class="label">Errors</div></div>
+        </div>
+        <div class="dest-line">→ Activity Log: +${res.counts.total || 0} entries</div>`;
+
+      if (res.reviewDetails && res.reviewDetails.length) {
+        html += '<div class="review-list"><b style="font-size:10px;color:var(--primary-dark);font-family:Arial, Helvetica, sans-serif;">To review:</b>';
+        res.reviewDetails.slice(0, 20).forEach(r => {
+          const safeText = escapeText(r.text);
+          html += '<div class="review-item"><div class="reason">' + escapeText(r.reason) + '</div><div class="text">' + safeText + '</div></div>';
+        });
+        if (res.reviewDetails.length > 20) html += '<div class="review-more">...and ' + (res.reviewDetails.length - 20) + ' more</div>';
+        html += '</div>';
+      }
+
+      document.getElementById(tab + 'Results').innerHTML = html;
+
+      // Clear paste box after successful parse
+      if (tab === 'notif') document.getElementById('notifBox').innerHTML = '';
+      else document.getElementById('bankBox').innerHTML = '';
+    }
+  </script>
+<?!= renderModalHelp('activity'); ?>
+</body>
+</html>

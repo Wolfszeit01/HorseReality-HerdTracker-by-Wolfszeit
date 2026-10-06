@@ -1,28 +1,35 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Tagline Printer</title>
   <base target="_top">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Finlandica:wght@400;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/gh/mats-k/sweden-sans@master/sweden-sans.css" rel="stylesheet" />
+  <link href="https://fonts.cdnfonts.com/css/elometha" rel="stylesheet" />
+  <?!= renderThemeVariables(); ?>
   <style>
     :root {
-      --hr-purple:       #0b2c41;
-      --hr-purple-mid:   #081b28;
-      --hr-purple-light: #407f9c;
-      --hr-gold:         #ffa100;
-      --hr-bg:           #f5f7f9;
-      --hr-card:         #f5f7f9;
-      --hr-white:        #ffffff;
-      --hr-text:         #0b2c41;
-      --hr-text-muted:   #5a7a8a;
-      --hr-border:       rgba(255, 161, 0, 0.3);
-      --hr-shadow:       0 12px 30px rgba(8, 27, 40, 0.15);
+      /* Aliase auf Theme-Bridge-Variablen — Rest der Datei bleibt unangetastet. */
+      --hr-purple:       var(--primary-dark);
+      --hr-purple-mid:   var(--primary-mid);
+      --hr-purple-light: var(--primary-ultra);
+      --hr-gold:         var(--secondary-base);
+      --hr-bg:           var(--primary-ultramuted);
+      --hr-card:         var(--primary-lightmuted);
+      --hr-white:        var(--neutrals-white);
+      --hr-text:         var(--primary-deep);
+      --hr-text-muted:   var(--primary-mid);
+      --hr-border:       color-mix(in srgb, var(--secondary-base) 35%, var(--neutrals-white));
+      --hr-shadow:       0 12px 30px color-mix(in srgb, var(--primary-deep) 10%, transparent);
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
-      font-family: 'Roboto', sans-serif;
-      background: #e4e8ec;
+      font-family: 'Sweden Sans', sans-serif;
+      background: var(--hr-bg);
       color: var(--hr-text);
       padding: 15px;
       line-height: 1.4;
@@ -39,19 +46,50 @@
 
     .modal-header {
       background: var(--hr-purple);
-      padding: 18px 20px;
-      text-align: center;
+      padding: 16px 20px 0;
       border-bottom: 3px solid var(--hr-gold);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
+    .header-top-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      width: 100%;
+      margin-bottom: 14px;
+    }
+    .header-left { display: flex; align-items: center; gap: 10px; }
+    .stuteri-logo-left { height: 36px; width: auto; filter: drop-shadow(0 2px 4px color-mix(in srgb, var(--primary-deep) 25%, transparent)); }
+    .brand-text-stacked { display: flex; flex-direction: column; justify-content: center; line-height: 1; }
+    .header-brand-title {
+      font-family: 'Sweden Sans', sans-serif;
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: var(--hr-gold);
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      text-align: left;
+    }
+    .stuteri-text-sub {
+      font-family: 'Elometha', cursive;
+      color: var(--hr-white);
+      font-size: 0.85rem;
+      margin-top: 1px;
+      white-space: nowrap;
+    }
+    .header-center { text-align: center; }
     .modal-header h1 {
-      font-family: 'Playfair Display', serif;
-      font-style: italic;
-      color: #ffffff;
-      font-size: 20px;
+      font-family: 'Sweden Sans', sans-serif;
+      font-weight: 600;
+      color: var(--hr-gold);
+      font-size: 18px;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
       margin-bottom: 3px;
     }
     .modal-header .subtitle {
-      color: rgba(255,255,255,0.75);
+      color: color-mix(in srgb, var(--neutrals-white) 75%, transparent);
       font-size: 9px;
       text-transform: uppercase;
       letter-spacing: 2px;
@@ -68,20 +106,24 @@
       padding: 9px 4px;
       border: none;
       background: transparent;
-      color: rgba(255,255,255,0.6);
+      color: color-mix(in srgb, var(--neutrals-white) 65%, transparent);
       cursor: pointer;
       font-size: 9px;
       text-transform: uppercase;
       letter-spacing: 1px;
-      font-family: 'Roboto', sans-serif;
+      font-family: 'Sweden Sans', sans-serif;
       font-weight: 600;
       transition: all 0.2s;
-      border-bottom: 2px solid transparent;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
     }
-    .tab:hover { color: rgba(255,255,255,0.9); }
+    .tab svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 2; flex-shrink: 0; }
+    .tab:hover { color: var(--neutrals-white); }
     .tab.active {
       background: var(--hr-card);
-      color: var(--hr-text);
+      color: var(--hr-purple);
       border-bottom: 2px solid var(--hr-gold);
     }
 
@@ -91,8 +133,8 @@
     .section-title {
       font-size: 10px;
       font-weight: 700;
-      color: var(--hr-text);
-      border-bottom: 1px solid rgba(255,161,0,0.3);
+      color: var(--hr-purple);
+      border-bottom: 1px solid var(--hr-gold);
       padding: 0 0 4px 0;
       margin: 16px 0 10px 0;
       text-transform: uppercase;
@@ -118,10 +160,10 @@
       width: 100%;
       padding: 10px 14px;
       border-radius: 7px;
-      border: 1px solid #ddd;
+      border: 1px solid var(--hr-border);
       background: var(--hr-white);
       color: var(--hr-text);
-      font-family: 'Roboto', sans-serif;
+      font-family: 'Sweden Sans', sans-serif;
       font-size: 13px;
       font-weight: 600;
       outline: none;
@@ -129,7 +171,7 @@
     }
     input[type="text"]:focus {
       border-color: var(--hr-gold);
-      box-shadow: 0 0 0 2px rgba(255,161,0,0.15);
+      box-shadow: 0 0 0 2px color-mix(in srgb, var(--secondary-base) 15%, transparent);
     }
 
     #suggestions {
@@ -147,7 +189,7 @@
     .suggestion-item {
       padding: 9px 14px;
       cursor: pointer;
-      border-bottom: 1px solid #f5f5f5;
+      border-bottom: 1px solid var(--primary-ultramuted);
       font-size: 12px;
       transition: background 0.15s;
     }
@@ -179,7 +221,7 @@
     .info-box {
       background: var(--hr-white);
       border-radius: 8px;
-      border: 1px solid #eee;
+      border: 1px solid var(--hr-border);
       padding: 14px;
       font-size: 12px;
       color: var(--hr-text);
@@ -201,7 +243,7 @@
       border-radius: 7px;
       border: none;
       cursor: pointer;
-      font-family: 'Roboto', sans-serif;
+      font-family: 'Sweden Sans', sans-serif;
       font-weight: 700;
       font-size: 11px;
       text-transform: uppercase;
@@ -212,15 +254,15 @@
       justify-content: center;
       gap: 6px;
     }
-    .btn-primary  { background: var(--hr-purple); color: #ffffff; border: 1px solid rgba(255,161,0,0.4); }
+    .btn-primary  { background: var(--hr-purple); color: var(--hr-gold); border: 1px solid var(--hr-gold); }
     .btn-primary:hover { background: var(--hr-gold); color: var(--hr-white); }
     .btn-secondary { background: var(--hr-gold); color: var(--hr-white); border: 1px solid var(--hr-gold); }
     .btn-secondary:hover { opacity: 0.85; }
     .btn-full { grid-column: span 2; background: var(--hr-purple-mid); color: var(--hr-gold); border: 1px solid var(--hr-gold); }
     .btn-full:hover { background: var(--hr-gold); color: var(--hr-white); }
-    .btn-outline { grid-column: span 2; background: transparent; color: var(--hr-purple); border: 1px solid rgba(11,44,65,0.2); }
-    .btn-outline:hover { background: rgba(74,35,60,0.05); }
-    .btn-save { width: 100%; padding: 10px; background: var(--hr-purple); color: #ffffff; border: 1px solid rgba(255,161,0,0.4); border-radius: 7px; font-family: 'Roboto', sans-serif; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; margin-top: 16px; transition: all 0.2s; }
+    .btn-outline { grid-column: span 2; background: transparent; color: var(--hr-purple); border: 1px solid var(--primary-mid); }
+    .btn-outline:hover { background: var(--primary-lightmuted); }
+    .btn-save { width: 100%; padding: 10px; background: var(--hr-purple); color: var(--hr-gold); border: 1px solid var(--hr-gold); border-radius: 7px; font-family: 'Sweden Sans', sans-serif; font-weight: 700; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; cursor: pointer; margin-top: 16px; transition: all 0.2s; }
     .btn-save:hover { background: var(--hr-gold); color: var(--hr-white); }
 
     /* ===== SETTINGS ===== */
@@ -261,7 +303,7 @@
       gap: 10px;
       padding: 8px 10px;
       background: var(--hr-white);
-      border: 1px solid #eee;
+      border: 1px solid var(--hr-border);
       border-radius: 7px;
       margin-bottom: 6px;
       cursor: grab;
@@ -270,7 +312,7 @@
     }
     .builder-item:active { cursor: grabbing; }
     .builder-item.dragging { opacity: 0.4; }
-    .builder-item.drag-over { border-color: var(--hr-gold); box-shadow: 0 0 0 2px rgba(255,161,0,0.2); }
+    .builder-item.drag-over { border-color: var(--hr-gold); box-shadow: 0 0 0 2px color-mix(in srgb, var(--secondary-base) 20%, transparent); }
 
     .drag-handle {
       color: var(--hr-text-muted);
@@ -288,13 +330,14 @@
       flex-grow: 1;
       font-size: 12px;
       font-weight: 600;
+      font-family: Arial, Helvetica, sans-serif;
       color: var(--hr-text);
     }
     .builder-preview {
       font-size: 10px;
       color: var(--hr-text-muted);
       font-family: monospace;
-      background: #e8f0f5;
+      background: var(--primary-ultramuted);
       padding: 2px 6px;
       border-radius: 3px;
     }
@@ -317,7 +360,7 @@
       display: none;
       font-weight: 700;
     }
-    .save-status.success { background: #d4edda; color: #155724; display: block; }
+    .save-status.success { background: var(--tertiary-light); color: var(--neutrals-white); display: block; }
 
     .note {
       font-size: 10px;
@@ -331,6 +374,109 @@
 
     ::-webkit-scrollbar { width: 5px; }
     ::-webkit-scrollbar-thumb { background: var(--hr-gold); border-radius: 10px; }
+  
+    /* Shared modal presentation; compact width retained for the printer. */
+    body { background: var(--neutrals-white); line-height: 1.5; }
+    .modal-frame { background: var(--hr-bg); border: none; border-radius: 12px 12px 0 0; min-height: 0; }
+    .modal-header { border-bottom: none; }
+    .header-top-row { grid-template-columns: 1fr; gap: 14px; margin-bottom: 16px; }
+    .header-left { gap: 12px; }
+    .stuteri-logo-left { height: 42px; }
+    .header-brand-title { font-size: .90rem; letter-spacing: .15em; }
+    .stuteri-text-sub { font-size: 1rem; text-align: center; }
+    .modal-header h1 { font-size: 1.20rem; letter-spacing: .15em; }
+    .header-top-row > div:last-child:empty { display: none; }
+    .tabs { background: var(--hr-purple); padding: 0 20px; gap: 4px; align-items: flex-end; }
+    .tab { flex: 0 1 auto; height: 30px; padding: 0 14px; font-size: .70rem; border-radius: 8px 8px 0 0; }
+    .tab.active { background: var(--hr-bg); color: var(--primary-mid); border-bottom: none; }
+    .tab:hover { background: var(--hr-bg); color: var(--primary-mid); }
+    .tab-content { padding: 20px; margin: 20px; background: var(--hr-white); border-radius: 12px; box-shadow: 0 2px 8px color-mix(in srgb, var(--primary-deep) 4%, transparent); }
+    .section-title { border-bottom: none; padding: 0; letter-spacing: 2px; margin: 20px 0 12px; }
+    .section-title::before { width: 2px; }
+    input[type="text"] { font-weight: 400; border-radius: 8px; }
+    .tagline-display { background: var(--primary-lightmuted); border-left-width: 1px; border-radius: 10px; }
+    .btn, .btn-save { border-radius: 8px; }
+    .btn-primary, .btn-full, .btn-save { background: var(--primary-dark); color: var(--neutrals-white); }
+    .btn-primary:hover, .btn-full:hover, .btn-save:hover { background: var(--primary-deep); color: var(--neutrals-white); }
+    .btn-secondary { background: transparent; color: var(--primary-mid); border-color: var(--primary-mid); }
+    .btn-secondary:hover { background: var(--primary-lightmuted); opacity: 1; }
+    .builder-label { font-family: 'Sweden Sans', sans-serif; font-weight: 400; }
+    .save-status.success { background: color-mix(in srgb, var(--tertiary-light) 20%, var(--neutrals-white)); color: var(--tertiary-deep); }
+    button:focus-visible { outline: 2px solid var(--secondary-base); outline-offset: 2px; }
+    @media (max-width: 420px) {
+      .tab-content { margin: 12px; padding: 16px; }
+      .settings-row { flex-wrap: wrap; }
+      .settings-hint { padding-left: 0; }
+    }
+  
+    /* Shared modal typography — Horse Import is the reference. */
+    .stuteri-logo-left { height: 42px; width: auto; }
+    .header-brand-title { font-family: 'Sweden Sans', sans-serif; font-size: .90rem; font-weight: 600; letter-spacing: .15em; line-height: 1.2; }
+    .stuteri-text-sub { font-size: 1rem; line-height: 1.2; }
+    .title-container h1, .modal-header h1, .header-right h2 {
+      font-family: 'Sweden Sans', sans-serif; font-size: 1.40rem; font-weight: 600;
+      letter-spacing: .15em; line-height: 1.2; text-transform: uppercase;
+      color: var(--secondary-base); margin: 0;
+    }
+    .header-center { margin-top: 0; }
+    .header-top-row { margin-bottom: 16px; }
+    .header-subtitle, .modal-header .subtitle {
+      font-family: 'Sweden Sans', sans-serif; font-size: 9px; font-weight: 600;
+      letter-spacing: 2px; line-height: 1.5; text-transform: uppercase;
+      color: color-mix(in srgb, var(--neutrals-white) 65%, transparent); margin: 4px 0 0;
+    }
+    .section-title {
+      font-family: 'Sweden Sans', sans-serif; font-size: 10px; font-weight: 700;
+      letter-spacing: 2px; line-height: 1.5; text-transform: uppercase;
+      color: var(--primary-dark); margin-bottom: 16px; border-bottom: none; padding-bottom: 0;
+    }
+    .section-title::before { width: 2px; height: 12px; background: var(--secondary-base); border-radius: 2px; }
+    .nav-tab, .nav-tab.active, .main-tab, .main-tab.active, .tab, .tab.active {
+      font-family: 'Sweden Sans', sans-serif; font-size: .70rem; font-weight: 600;
+      letter-spacing: 1px; line-height: 1; height: 30px; padding: 0 14px;
+    }
+    .nav-tab.active, .main-tab.active, .tab.active { font-weight: 700; border-radius: 8px 8px 0 0; margin-bottom: 0; }
+  
+    /* Header layout: balanced vertical spacing, responsive title row. */
+.modal-header { min-height: 0; padding-top: 22px; }
+    .header-top-row { align-items: center; column-gap: 24px; margin-bottom: 22px; }
+    .header-center { margin-top: 0; }
+    .header-brand-title { white-space: nowrap; }
+@media (max-width: 820px) {
+      .header-top-row { grid-template-columns: minmax(0, 1fr); row-gap: 18px; }
+      .header-top-row .header-left { justify-content: flex-start; }
+      .header-top-row .header-right, .header-top-row > div:last-child:empty { display: none; }
+      .header-center { width: 100%; text-align: center; }
+    }
+  
+    /* Canonical header geometry, including the import modals' legacy class. */
+    .modal-header, .dashboard-header {
+      display: flex !important; flex-direction: column !important;
+      align-items: stretch; justify-content: flex-start; gap: 0;
+      height: auto; min-height: 0; padding: 0; margin: 0; border-bottom: none;
+    }
+    .modal-header .header-top-row, .dashboard-header .header-top-row {
+      display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+      align-items: center; justify-content: normal; gap: 0 24px;
+      width: 100%; height: 90px; min-height: 90px; padding: 0 20px; margin: 0;
+    }
+    .header-top-row .header-left { grid-column: 1; grid-row: 1; justify-content: flex-start; gap: 12px; }
+    .header-top-row .header-center { grid-column: 2; grid-row: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; margin: 0; padding: 0; width: auto; text-align: center; transform: translateY(9px); }
+    .header-top-row .header-right { grid-column: 3; grid-row: 1; }
+    .header-top-row .header-brand-title { white-space: nowrap; }
+    .header-top-row .stuteri-logo-left { height: 42px; flex-shrink: 0; }
+    .header-top-row h1, .header-top-row h2 { font-family: 'Sweden Sans', sans-serif; font-size: 1.40rem; font-weight: 600; letter-spacing: .15em; line-height: 1.2; color: var(--secondary-base); margin: 0; text-transform: uppercase; }
+    .nav-bar, .tabs { height: 30px; min-height: 30px; margin: 0; padding: 0 20px; align-items: flex-end; }
+    .nav-tabs { height: 30px; align-items: flex-end; }
+    @media (max-width: 820px) {
+      .modal-header .header-top-row, .dashboard-header .header-top-row {
+        grid-template-columns: minmax(0, 1fr); grid-template-rows: 42px auto;
+        height: 130px; min-height: 130px; padding: 16px 20px; gap: 14px;
+      }
+      .header-top-row .header-left { grid-column: 1; grid-row: 1; justify-content: center; }
+      .header-top-row .header-center { grid-column: 1; grid-row: 2; }
+      .header-top-row .header-right { display: none; }
+    }
   </style>
 
   <script>
@@ -462,7 +608,9 @@
       if (pText.includes('PROVEN'))   prefix += (settings.predicates.proven   || 'ℙ');
       if (pText.includes('CLINICAL')) prefix += (settings.predicates.clinical || 'ℂ');
 
-      const rawName     = (horse.name || '').replace(/\bNB\b/g, settings.suffix).trim();
+      const originalName = (horse.name || '').trim();
+      const suffix = (settings.suffix || '').trim();
+      const rawName = suffix && !originalName.endsWith(' '+suffix) ? originalName+' '+suffix : originalName;
       const displayName = (settings.namePrefix || '') +
                           (prefix ? prefix + ' ' : '') +
                           rawName +
@@ -611,7 +759,7 @@
             : `<span class="builder-label">${line.label}</span>`
           }
           ${isCustom
-            ? `<span class="builder-preview" style="cursor:pointer;color:#c0392b;" onclick="removeCustomLine(${idx})">✕</span>`
+            ? `<span class="builder-preview" style="cursor:pointer;color:var(--accent-2);" onclick="removeCustomLine(${idx})">✕</span>`
             : ''
           }
         `;
@@ -687,14 +835,14 @@
           <span class="drag-handle">⠿</span>
           <input type="checkbox" ${part.enabled ? 'checked' : ''} onchange="togglePart(${idx}, this.checked)">
           ${part.custom
-            ? `<input type="text" value="${part.text || ''}" placeholder="Custom text e.g. ❊ or NB"
+            ? `<input type="text" value="${part.text || ''}" placeholder="Custom text e.g. your stud initials"
                 oninput="updateCustomPart(${idx}, this.value)"
                 style="flex:1;padding:4px 8px;font-size:11px;height:26px;">`
             : `<span class="builder-label">${part.label}</span>
                <span class="builder-preview">${getPartPreview(part.id)}</span>`
           }
           ${part.custom
-            ? `<span class="builder-preview" style="cursor:pointer;color:#c0392b;" onclick="removeCustomPart(${idx})">✕</span>`
+            ? `<span class="builder-preview" style="cursor:pointer;color:var(--accent-2);" onclick="removeCustomPart(${idx})">✕</span>`
             : ''
           }
         `;
@@ -794,18 +942,38 @@
         .saveTaglineSettings(JSON.stringify(settings));
     }
   </script>
+<style>
+.stuteri-logo-left { max-width:90px; object-fit:contain; }
+.stuteri-logo-center { max-width:130px; object-fit:contain; }
+.sidebar-brand img { max-width:60px; object-fit:contain; }
+.header-brand-title, .brand-name { overflow-wrap:anywhere; }
+</style>
 </head>
 <body onload="init()">
 
   <div class="modal-frame">
     <div class="modal-header">
-      <h1>Tagline Printer</h1>
-      <div class="subtitle">HorseReality Herd Manager</div>
+      <div class="header-top-row">
+        <div class="header-left">
+          <?!= renderPublicLogo_('stuteri-logo-left'); ?>
+          <div class="brand-text-stacked">
+            <span class="header-brand-title"><?= getBranding_().name ?></span>
+            <span class="stuteri-text-sub"><?= getBranding_().signature ?></span>
+          </div>
+        </div>
+        <div class="header-center">
+          <h1>Tagline Printer</h1>
+        </div>
+        <div></div>
+      </div>
     </div>
 
     <div class="tabs">
       <button class="tab active" id="tab-printer"  onclick="switchTab('printer')">Printer</button>
-      <button class="tab"        id="tab-settings" onclick="switchTab('settings')">⚙ Settings</button>
+      <button class="tab"        id="tab-settings" onclick="switchTab('settings')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.325 4.317c.426 -1.756 2.924 -1.756 3.35 0a1.724 1.724 0 0 0 2.573 1.066c1.543 -.94 3.31 .826 2.37 2.37a1.724 1.724 0 0 0 1.065 2.572c1.756 .426 1.756 2.924 0 3.35a1.724 1.724 0 0 0 -1.066 2.573c.94 1.543 -.826 3.31 -2.37 2.37a1.724 1.724 0 0 0 -2.572 1.065c-.426 1.756 -2.924 1.756 -3.35 0a1.724 1.724 0 0 0 -2.573 -1.066c-1.543 .94 -3.31 -.826 -2.37 -2.37a1.724 1.724 0 0 0 -1.065 -2.572c-1.756 -.426 -1.756 -2.924 0 -3.35a1.724 1.724 0 0 0 1.066 -2.573c-.94 -1.543 .826 -3.31 2.37 -2.37c1 .608 2.296 .07 2.572 -1.065z"/><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0 -6 0"/></svg>
+        Settings
+      </button>
     </div>
 
     <!-- ===== PRINTER TAB ===== -->
@@ -840,9 +1008,9 @@
 
       <div class="settings-row">
         <label>Stud Suffix</label>
-        <input type="text" id="set_suffix" placeholder="e.g. NB" style="max-width:80px;">
+        <input type="text" id="set_suffix" placeholder="e.g. your initials" style="max-width:80px;">
       </div>
-      <div class="settings-hint">Replaces your stud suffix in all horse names</div>
+      <div class="settings-hint">Adds your optional suffix without replacing the stored horse name</div>
 
       <div class="settings-row">
         <label>Name Prefix</label>
@@ -884,7 +1052,7 @@
       <ul class="builder-list" id="builderList"></ul>
       <button type="button" onclick="addCustomPart()"
         style="width:100%;padding:7px;background:transparent;border:1px dashed var(--hr-gold);
-               border-radius:7px;color:var(--hr-gold);font-family:'Roboto',sans-serif;
+               border-radius:7px;color:var(--hr-gold);font-family:'Sweden Sans',sans-serif;
                font-weight:700;font-size:11px;cursor:pointer;margin-bottom:12px;">
         + Add Custom Part
       </button>
@@ -896,7 +1064,7 @@
       <ul class="builder-list" id="infoBuilderList"></ul>
       <button type="button" onclick="addCustomLine()"
         style="width:100%;padding:7px;background:transparent;border:1px dashed var(--hr-gold);
-               border-radius:7px;color:var(--hr-gold);font-family:'Roboto',sans-serif;
+               border-radius:7px;color:var(--hr-gold);font-family:'Sweden Sans',sans-serif;
                font-weight:700;font-size:11px;cursor:pointer;margin-bottom:10px;">
         + Add Custom Line
       </button>
@@ -907,5 +1075,6 @@
 
   </div>
 
+<?!= renderModalHelp('tagline'); ?>
 </body>
 </html>

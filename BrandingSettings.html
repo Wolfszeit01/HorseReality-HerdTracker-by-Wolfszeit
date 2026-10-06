@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en"><head><meta name="viewport" content="width=device-width,initial-scale=1">
+<link href="https://fonts.googleapis.com/css2?family=Finlandica:wght@400;600&family=Allison&display=swap" rel="stylesheet">
+<?!= renderThemeVariables(); ?>
+<style>
+*{box-sizing:border-box}body{margin:0;padding:20px;background:var(--primary-ultramuted);color:var(--primary-deep);font:15px Finlandica,Arial,sans-serif}h1{margin:0 0 6px;font-size:22px}p{margin:0 0 16px;line-height:1.4}form{background:var(--neutrals-white);border-radius:12px;padding:18px}label{display:block;margin-bottom:12px;font-weight:600}input{display:block;width:100%;margin-top:4px;padding:9px;border:1px solid var(--secondary-light);border-radius:6px;background:var(--primary-lightmuted);color:var(--primary-deep);font:inherit}small{display:block;font-weight:400;margin-top:4px;line-height:1.3}.fields{display:grid;grid-template-columns:1fr 1fr;gap:0 14px}.wide{grid-column:1/-1}.preview{display:flex;align-items:center;justify-content:center;gap:14px;min-height:112px;padding:18px;margin:14px 0;border-radius:10px;background:var(--primary-dark);color:var(--secondary-base)}.preview img{width:64px;height:64px;object-fit:contain;flex-shrink:0}.preview div{min-width:0}.name{font-size:20px;letter-spacing:1px;overflow-wrap:anywhere}.signature{font-family:Allison,cursive;font-size:30px;overflow-wrap:anywhere}.subtitle{font-size:11px;letter-spacing:2px;margin-top:3px;overflow-wrap:anywhere}button{font:600 14px Finlandica,Arial;padding:10px 14px;border:1px solid var(--primary-dark);border-radius:6px;cursor:pointer;background:var(--neutrals-white);color:var(--primary-dark)}button[type=submit]{background:var(--primary-dark);color:var(--neutrals-white)}button:disabled{opacity:.5;cursor:wait}.actions{display:flex;gap:8px;flex-wrap:wrap}#status,#imageStatus{font-size:13px;margin:8px 0;min-height:18px}#status{white-space:pre-wrap}input:focus-visible,button:focus-visible{outline:2px solid var(--secondary-base);outline-offset:2px}
+</style></head><body>
+<h1>Branding</h1><p>Personalize the dashboard, dialogs and calculator sidebar. Settings are shared by everyone using this spreadsheet.</p>
+<form id="form"><div class="fields">
+<label>Stud name<input id="name" maxlength="60" required disabled></label>
+<label>Signature<input id="signature" maxlength="60" disabled><small>Optional, for example “by Your Name”.</small></label>
+<label class="wide">Logo image URL<input id="logoUrl" type="url" maxlength="2048" placeholder="https://…/logo.png" disabled><small>Use a public HTTPS image link, preferably a transparent PNG. A sharing-page link will not work. Leave blank to use the original logo.</small></label>
+<label class="wide">Dashboard subtitle<input id="subtitle" maxlength="60" disabled><small>Optional, for example “EST. 2026”.</small></label>
+</div>
+<div class="preview" aria-label="Branding preview"><img id="previewLogo" alt="Logo preview" referrerpolicy="no-referrer"><div><div id="previewName" class="name"></div><div id="previewSignature" class="signature"></div><div id="previewSubtitle" class="subtitle"></div></div></div>
+<div id="imageStatus" role="status"></div>
+<div class="actions"><button id="save" type="submit" disabled>Save Branding</button><button id="reset" type="button" disabled>Restore Defaults</button><button type="button" onclick="google.script.host.close()">Close</button></div>
+<div id="status" role="status" aria-live="polite">Loading…</div>
+<small>Save or Restore Defaults applies to this spreadsheet. Reopen existing dialogs to see the change. Image proportions are preserved; layout varies by view.</small>
+</form>
+<script>
+const ids=['name','signature','logoUrl','subtitle'];
+const el=id=>document.getElementById(id);
+const defaultLogo="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMjgiIGhlaWdodD0iMTI4IiB2aWV3Qm94PSIwIDAgMTI4IDEyOCI+PHJlY3QgeD0iNCIgeT0iNCIgd2lkdGg9IjEyMCIgaGVpZ2h0PSIxMjAiIHJ4PSIyOCIgZmlsbD0iIzFBNEE2RSIvPjxwYXRoIGQ9Ik0zOSAyOUMyNCA0NyAyNCA3NyAzOCA5MmMxNCAxNSAzOCAxNSA1MiAwIDE0LTE1IDE0LTQ1LTEtNjNMNzQgNDBjMTAgMTMgMTAgMzIgMyA0MS03IDktMTkgOS0yNiAwLTctOS03LTI4IDMtNDFaIiBmaWxsPSJub25lIiBzdHJva2U9IiNFMkQyQjYiIHN0cm9rZS13aWR0aD0iOCIgc3Ryb2tlLWxpbmVqb2luPSJyb3VuZCIvPjxnIGZpbGw9IiNFMkQyQjYiPjxjaXJjbGUgY3g9IjM1IiBjeT0iNTgiIHI9IjMiLz48Y2lyY2xlIGN4PSIzNyIgY3k9Ijc4IiByPSIzIi8+PGNpcmNsZSBjeD0iOTMiIGN5PSI1OCIgcj0iMyIvPjxjaXJjbGUgY3g9IjkxIiBjeT0iNzgiIHI9IjMiLz48L2c+PC9zdmc+";
+let ready=false,timer;
+function busy(value){ids.concat(['save','reset']).forEach(id=>el(id).disabled=value);}
+function preview(){
+ el('previewName').textContent=el('name').value;
+ el('previewSignature').textContent=el('signature').value;
+ el('previewSubtitle').textContent=el('subtitle').value;
+ const url=el('logoUrl').value.trim()||defaultLogo;
+ if(url!==defaultLogo && !/^https:\/\//i.test(url)){el('previewLogo').removeAttribute('src');el('imageStatus').textContent='Use an HTTPS image link.';return;}
+ if(el('previewLogo').getAttribute('src')!==url){el('imageStatus').textContent='Loading logo…';el('previewLogo').src=url;}
+}
+el('previewLogo').onload=()=>el('imageStatus').textContent='';
+el('previewLogo').onerror=()=>el('imageStatus').textContent='Logo could not be loaded. Check that the link opens an image without signing in.';
+function fill(settings){ids.forEach(id=>el(id).value=(id==='logoUrl' && settings[id]===defaultLogo)?'':settings[id]);preview();ready=true;busy(false);}
+function failure(error){busy(!ready);el('status').textContent=error.message||String(error);}
+ids.forEach(id=>el(id).addEventListener('input',()=>{clearTimeout(timer);timer=setTimeout(preview,250);}));
+el('form').addEventListener('submit',event=>{event.preventDefault();busy(true);el('status').textContent='Saving…';const input=Object.fromEntries(ids.map(id=>[id,el(id).value]));google.script.run.withSuccessHandler(settings=>{fill(settings);el('status').textContent='Saved. Reopen your dashboard or dialog to see the new branding.';}).withFailureHandler(failure).saveBrandingSettings(input);});
+el('reset').addEventListener('click',()=>{busy(true);el('status').textContent='Restoring…';google.script.run.withSuccessHandler(settings=>{fill(settings);el('status').textContent='Original branding restored and saved.';}).withFailureHandler(failure).resetBrandingSettings();});
+google.script.run.withSuccessHandler(settings=>{fill(settings);el('status').textContent='';}).withFailureHandler(failure).getBrandingSettings();
+</script></body></html>

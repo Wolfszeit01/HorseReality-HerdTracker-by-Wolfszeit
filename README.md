@@ -1,126 +1,39 @@
-Fix 1; 30.05.2026
+# Horse Reality Herd Tracker — Public Edition
 
-There was an error involving missing formulas. You can easily fix this by copying the formulas form first line using the fill handle (the small square at the bottom right corner of the active cell) or recopying the sheet.
+The current public Apps Script source for the Herd Tracker by Wolfszeit.
 
-Additionally, there was another minor error when retrieving the breeds. This can also be resolved—either by recopying the entire Tracker, or by replacing the specific files
-export.gs
-Outsidestudsbackend.gs
-with the ones attached here.
+## Install or update
 
-To do this, simply navigate to "Extensions" > "Apps Script" and replace the respective files.
+Use a separate copy of the matching current spreadsheet template. This repository contains code, not a spreadsheet template; replacing code alone does not migrate an older workbook's columns or formulas.
 
-Fix 2; 31.05.2026
+1. Back up your spreadsheet before updating.
+2. Open **Extensions → Apps Script** in the copy.
+3. Replace the old project code with **all `.gs` and `.html` files in this repository**. Remove obsolete script files so duplicate functions are not left behind. Also include `appsscript.json` (enable the manifest editor under Project Settings).
+4. Save, reload the spreadsheet and authorize the script when requested.
+5. Under **Herd Management → Appearance**, apply the current theme and set your branding.
 
-Replace: 
-Outsidestudsbackend.gs
-outsideStudsModal.html
-FoalCalulator.gs
+Download the repository using **Code → Download ZIP** to get all files together. Images, this README, and `version.txt` do not need to be pasted into Apps Script.
 
-To do this, simply navigate to "Extensions" > "Apps Script" and replace the respective files.
+For bulk uploads with clasp, connect a separate checkout to your intended Apps Script project and upload only the code, HTML and manifest. This repository deliberately contains no connected `.clasp.json` or credentials.
 
- for Outside Stud
+## Themes and branding
 
-Colum AI: =COUNTIF(G3:T3,"VG")
-Colum AJ: =COUNTIF(G3:T3,"G+")
-Colum AK: =COUNTIF(G3:T3,"G") 
-Colum AL: =COUNTIF(G3:T3,"G-")
-Colum AM:  =COUNTIF(G3:T3,"A")
-Colum AN:  =COUNTIF(G3:T3,"BA")
-Colum AO:  =COUNTIF(G3:T3,"P")
+- Ocean Blue is the public default.
+- Forest & Gold and Midnight & Silver are also included.
+- Add your own colours through the Theme Editor.
+- A bundled horseshoe logo and **HERD TRACKER** name provide neutral defaults. Configure your stud name, signature and logo under Appearance.
+- Leave the logo URL empty when saving to restore the bundled logo. Custom logos require a direct public HTTPS image URL.
 
-Column BP: =INDEX($BA$1:$BO$1,MATCH(MAX(BC3,BE3,BG3,BI3,BK3,BM3,BO3),BB3:BO3,0))
+## Sharing your own template
 
-for Her Tracker
+Remove personal horse records from every sheet, including Archive, Pedigree, breeding/team/market tabs, result columns and logs. Review hidden sheets, notes, links, balances and settings while preserving template formulas and structure.
 
-Colum L: 
-=IFNA(
-  LET(
-    vater, VLOOKUP(C2, Pedigree!$B$1:G, 5, FALSE),
-    linie, VLOOKUP(C2, Pedigree!$B$1:G, 3, FALSE),
-    IF(AND(vater="", linie=""), "Unknown",
-      IF(vater="", "Unknown", vater) & " (" & IF(linie="", "Unknown", linie) & ")"
-    )
-  ),
-  "Unknown"
-)
+**Archive All Horses is not a full cleanup:** it preserves archived records and does not clear every related tab.
 
-Colum M: 
-=IFNA(
-  LET(
-    mutter, VLOOKUP(C2, Pedigree!$B$1:G, 6, FALSE),
-    linie, VLOOKUP(C2, Pedigree!$B$1:G, 4, FALSE),
-    IF(AND(mutter="", linie=""), "Unknown",
-      IF(mutter="", "Unknown", mutter) & " (" & IF(linie="", "Unknown", linie) & ")"
-    )
-  ),
-  "Unknown"
-)
+## Help and history
 
-Colum S: 
-=LET(breed, $E2, id, $C2, 
-  sheet, IFS(ISNUMBER(SEARCH("Icelandic", breed)), "ICE_Horse Stats", ISNUMBER(SEARCH("Kathiawari", breed)), "KATH_Horse Stats", TRUE, "Horse Stats"),
-  offset, IFS(ISNUMBER(SEARCH("Icelandic", breed)), 4, ISNUMBER(SEARCH("Kathiawari", breed)), 2, TRUE, 0),
-  VLOOKUP(id, INDIRECT(sheet & "!B:BX"), 44 + offset, FALSE)
-)
+Use the built-in **Help & Guide** and contextual tooltips. The screenshot assets here remain available to those dialogs.
 
-Colum T: =IFERROR(
-  TRIM(
-    LET(
-      breed, $E2,
-      horseID, $C2,
-      targetSheet, IFS(
-        ISNUMBER(SEARCH("Icelandic", breed)), "ICE_Horse Stats",
-        ISNUMBER(SEARCH("Kathiawari", breed)), "KATH_Horse Stats",
-        TRUE, "Horse Stats"
-      ),
-      offset, IFS(
-        ISNUMBER(SEARCH("Icelandic", breed)), 4,
-        ISNUMBER(SEARCH("Kathiawari", breed)), 2,
-        TRUE, 0
-      ),
-      rangeID, INDIRECT(targetSheet & "!$B:$B"),
-      rowIdx, MATCH(horseID, rangeID, 0),
-      valVG,    INDEX(INDIRECT(targetSheet & "!1:" & rowIdx), rowIdx, 28 + offset),
-      valGplus, INDEX(INDIRECT(targetSheet & "!1:" & rowIdx), rowIdx, 29 + offset),
-      valG,     INDEX(INDIRECT(targetSheet & "!1:" & rowIdx), rowIdx, 30 + offset),
-      valGminus,INDEX(INDIRECT(targetSheet & "!1:" & rowIdx), rowIdx, 31 + offset),
-      valA,     INDEX(INDIRECT(targetSheet & "!1:" & rowIdx), rowIdx, 32 + offset),
-      valBA,    INDEX(INDIRECT(targetSheet & "!1:" & rowIdx), rowIdx, 33 + offset),
-      IF(valVG<>"", valVG & " VG ", "") &
-      IF(valGplus<>"", valGplus & " G+ ", "") &
-      IF(valG, valG & " G ", "") &
-      IF(valGminus<>"", valGminus & " G- ", "") &
-      IF(valA<>"", valA & " A ", "") &
-      IF(valBA<>"", valBA & " BA ", "")
-    )
-  ), 
-  "not found"
-)
+See [version.txt](version.txt) for the changelog. Superseded script files remain recoverable through Git history.
 
-
-Colum W:
-=LET(breed, $E2, id, $C2,
-  sheet, IFS(ISNUMBER(SEARCH("Icelandic", breed)), "ICE_Horse Stats", ISNUMBER(SEARCH("Kathiawari", breed)), "KATH_Horse Stats", TRUE, "Horse Stats"),
-  off, IFS(ISNUMBER(SEARCH("Icelandic", breed)), 4, ISNUMBER(SEARCH("Kathiawari", breed)), 1, TRUE, 0),
-  VLOOKUP(id, INDIRECT(sheet & "!B:BW"), 64 + off, 0) & " | " & 
-  VLOOKUP(id, INDIRECT(sheet & "!B:BW"), 65 + off, 0) & " | " & 
-  VLOOKUP(id, INDIRECT(sheet & "!B:BW"), 66 + off, 0) & " | " & 
-  VLOOKUP(id, INDIRECT(sheet & "!B:BW"), 67 + off, 0)
-)
-
-Colum X: 
-=LET(
-  breed, $E2, 
-  id, $C2, 
-  targetSheet, IFS(
-    ISNUMBER(SEARCH("Icelandic", breed)), "ICE_Horse Stats", 
-    ISNUMBER(SEARCH("Kathiawari", breed)), "KATH_Horse Stats", 
-    TRUE, "Horse Stats"
-  ),
-  offset, IFS(
-    ISNUMBER(SEARCH("Icelandic", breed)), 4, 
-    ISNUMBER(SEARCH("Kathiawari", breed)), 2, 
-    TRUE, 0
-  ),
-  VLOOKUP(id, INDIRECT(targetSheet & "!B:BW"), 59 + offset, FALSE)
-)
+The public source has passed local syntax and configuration checks. Test imports and formatting in your separate spreadsheet copy before using it with important data.

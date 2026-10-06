@@ -1,3 +1,8 @@
+Public Edition — 06.10.2026
+- Replaced legacy scripts with the complete current public source.
+- Added a neutral bundled logo and Ocean Blue default; retained custom themes and branding.
+- Removed superseded script files; retained help screenshots and historical changelog.
+
 
 
 Change Log:
@@ -8,7 +13,7 @@ Design & Navigation
 - Reorganized the Herd Management menu.
 - Added contextual help, tooltips, and a central Help & Guide.
 Themes & Branding
-- Added four built-in themes.
+- Added three public built-in themes (Ocean Blue, Forest & Gold, Midnight & Silver).
 - Added a Theme Editor with custom colours, previews, contrast hints, and saved themes.
 - Added customizable stud names, signatures, logos, and dashboard subtitles.
 Dashboard
@@ -125,3 +130,4 @@ Fixes
 
 02.07.24 V.2.1 
 - Bug Fixing in "Paste your horses Infos"; adjust stud price
+
