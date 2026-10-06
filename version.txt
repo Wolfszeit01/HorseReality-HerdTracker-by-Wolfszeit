@@ -1,4 +1,52 @@
-5.0.1
+
+
+Change Log:
+06.10.2026
+Design & Navigation
+- Unified the design across the dashboard, dialogs, sidebar, and spreadsheet tabs.
+- Improved column widths, alignment, headers, and theme-based colours.
+- Reorganized the Herd Management menu.
+- Added contextual help, tooltips, and a central Help & Guide.
+Themes & Branding
+- Added four built-in themes.
+- Added a Theme Editor with custom colours, previews, contrast hints, and saved themes.
+- Added customizable stud names, signatures, logos, and dashboard subtitles.
+Dashboard
+- Updated the layout, charts, icons, and typography.
+- Improved herd statistics, occupancy information, and data handling.
+- Standardized interface text in English.
+Breeding & Genetics
+- Improved Foal Calculator loading speed and horse selection.
+- Improved coat-colour calculations and result grouping.
+- Made additional colour outcomes expandable.
+- Added shared-ancestor information and explanations.
+- Clearly separated local pedigree-based inbreeding estimates from official HR COI values.
+- Added support for manually recording HR COI values for individual pairings.
+- Updated Outside Studs to support the Breed column and flag missing breeds.
+Spreadsheet Improvements
+- Applied consistent styling across horse, stats, genetics, pedigree, breeding, market, and settings tabs.
+- Added frozen headers and identifying columns where useful.
+- Improved result matrices with wrapped names and dynamic styling for new horse columns.
+- Added blank-ID checks to selected formulas to reduce errors in empty rows.
+- Prevented invalid foaling-date calculations when the covering date is missing.
+- Corrected the Competition Team sync’s starting row.
+Archive
+- Added clearer formatting and collapsible groups by source tab.
+- Made archive styling adapt to additional columns.
+- Fixed failures when removing the last unfrozen row or column.
+- Improved recovery after interrupted archiving and prevented duplicate archive entries on retry.
+- Added Archive All Horses, with explicit confirmation, using the existing archive workflow for every horse in Herd.
+Fixes
+- Corrected several number-font and header-alignment issues.
+- Fixed styling interruptions caused by number-format changes in typed columns.
+- Improved styling error messages so they remain readable until dismissed.
+
+01.07.2026
+
+-fixing issue with Leopard Complex
+
+-fixing little Import bug with Bloodlines
+
 
 31.05.2026 V5.0.1
 
