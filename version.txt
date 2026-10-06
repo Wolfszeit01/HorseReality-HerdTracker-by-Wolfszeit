@@ -1,3 +1,8 @@
+Archive formula preservation fix
+- Regular and all-horse archiving now clear entered values instead of deleting entire source rows or result columns.
+- Formulas, formatting and validation remain available for reuse.
+- Cleanup targets are captured before linked sheets recalculate.
+
 Public Edition — 06.10.2026
 - Replaced legacy scripts with the complete current public source.
 - Added a neutral bundled logo and Ocean Blue default; retained custom themes and branding.

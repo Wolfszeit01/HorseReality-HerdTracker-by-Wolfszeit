@@ -21,7 +21,7 @@ function archiveAllHorses() {
   if (!ids.length) { ui.alert('There are no horses in Herd to archive.'); return; }
   const answer = ui.prompt('Archive All Horses',
     'Archive all ' + ids.length + ' horses in Herd, including active horses?\n\n' +
-    'Uses the regular archive workflow: Herd, Stats, ICE_Stats, KATH_Stats, Colour Genetics and the two Results tabs. Other tabs, settings, branding, themes and logs are not cleared. Existing archive entries are retained.\n\n' +
+    'Uses the regular archive workflow: Herd, Stats, ICE_Stats, KATH_Stats, Colour Genetics and the two Results tabs. Other tabs, settings, branding, themes and logs are not cleared. Existing archive entries are retained. Source formulas, formatting and dropdowns are preserved; cleared rows and result columns remain available for reuse.\n\n' +
     'Type ARCHIVE ALL to confirm.', ui.ButtonSet.OK_CANCEL);
   if (answer.getSelectedButton() !== ui.Button.OK || answer.getResponseText().trim() !== 'ARCHIVE ALL') return;
   const lock = LockService.getDocumentLock();
@@ -102,6 +102,10 @@ function archiveHorsesLocked_(allHorses, expectedIds) {
     fields.forEach(f => { if (masterFields.indexOf(f) === -1) masterFields.push(f); });
   });
 
+  // Capture all targets before linked IDs can recalculate during cleanup.
+  const cleanupPlans = normalSheets.map(cfg => planArchiveCleanup_(ss, cfg.name, idsToArchive, cfg.idColumn, false))
+    .concat(resultsSheets.map(name => planArchiveCleanup_(ss, name, idsToArchive, 0, true)));
+
   // ===== Schritt 2: Ins Archiv schreiben (1 Zeile pro Pferd) =====
   let archiveSheet;
   if (horsesToArchive.length) {
@@ -117,13 +121,10 @@ function archiveHorsesLocked_(allHorses, expectedIds) {
 
   // ===== Schritt 3: Aus den Quell-Sheets löschen =====
   let archiveReport = [];
-  normalSheets.forEach(cfg => {
-    const removed = deleteFromNormalSheet(ss, cfg.name, idsToArchive, cfg.idColumn);
-    archiveReport.push((removed > 0 ? '✓ ' : '○ ') + cfg.name + ': ' + removed + ' Zeile(n) entfernt');
-  });
-  resultsSheets.forEach(name => {
-    const removed = deleteFromResultsSheet(ss, name, idsToArchive);
-    archiveReport.push((removed > 0 ? '✓ ' : '○ ') + name + ': ' + removed + ' Spalte(n) entfernt');
+  cleanupPlans.forEach(plan => {
+    applyArchiveCleanup_(plan);
+    archiveReport.push((plan.count > 0 ? '✓ ' : '○ ') + plan.name + ': ' + plan.count +
+      (plan.results ? ' result column(s)' : ' horse row(s)') + ' cleared; formulas retained');
   });
 
   let message = horsesToArchive.length + ' Pferd(e) archiviert (je 1 Zeile im Archive-Sheet):\n\n';
@@ -289,49 +290,63 @@ function writeHorsesToArchive(sheet, horsesToArchive, horseData, masterFields) {
 }
 
 
+// Retain rows/columns so formulas, references, validation and formatting survive.
+// Only non-formula cells in selected horse records are cleared.
+function planArchiveCleanup_(ss, name, ids, idColumn, results) {
+  const sheet = ss.getSheetByName(name);
+  const plan = {name: name, sheet: sheet, results: results, count: 0, ranges: []};
+  if (!sheet) return plan;
+  const range = sheet.getDataRange();
+  const values = range.getValues(), formulas = range.getFormulas();
+  const height = values.length, width = values[0] ? values[0].length : 0;
+  const selected = new Set(ids.map(String));
+  function addRuns(length, cell, address) {
+    let start = -1;
+    for (let i = 0; i <= length; i++) {
+      const pos = i < length ? cell(i) : null;
+      const clear = pos && !formulas[pos[0]][pos[1]] && values[pos[0]][pos[1]] !== '';
+      if (clear && start < 0) start = i;
+      if (!clear && start >= 0) { plan.ranges.push(address(start, i - 1)); start = -1; }
+    }
+  }
+  if (results) {
+    for (let c = 0; c < width; c++) {
+      if (!values[0][c] || !selected.has(String(values[0][c]).trim())) continue;
+      if (c + 1 <= sheet.getFrozenColumns()) throw new Error(name + ': horse found in frozen header column. Nothing cleared.');
+      const col = archiveColumnName_(c + 1);
+      addRuns(height, r => [r, c], (a, b) => col + (a + 1) + ':' + col + (b + 1));
+      plan.count++;
+    }
+  } else {
+    for (let r = 1; r < height; r++) {
+      if (!values[r][idColumn] || !selected.has(String(values[r][idColumn]).trim())) continue;
+      if (r + 1 <= sheet.getFrozenRows()) throw new Error(name + ': horse found in frozen header row. Nothing cleared.');
+      addRuns(width, c => [r, c], (a, b) => archiveColumnName_(a + 1) + (r + 1) + ':' + archiveColumnName_(b + 1) + (r + 1));
+      plan.count++;
+    }
+  }
+  return plan;
+}
+function archiveColumnName_(column) {
+  let name = '';
+  while (column > 0) { column--; name = String.fromCharCode(65 + column % 26) + name; column = Math.floor(column / 26); }
+  return name;
+}
+function applyArchiveCleanup_(plan) {
+  // Bounded batches avoid one request per cell in large archives.
+  for (let i = 0; i < plan.ranges.length; i += 200) plan.sheet.getRangeList(plan.ranges.slice(i, i + 200)).clearContent();
+}
 function deleteFromNormalSheet(ss, sheetName, idsToArchive, idColumn) {
-  const sheet = ss.getSheetByName(sheetName);
-  if (!sheet) return 0;
-
-  const data = sheet.getDataRange().getValues();
-  let removed = 0;
-
-  for (let i = data.length - 1; i >= 1; i--) {
-    const rowId = data[i][idColumn];
-    const rowIdStr = rowId ? String(rowId).trim() : '';
-    if (rowIdStr && idsToArchive.indexOf(rowIdStr) !== -1) {
-      if (i + 1 <= sheet.getFrozenRows()) throw new Error(sheetName + ': matching horse is in a frozen header row; no deletion performed.');
-      if (sheet.getMaxRows() <= sheet.getFrozenRows() + 1) sheet.insertRowsAfter(sheet.getMaxRows(), 1);
-      sheet.deleteRow(i + 1);
-      removed++;
-    }
-  }
-  return removed;
+  const plan = planArchiveCleanup_(ss, sheetName, idsToArchive, idColumn, false);
+  applyArchiveCleanup_(plan);
+  return plan.count;
 }
-
-
 function deleteFromResultsSheet(ss, sheetName, idsToArchive) {
-  const sheet = ss.getSheetByName(sheetName);
-  if (!sheet) return 0;
-
-  const lastColumn = sheet.getLastColumn();
-  if (lastColumn < 1) return 0;
-
-  const headerRow = sheet.getRange(1, 1, 1, lastColumn).getValues()[0]; // Zeile 1 = ID
-  let removed = 0;
-
-  for (let col = lastColumn - 1; col >= 0; col--) { // jede Spalte inkl. A ist ein Pferd
-    const colId = headerRow[col];
-    const colIdStr = colId ? String(colId).trim() : '';
-    if (colIdStr && idsToArchive.indexOf(colIdStr) !== -1) {
-      if (col + 1 <= sheet.getFrozenColumns()) throw new Error(sheetName + ': matching horse is in a frozen header column; no deletion performed.');
-      if (sheet.getMaxColumns() <= sheet.getFrozenColumns() + 1) sheet.insertColumnsAfter(sheet.getMaxColumns(), 1);
-      sheet.deleteColumn(col + 1);
-      removed++;
-    }
-  }
-  return removed;
+  const plan = planArchiveCleanup_(ss, sheetName, idsToArchive, 0, true);
+  applyArchiveCleanup_(plan);
+  return plan.count;
 }
+
 
 
 /**

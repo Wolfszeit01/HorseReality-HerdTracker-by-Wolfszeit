@@ -30,6 +30,10 @@ Remove personal horse records from every sheet, including Archive, Pedigree, bre
 
 **Archive All Horses is not a full cleanup:** it preserves archived records and does not clear every related tab.
 
+## Archiving
+
+After saving archive snapshots, regular archiving and Archive All Horses clear entered values while retaining source formulas, rows, result columns, formatting and dropdowns. Empty slots remain available for reuse.
+
 ## Help and history
 
 Use the built-in **Help & Guide** and contextual tooltips. The screenshot assets here remain available to those dialogs.
