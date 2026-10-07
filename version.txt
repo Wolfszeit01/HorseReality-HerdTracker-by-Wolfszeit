@@ -1,3 +1,8 @@
+XP calculation fix — 07.10.2026
+- Since Last accounts for one or more level-ups using the per-level wiki XP caps.
+- Day Total uses the last prior-day snapshot, or the first snapshot today; the Help explains this estimate.
+- Shared client/server calculation, input validation and serialized snapshot saves. Existing history is unchanged.
+
 Archive formula preservation fix
 - Regular and all-horse archiving now clear entered values instead of deleting entire source rows or result columns.
 - Formulas, formatting and validation remain available for reuse.

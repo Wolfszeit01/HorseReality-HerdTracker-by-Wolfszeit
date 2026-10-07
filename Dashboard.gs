@@ -1069,11 +1069,15 @@ function getXpHistory() {
 }
 
 function saveXpSnapshot(data) {
+  const lock = LockService.getDocumentLock();
+  if (!lock.tryLock(1000)) return {success:false,error:'A snapshot is being saved. Please try again.'};
   try {
     const ss = SpreadsheetApp.getActiveSpreadsheet();
     const sheet = ss.getSheetByName('XP Tracker');
     if (!sheet) return { success: false, error: 'XP Tracker sheet not found' };
     const today = new Date();
+    if (!data || data.level === '' || data.xp === '' || data.level == null || data.xp == null) throw new Error('Enter level and XP.');
+    const metrics = xpMetrics_(Number(data.level), Number(data.xp), xpContext_(sheet, today, ss.getSpreadsheetTimeZone()), XP_LEVEL_CAPS);
     const lastRow = lastDataRowByColumnA_(sheet);
     const hrc = Number(data.hrc) || 0; const savings = Number(data.savings) || 0;
     const dp = Number(data.dp) || 0; const ft = Number(data.ft) || 0; const wt = Number(data.wt) || 0;
@@ -1082,11 +1086,11 @@ function saveXpSnapshot(data) {
     let dollarChange = 0, dollarChangeDay = 0;
     if (lastRow >= 2) { const prevNetWorth = Number(sheet.getRange(lastRow, 14).getValue()) || 0; dollarChange = netWorth - prevNetWorth; dollarChangeDay = dollarChange; }
     const cycleEarnings = calculateCycleEarnings_(ss);
-    const newRow = [ today, Number(data.level) || 0, data.rank || '', Number(data.xp) || 0, Number(data.sinceLast) || 0, Number(data.dayTotal) || 0, Number(data.tilNext) || 0, (Number(data.percent) || 0) / 100, hrc, savings, dp, ft, wt, netWorth, dollarChange, dollarChangeDay, '', cycleEarnings.conf, cycleEarnings.comp, cycleEarnings.sales, cycleEarnings.stud, Number(data.totalStalls) || 0, Number(data.horsesOnPasture) || 0 ];
+    const newRow = [ today, Number(data.level) || 0, data.rank || '', Number(data.xp) || 0, metrics.sinceLast, metrics.dayTotal, metrics.tilNext, metrics.percent / 100, hrc, savings, dp, ft, wt, netWorth, dollarChange, dollarChangeDay, '', cycleEarnings.conf, cycleEarnings.comp, cycleEarnings.sales, cycleEarnings.stud, Number(data.totalStalls) || 0, Number(data.horsesOnPasture) || 0 ];
     sheet.getRange(lastRow + 1, 1, 1, newRow.length).setValues([newRow]);
     updateSettingsBalance_(ss, hrc, savings, dp, ft, wt, netWorth);
     return { success: true, netWorth: netWorth };
-  } catch (e) { return { success: false, error: e.toString() }; }
+  } catch (e) { return { success: false, error: e.toString() }; } finally { lock.releaseLock(); }
 }
 
 /**
@@ -1261,4 +1265,43 @@ function columnLetter_(col) {
 // Entfernt Sonderzeichen/Symbole (☆, °, Geschlechts-Icons etc.) für robusten Namensabgleich
 function normalizeHorseName_(name) {
   return String(name || '').replace(/[^\p{L}\p{N} ]/gu, '').trim().toLowerCase();
+}
+
+// Per-level XP caps: https://horsereality.wiki/en/Account/Levelling-Up (checked 2026-10-07).
+const XP_LEVEL_CAPS = [75,225,400,595,825,1085,1385,1735,2130,2590,3115,3720,4415,5215,6130,7190,8405,9800,11405,13250,15375,17815,20620,23850,27555,31820,36725,42365,48845,56300,64870,74755,86050,99075,114055,131270,151070,173830,200000,230090,264685,304465,350195,402780,463235,532745,612670,704555,810210,931680,1071345,1231925,1416550,1628830,1872895,2153510,2476155,2847115,3273625,3764015,4327840,4876100,5721445,6578410,7563710,8696565,9999075,11496645,13218490,15198190,17474360,20091405,23100375,26559955,30537630,35110995,40363250,46414965,53366070,61358150,70547100,81112160,93259410,107225800,123283750,141746495,162974160,187380820,215442545,247706715,284802665,327453995,376492660,432875205,497701435,572235845,657932300,756462405,869748080,1000000000];
+function xpTotal_(level, xp, caps) {
+  if (!Number.isInteger(level) || level < 1 || level > caps.length || !Number.isSafeInteger(xp) || xp < 0 || xp > caps[level - 1]) throw new Error('Enter a valid level (1–100) and XP within that level.');
+  return caps.slice(0, level - 1).reduce((sum, value) => sum + value, 0) + xp;
+}
+function xpMetrics_(level, xp, context, caps) {
+  const total = xpTotal_(level, xp, caps);
+  const previous = context && context.previous;
+  const baseline = context && context.baseline;
+  const sinceLast = previous ? total - xpTotal_(previous.level, previous.xp, caps) : 0;
+  if (sinceLast < 0) throw new Error('XP is lower than the last saved snapshot. Check your level and XP.');
+  return {sinceLast: sinceLast, dayTotal: baseline ? Math.max(0, total - xpTotal_(baseline.level, baseline.xp, caps)) : 0,
+    tilNext: caps[level - 1] - xp, percent: xp / caps[level - 1] * 100};
+}
+function xpContext_(sheet, now, timezone) {
+  const last = lastDataRowByColumnA_(sheet);
+  if (last < 2) return {previous:null, baseline:null};
+  const today = Utilities.formatDate(now, timezone, 'yyyy-MM-dd');
+  const records = sheet.getRange(2, 1, last - 1, 4).getValues().map(row => {
+    if (!(row[0] instanceof Date) || isNaN(row[0].getTime()) || row[1] === '' || row[3] === '') return null;
+    const record = {level:Number(row[1]), xp:Number(row[3]), day:Utilities.formatDate(row[0], timezone, 'yyyy-MM-dd')};
+    try { xpTotal_(record.level, record.xp, XP_LEVEL_CAPS); } catch (error) { return null; }
+    return record.day <= today ? record : null;
+  }).filter(Boolean);
+  const earlier = records.filter(record => record.day < today);
+  // No midnight measurement exists: compare with last prior-day snapshot, or first today.
+  return {previous:records.length ? records[records.length - 1] : null,
+    baseline:earlier.length ? earlier[earlier.length - 1] : (records[0] || null)};
+}
+function getXpSnapshotFormData() {
+  const ss = SpreadsheetApp.getActiveSpreadsheet();
+  const sheet = ss.getSheetByName('XP Tracker');
+  return {entry:getLastXpEntry(), xpContext:sheet ? xpContext_(sheet, new Date(), ss.getSpreadsheetTimeZone()) : {previous:null,baseline:null}};
+}
+function renderXpFunctions_() {
+  return 'const XP_TABLE = ' + JSON.stringify(XP_LEVEL_CAPS) + ';\n' + xpTotal_.toString() + '\n' + xpMetrics_.toString();
 }

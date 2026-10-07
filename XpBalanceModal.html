@@ -288,39 +288,38 @@
   </div>
 
   <script>
-    // XP Thresholds: Max XP needed to reach level N+1 (index 0 = level 1)
-    const XP_TABLE = [
-      75,225,400,595,825,1085,1385,1735,2130,2590,
-      3115,3720,4415,5215,6130,7190,8405,9800,11405,13250,
-      15375,17815,20620,23850,27555,31820,36725,42365,48845,56300,
-      64870,74755,86050,99075,114055,131270,151070,173830,200000,230090,
-      264685,304465,350195,402780,463235,532745,612670,704555,810210,931680,
-      1071345,1231925,1416550,1628830,1872895,2153510,2476155,2847115,3273625,3764015,
-      4327840,4876100,5721445,6578410,7563710,8696565,9999075,11496645,13218490,15198190,
-      17474360,20091405,23100375,26559955,30537630,35110995,40363250,46414965,53366070,61358150,
-      70547100,81112160,93259410,107225800,123283750,141746495,162974160,187380820,215442545,247706715,
-      284802665,327453995,376492660,432875205,497701435,572235845,657932300,756462405,869748080,1000000000
-    ];
-
-    let prevXP = 0;
+    <?!= renderXpFunctions_(); ?>
+    let xpContext = {previous:null,baseline:null};
+    let xpReady = false;
+    function readXpMetrics() {
+      if (!xpReady) throw new Error('Wait for the previous snapshot to load.');
+      if (document.getElementById('level').value === '' || document.getElementById('xp').value === '') throw new Error('Enter level and XP.');
+      return xpMetrics_(Number(document.getElementById('level').value), Number(document.getElementById('xp').value), xpContext, XP_TABLE);
+    }
 
     function recalcXP() {
       const level = parseInt(document.getElementById('level').value) || 0;
       const xp = parseInt(document.getElementById('xp').value) || 0;
 
-      if (level < 1 || level > 100) return;
+
 
       // XP_TABLE[level-1] = XP needed FOR this level (not cumulative)
       // User's "Total XP" = XP earned within current level
       const levelMax = XP_TABLE[level - 1];
       const tilNext = Math.max(0, levelMax - xp);
       const pct = levelMax > 0 ? Math.min(100, (xp / levelMax) * 100) : 0;
-      const sinceLast = prevXP > 0 ? Math.max(0, xp - prevXP) : 0;
+      let metrics;
+      try { metrics = readXpMetrics(); } catch (error) {
+        ['calcTilNext','calcPercent','calcSinceLast','calcDayTotal'].forEach(id => document.getElementById(id).textContent = '—');
+        document.getElementById('progressWrap').style.display = 'none';
+        return;
+      }
+      const sinceLast = metrics.sinceLast;
 
       document.getElementById('calcTilNext').textContent = tilNext.toLocaleString('en-US');
       document.getElementById('calcPercent').textContent = pct.toFixed(1) + '%';
-      document.getElementById('calcSinceLast').textContent = prevXP > 0 ? '+' + sinceLast.toLocaleString('en-US') : '—';
-      document.getElementById('calcDayTotal').textContent = prevXP > 0 ? '+' + sinceLast.toLocaleString('en-US') : '—';
+      document.getElementById('calcSinceLast').textContent = xpContext.previous ? '+' + sinceLast.toLocaleString('en-US') : '—';
+      document.getElementById('calcDayTotal').textContent = xpContext.baseline ? '+' + metrics.dayTotal.toLocaleString('en-US') : '—';
 
       document.getElementById('progressWrap').style.display = 'block';
       document.getElementById('progressFill').style.width = pct + '%';
@@ -392,11 +391,14 @@
 
     window.onload = function() {
       google.script.run
-        .withSuccessHandler(function(data) {
+        .withSuccessHandler(function(result) {
+          xpContext = result.xpContext;
+          xpReady = true;
+          const data = result.entry;
           if (data && data.lastDate) {
             document.getElementById('lastEntry').style.display = 'block';
             document.getElementById('lastEntry').innerHTML = 'Last entry: <b>' + data.lastDate + '</b> — Level ' + data.level + ', ' + data.xp.toLocaleString('en-US') + ' XP';
-            prevXP = data.xp || 0;
+
             document.getElementById('level').value = data.level || '';
             document.getElementById('rank').value = data.rank || '';
             document.getElementById('hrc').value = data.hrc || 0;
@@ -408,10 +410,20 @@
             document.getElementById('horsesOnPasture').value = data.horsesOnPasture || 0;
           }
         })
-        .getLastXpEntry();
+        .withFailureHandler(function(error) {
+          const status = document.getElementById('status');
+          status.className = 'status error'; status.style.display = 'block'; status.textContent = 'Could not load XP history: ' + error.message;
+        })
+        .getXpSnapshotFormData();
     };
 
     function save() {
+      let metrics;
+      try { metrics = readXpMetrics(); } catch (error) {
+        const status = document.getElementById('status');
+        status.className = 'status error'; status.style.display = 'block'; status.textContent = error.message;
+        return;
+      }
       const level = parseInt(document.getElementById('level').value) || 0;
       const xp = parseInt(document.getElementById('xp').value) || 0;
       const levelMax = XP_TABLE[level - 1] || 0;
@@ -422,8 +434,8 @@
         level: level,
         rank: document.getElementById('rank').value.trim(),
         xp: xp,
-        sinceLast: prevXP > 0 ? Math.max(0, xp - prevXP) : 0,
-        dayTotal: prevXP > 0 ? Math.max(0, xp - prevXP) : 0,
+        sinceLast: metrics.sinceLast,
+        dayTotal: metrics.dayTotal,
         tilNext: tilNext,
         percent: pct,
         hrc: Number(document.getElementById('hrc').value) || 0,
